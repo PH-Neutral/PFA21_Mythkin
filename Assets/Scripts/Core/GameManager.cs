@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public Character character;
+    public Character player;
     public Image image;
 
     private void Awake()

@@ -58,7 +58,7 @@ public class Character : MonoBehaviour
     [SerializeField] PlayerCamera _playerCamera;
     [SerializeField] SphereCollider _soundRangeCol;
     [SerializeField] float _stunDuration = 2;
-    [SerializeField] Transform model;
+    public Transform model;
     float _stunRemainingTime = 0;
     int _nbGrassCollided = 0;
     bool _isAlive = true, _isRunning = false, _isClimbing = false, _canDeClimb = false;
@@ -76,7 +76,7 @@ public class Character : MonoBehaviour
         if (_isClimbing) Climb();
         else Move();
         Look();
-        Debug.Log(_rb.velocity);
+        //Debug.Log(_rb.velocity);
     }
     private void LateUpdate()
     {
