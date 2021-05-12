@@ -6,7 +6,10 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+
+    public Character character;
     public Image image;
+
     private void Awake()
     {
         if (Instance == null)
