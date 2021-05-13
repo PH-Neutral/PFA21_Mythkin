@@ -13,13 +13,13 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  - Environment
+  - Terrain
   - PostProcessing
   - Not in Reflection
   - 
-  - 
-  - 
+  - Player
+  - Enemies
   - 
   - 
   - 
