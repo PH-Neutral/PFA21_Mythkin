@@ -50,10 +50,10 @@ public class Character : MonoBehaviour
         {
             _isClimbing = value;
             _rb.useGravity = !value;
-            GameManager.Instance.ChangeImageColor(value ? Color.green : Color.red);
+            //GameManager.Instance.ChangeImageColor(value ? Color.green : Color.red);
         }
     }
-    public float moveSpeedBase = 3, runSpeedRatio = 1.5f, rotationSpeed = 1, modelRotationSpeed = 10, jumpForce = 5, inAirMoveRatio = 0.25f;
+    public float moveSpeedBase = 3, runSpeedRatio = 1.5f, rotationSpeed = 1, modelRotationSpeed = 10, jumpForce = 5, inAirMoveRatio = 0.25f, fallingDistance = 1, nearestClimb = 0.1f;
 
     [SerializeField] PlayerCamera _playerCamera;
     [SerializeField] SphereCollider _soundRangeCol;
@@ -64,7 +64,7 @@ public class Character : MonoBehaviour
     bool _isAlive = true, _isRunning = false, _isClimbing = false, _canDeClimb = false;
     bool[] _canUseAbility;
     Rigidbody _rb;
-    Vector3 movement = Vector3.zero, treeNormal;
+    Vector3 movement = Vector3.zero, treeNormal, treeColPoint;
 
     private void Awake()
     {
@@ -76,7 +76,6 @@ public class Character : MonoBehaviour
         if (_isClimbing) Climb();
         else Move();
         Look();
-        Debug.Log(_rb.velocity);
     }
     private void LateUpdate()
     {
@@ -112,14 +111,26 @@ public class Character : MonoBehaviour
     void Climb()
     {
         Debug.DrawRay(model.position, treeNormal * 100, Color.cyan);
+
+        float distanceToTree = Vector3.Distance(transform.position, treeColPoint);
+
         Vector2 inputs = GetInputs();
         model.LookAt(model.position - treeNormal);
-        Vector3 dir = Vector3.up * inputs.y;
+        Vector3 dir = new Vector3(inputs.x, inputs.y, 0);
         if (_canDeClimb && inputs.y < 0)
         {
             dir = Vector3.forward * inputs.y;
         }
         movement = model.localRotation * dir * MoveSpeed;
+        if (distanceToTree < fallingDistance && distanceToTree > nearestClimb)
+        {
+            movement += transform.TransformDirection(0, 0, MoveSpeed);
+            GameManager.Instance.ChangeImageColor(Color.green);
+        }
+        else
+        {
+            GameManager.Instance.ChangeImageColor(Color.red);
+        }
         _rb.velocity = movement;
     }
     Vector2 CartToPolar(Vector2 coord)
@@ -155,12 +166,14 @@ public class Character : MonoBehaviour
     }
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.CompareTag("tree"))
+        /*if (collision.gameObject.CompareTag("tree"))
         {
+            treeColPoint = Vector3.zero;
             Vector3 sum = Vector3.zero;
             for (int i = 0; i < collision.contactCount; i++)
             {
                 sum += collision.contacts[i].normal;
+                treeColPoint += collision.contacts[i].point;
             }
             treeNormal = sum.normalized;
             if (Mathf.Abs(Vector3.Dot(treeNormal, Vector3.up)) > 0.2f)
@@ -168,7 +181,8 @@ public class Character : MonoBehaviour
                 IsClimbing = false;
             }
         }
-        else if (IsClimbing)
+        else*/
+        if (IsClimbing)
         {
             _canDeClimb = false;
             for (int i = 0; i < collision.contactCount; i++)
@@ -181,18 +195,32 @@ public class Character : MonoBehaviour
             }
         }
     }
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("tree"))
+        if (other.gameObject.CompareTag("tree"))
         {
             IsClimbing = true;
         }
     }
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-        if (collision.gameObject.CompareTag("tree"))
+        if (other.gameObject.CompareTag("tree"))
         {
             IsClimbing = false;
+            GameManager.Instance.ChangeImageColor(Color.red);
+        }
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        RaycastHit hit;
+        treeColPoint = Vector3.forward * fallingDistance * 2;
+        for (float i = -90; i < 90; i += 0.1f)
+        {
+            if (Physics.Raycast(transform.position, Quaternion.Euler(0, i, 0) * model.TransformDirection(Vector3.forward), out hit, treeColPoint.magnitude))
+            {
+                treeColPoint = hit.point;
+                treeNormal = hit.normal;
+            }
         }
     }
 }
