@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     public Character player;
     public Image image;
 
+    public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
+
     private void Awake()
     {
         if (Instance == null)
