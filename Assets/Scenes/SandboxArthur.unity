@@ -891,7 +891,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60efa3d3d2a234c47806a7cb9e93c954, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 0}
   image: {fileID: 217456969}
+  matEnemyPatrol: {fileID: 0}
+  matEnemySearch: {fileID: 0}
+  matEnemyAttack: {fileID: 0}
 --- !u!4 &1148928821
 Transform:
   m_ObjectHideFlags: 0
@@ -1270,10 +1274,11 @@ MonoBehaviour:
   inAirMoveRatio: 0.25
   fallingDistance: 10
   nearestClimb: 0.001
+  _model: {fileID: 1937016932}
   _playerCamera: {fileID: 1095536146}
   _soundRangeCol: {fileID: 1491459549}
   _stunDuration: 2
-  model: {fileID: 1937016932}
+  _noiseRangeWalking: 100
 --- !u!4 &1491459551
 Transform:
   m_ObjectHideFlags: 0

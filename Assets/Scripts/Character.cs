@@ -132,7 +132,7 @@ public class Character : MonoBehaviour
         movement = _model.localRotation * dir * MoveSpeed;
         if (distanceToTree < fallingDistance && distanceToTree > nearestClimb)
         {
-            movement += transform.TransformDirection(0, 0, MoveSpeed);
+            //movement += transform.TransformDirection(0, 0, MoveSpeed);
             GameManager.Instance.ChangeImageColor(Color.green);
         }
         else
@@ -167,29 +167,37 @@ public class Character : MonoBehaviour
     {
 
     }
-    void MakeMovingNoises() {
+    void MakeMovingNoises()
+    {
         Vector2 inputs = GetInputs();
-        if(_rb.velocity.y == 0 && inputs.magnitude > 0) {
-            if(_debugMakeNoiseTimer <= 0) {
+        if (_rb.velocity.y == 0 && inputs.magnitude > 0)
+        {
+            if (_debugMakeNoiseTimer <= 0)
+            {
                 bool isSprinting = Input.GetKey(KeyCode.LeftShift);
                 _debugMakeNoiseTimer += 0.5f * (isSprinting ? 0.5f : 1);
                 float noiseRange = _noiseRangeWalking * inputs.magnitude * (isSprinting ? 2 : 1);
                 MakeNoise(noiseRange);
             }
             _debugMakeNoiseTimer -= Time.deltaTime;
-        } else {
+        }
+        else
+        {
             _debugMakeNoiseTimer = 0;
         }
     }
     void MakeNoise() => MakeNoise(_noiseRangeWalking);
-    void MakeNoise(float maxDistance) {
+    void MakeNoise(float maxDistance)
+    {
         float levelAtSource = Utils.SoundSourceLevelFromDistance(maxDistance, 1);
-        Collider[] colliders = Physics.OverlapSphere(transform.position, maxDistance, 1<<LayerMask.NameToLayer("Enemies"));
+        Collider[] colliders = Physics.OverlapSphere(transform.position, maxDistance, 1 << LayerMask.NameToLayer("Enemies"));
         //Debug.Log($"Noise produced at {levelAtSource.ChangePrecision(4)}dB and reached {colliders.Length} colliders with radius {maxDistance}m.");
         float soundLevel;
         Vector3 relativePos;
-        for(int i = 0; i < colliders.Length; i++) {
-            if (colliders[i].TryGetComponent(out Enemy enemy)) {
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i].TryGetComponent(out Enemy enemy))
+            {
                 relativePos = transform.position - enemy.transform.position;
                 soundLevel = Utils.CalculateSoundLevel(levelAtSource, relativePos.magnitude);
                 enemy.HearSound(relativePos, soundLevel);
@@ -251,10 +259,11 @@ public class Character : MonoBehaviour
     {
         RaycastHit hit;
         treeColPoint = Vector3.forward * fallingDistance * 2;
-        for (float i = -90; i < 90; i += 0.1f)
+        for (float i = -90; i < 90; i += 1f)
         {
-            if (Physics.Raycast(transform.position, Quaternion.Euler(0, i, 0) * _model.TransformDirection(Vector3.forward), out hit, treeColPoint.magnitude))
+            if (Physics.Raycast(_model.position, Quaternion.Euler(0, i, 0) * _model.TransformDirection(Vector3.forward), out hit, _model.InverseTransformPoint(treeColPoint).magnitude))
             {
+                Debug.DrawRay(_model.position, Quaternion.Euler(0, i, 0) * _model.TransformDirection(Vector3.forward), Color.red, 5);
                 treeColPoint = hit.point;
                 treeNormal = hit.normal;
             }
