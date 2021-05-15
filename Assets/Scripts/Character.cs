@@ -59,7 +59,7 @@ public class Character : MonoBehaviour
     [SerializeField] PlayerCamera _playerCamera;
     [SerializeField] SphereCollider _soundRangeCol;
     [SerializeField] float _stunDuration = 2;
-    [SerializeField] float _noiseRangeWalking = 100;
+    [SerializeField] float _noiseRangeWalking = 5, _noiseRangeSprinting = 15;
     float _stunRemainingTime = 0;
     int _nbGrassCollided = 0;
     bool _isAlive = true, _isRunning = false, _isClimbing = false, _canDeClimb = false;
@@ -176,7 +176,7 @@ public class Character : MonoBehaviour
             {
                 bool isSprinting = Input.GetKey(KeyCode.LeftShift);
                 _debugMakeNoiseTimer += 0.5f * (isSprinting ? 0.5f : 1);
-                float noiseRange = _noiseRangeWalking * inputs.magnitude * (isSprinting ? 2 : 1);
+                float noiseRange = inputs.magnitude * (isSprinting ? _noiseRangeSprinting : _noiseRangeWalking);
                 MakeNoise(noiseRange);
             }
             _debugMakeNoiseTimer -= Time.deltaTime;

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - tree
   - grass
+  - HitBox
   layers:
   - Default
   - TransparentFX

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utils {
+    public static float floorHeight = 2;
+
     #region MISC
     public static float ChangePrecision(this float f, int nbDecimals) {
         return ((int)(f * Mathf.Pow(10, nbDecimals))) / Mathf.Pow(10, nbDecimals);
