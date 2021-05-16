@@ -19,7 +19,7 @@ public class Character : MonoBehaviour
     {
         get
         {
-            return (Input.GetKey(KeyCode.LeftShift) ? runSpeedRatio : 1) * moveSpeedBase;
+            return (IsClimbing ? climbSpeedRatio : (Input.GetKey(KeyCode.LeftShift) ? runSpeedRatio : 1)) * moveSpeedBase;
         }
     }
     public bool IsStuned
@@ -53,7 +53,7 @@ public class Character : MonoBehaviour
             //GameManager.Instance.ChangeImageColor(value ? Color.green : Color.red);
         }
     }
-    public float moveSpeedBase = 3, runSpeedRatio = 1.5f, rotationSpeed = 1, modelRotationSpeed = 10, jumpForce = 5, inAirMoveRatio = 0.25f, fallingDistance = 1, nearestClimb = 0.1f;
+    public float moveSpeedBase = 3, runSpeedRatio = 1.5f, climbSpeedRatio = 0.5f, rotationSpeed = 1, modelRotationSpeed = 10, jumpForce = 5, inAirMoveRatio = 0.25f, fallingDistance = 1, nearestClimb = 0.1f;
 
     [SerializeField] Transform _model;
     [SerializeField] PlayerCamera _playerCamera;
@@ -132,7 +132,7 @@ public class Character : MonoBehaviour
         movement = _model.localRotation * dir * MoveSpeed;
         if (distanceToTree < fallingDistance && distanceToTree > nearestClimb)
         {
-            //movement += transform.TransformDirection(0, 0, MoveSpeed);
+            if (!_canDeClimb) movement += _model.TransformDirection(0, 0, MoveSpeed);
             GameManager.Instance.ChangeImageColor(Color.green);
         }
         else
@@ -235,6 +235,7 @@ public class Character : MonoBehaviour
                 if (Vector3.Dot(collision.contacts[i].normal, Vector3.up) > 0.8f)
                 {
                     _canDeClimb = true;
+                    Debug.Log("sol");
                     break;
                 }
             }
