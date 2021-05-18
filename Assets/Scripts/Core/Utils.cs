@@ -6,6 +6,19 @@ public static class Utils {
     public static float floorHeight = 2;
 
     #region MISC
+
+    public static Vector2 CartToPolar(Vector2 coord) {
+        if(coord == Vector2.zero) return Vector2.zero;
+        Vector2 vMax;
+        if(Mathf.Abs(coord.x) > Mathf.Abs(coord.y)) {
+            vMax.x = Mathf.Sign(coord.x);
+            vMax.y = coord.y / Mathf.Abs(coord.x);
+        } else {
+            vMax.y = Mathf.Sign(coord.y);
+            vMax.x = coord.x / Mathf.Abs(coord.y);
+        }
+        return coord / vMax.magnitude;
+    }
     public static float ChangePrecision(this float f, int nbDecimals) {
         return ((int)(f * Mathf.Pow(10, nbDecimals))) / Mathf.Pow(10, nbDecimals);
     }

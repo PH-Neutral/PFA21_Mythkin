@@ -90,7 +90,7 @@ public class Character : MonoBehaviour
     Vector2 GetInputs()
     {
         Vector2 inputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        return CartToPolar(inputs);
+        return Utils.CartToPolar(inputs);
     }
     void Move()
     {
@@ -140,22 +140,6 @@ public class Character : MonoBehaviour
             GameManager.Instance.ChangeImageColor(Color.red);
         }
         _rb.velocity = movement;
-    }
-    Vector2 CartToPolar(Vector2 coord)
-    {
-        if (coord == Vector2.zero) return Vector2.zero;
-        Vector2 vMax;
-        if (Mathf.Abs(coord.x) > Mathf.Abs(coord.y))
-        {
-            vMax.x = Mathf.Sign(coord.x);
-            vMax.y = coord.y / Mathf.Abs(coord.x);
-        }
-        else
-        {
-            vMax.y = Mathf.Sign(coord.y);
-            vMax.x = coord.x / Mathf.Abs(coord.y);
-        }
-        return coord / vMax.magnitude;
     }
     void Look()
     {
