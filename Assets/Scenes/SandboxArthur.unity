@@ -1545,14 +1545,17 @@ MonoBehaviour:
   modelRotationSpeed: 10
   jumpForce: 5
   inAirMoveRatio: 0.25
-  fallingDistance: 10
+  fallingDistance: 1
   nearestClimb: 1.1
+  t: 0
   _model: {fileID: 1937016932}
   _playerCamera: {fileID: 1095536146}
   _soundRangeCol: {fileID: 0}
   _stunDuration: 2
   _noiseRangeWalking: 100
   _noiseRangeSprinting: 15
+  possitionOffset: 0.5
+  offsetFromWall: 0.43
 --- !u!4 &1491459551
 Transform:
   m_ObjectHideFlags: 0

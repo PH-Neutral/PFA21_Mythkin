@@ -53,7 +53,7 @@ public class Character : MonoBehaviour
             //GameManager.Instance.ChangeImageColor(value ? Color.green : Color.red);
         }
     }
-    public float moveSpeedBase = 3, runSpeedRatio = 1.5f, climbSpeedRatio = 0.5f, rotationSpeed = 1, modelRotationSpeed = 10, jumpForce = 5, inAirMoveRatio = 0.25f, fallingDistance = 1, nearestClimb = 0.1f;
+    public float moveSpeedBase = 3, runSpeedRatio = 1.5f, climbSpeedRatio = 0.5f, rotationSpeed = 1, modelRotationSpeed = 10, jumpForce = 5, inAirMoveRatio = 0.25f, fallingDistance = 1, nearestClimb = 0.1f, t;
 
     [SerializeField] Transform _model;
     [SerializeField] PlayerCamera _playerCamera;
@@ -62,21 +62,73 @@ public class Character : MonoBehaviour
     [SerializeField] float _noiseRangeWalking = 5, _noiseRangeSprinting = 15;
     float _stunRemainingTime = 0;
     int _nbGrassCollided = 0;
-    bool _isAlive = true, _isRunning = false, _isClimbing = false, _canDeClimb = false;
+    bool _isAlive = true, _isRunning = false, _isClimbing = false, _canDeClimb = false, isInPosition, isLerping;
     bool[] _canUseAbility;
     Rigidbody _rb;
-    Vector3 movement = Vector3.zero, treeNormal, treeColPoint;
+    Vector3 movement = Vector3.zero, treeNormal, treeColPoint, startPos, targetPos;
+    Quaternion startRot, targetRot;
+    Transform helper;
+    public float possitionOffset, offsetFromWall;
     float _debugMakeNoiseTimer = 0;
 
     private void Awake()
     {
         _canUseAbility = new bool[3];
         _rb = GetComponentInChildren<Rigidbody>();
+        helper = new GameObject().transform;
+        helper.name = "climb helper";
     }
     private void Update()
     {
-        if (_isClimbing) Climb();
-        else Move();
+        if (IsClimbing)
+        {
+            if (!isInPosition)
+            {
+                GetInPosition();
+            }
+
+            if (!isLerping)
+            {
+                Vector2 inputs = GetInputs();
+                float m = Mathf.Abs(inputs.x) + Mathf.Abs(inputs.y);
+
+                Vector3 h = helper.right * inputs.x;
+                Vector3 v = helper.up * inputs.y;
+                Vector3 moveDir = (h + v).normalized;
+
+                bool canMove = CanMove(moveDir);
+                if (!canMove || moveDir == Vector3.zero) return;
+
+                t = 0;
+                isLerping = true;
+                startPos = transform.position;
+                //Vector3 tp = helper.position - transform.position;
+                targetPos = helper.position;
+
+            }
+            else
+            {
+                t += Time.deltaTime * MoveSpeed;
+                if (t > 1)
+                {
+                    t = 1;
+                    isLerping = false;
+                }
+
+                Vector3 cp = Vector3.Lerp(startPos, targetPos, t);
+                transform.position = cp;
+                transform.rotation = Quaternion.Slerp(transform.rotation, helper.rotation, Time.deltaTime * rotationSpeed);
+            }
+        }
+        else
+        {
+            CheckForClimb();
+            Move();
+        }
+
+
+        //if (_isClimbing) Climb();
+        //else Move();
         Look();
         /*/ ----- debug ----- //
         if (Input.GetKeyDown(KeyCode.Return)) {
@@ -140,6 +192,93 @@ public class Character : MonoBehaviour
             GameManager.Instance.ChangeImageColor(Color.red);
         }
         _rb.velocity = movement;
+    }
+    void CheckForClimb()
+    {
+        Vector3 origin = _model.position;
+        origin.y += 1.4f;
+        Vector3 dir = _model.forward;
+        RaycastHit hit;
+        if (Physics.Raycast(origin, dir, out hit, 5f))
+        {
+            helper.position = PosWithOffset(origin, hit.point);
+            InitForClimb(hit);
+        }
+    }
+    void InitForClimb(RaycastHit hit)
+    {
+        IsClimbing = true;
+        helper.transform.rotation = Quaternion.LookRotation(-hit.normal);
+        startPos = transform.position;
+        targetPos = hit.point + (hit.normal * offsetFromWall);
+        t = 0;
+        isInPosition = false;
+    }
+
+    bool CanMove(Vector3 moveDir)
+    {
+        Vector3 origin = transform.position;
+        float dis = possitionOffset;
+        Vector3 dir = moveDir;
+        Debug.DrawRay(origin, dir * dis, Color.red);
+        RaycastHit hit;
+
+        if (Physics.Raycast(origin, dir, out hit, dis))
+        {
+            return false;
+        }
+
+        origin += moveDir * dis;
+        dir = helper.forward;
+        float dis2 = 0.5f;
+
+        Debug.DrawRay(origin, dir * dis2, Color.blue);
+        if (Physics.Raycast(origin, dir, out hit, dis))
+        {
+            helper.position = PosWithOffset(origin, hit.point);
+            helper.rotation = Quaternion.LookRotation(-hit.normal);
+            return true;
+        }
+
+        origin += dir * dis2;
+        dir = -Vector3.up;
+
+        Debug.DrawRay(origin, dir, Color.yellow);
+        if (Physics.Raycast(origin, dir, out hit, dis2))
+        {
+            float angle = Vector3.Angle(helper.up, hit.normal);
+            if (angle < 40)
+            {
+                helper.position = PosWithOffset(origin, hit.point);
+                helper.rotation = Quaternion.LookRotation(-hit.normal);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void GetInPosition()
+    {
+        t += Time.deltaTime;
+        if (t > 1)
+        {
+            t = 1;
+            isInPosition = true;
+
+            //enable the ik
+        }
+
+        Vector3 tp = Vector3.Lerp(startPos, targetPos, t);
+        transform.position = tp;
+        _model.rotation = Quaternion.Slerp(transform.rotation, helper.rotation, t);
+    }
+    Vector3 PosWithOffset(Vector3 origin, Vector3 target)
+    {
+        Vector3 direction = origin - target;
+        direction.Normalize();
+        Vector3 offset = direction * offsetFromWall;
+        return target += offset;
     }
     Vector2 CartToPolar(Vector2 coord)
     {
@@ -209,24 +348,10 @@ public class Character : MonoBehaviour
         if ((int)ability < 0 || (int)ability >= _canUseAbility.Length) return;
         _canUseAbility[(int)ability] = true;
     }
+
+    /*
     private void OnCollisionStay(Collision collision)
     {
-        /*if (collision.gameObject.CompareTag("tree"))
-        {
-            treeColPoint = Vector3.zero;
-            Vector3 sum = Vector3.zero;
-            for (int i = 0; i < collision.contactCount; i++)
-            {
-                sum += collision.contacts[i].normal;
-                treeColPoint += collision.contacts[i].point;
-            }
-            treeNormal = sum.normalized;
-            if (Mathf.Abs(Vector3.Dot(treeNormal, Vector3.up)) > 0.2f)
-            {
-                IsClimbing = false;
-            }
-        }
-        else*/
         if (IsClimbing)
         {
             _canDeClimb = false;
@@ -269,7 +394,7 @@ public class Character : MonoBehaviour
                 treeNormal = hit.normal;
             }
         }
-    }
+    }*/
 }
 public enum AbilityType
 {
