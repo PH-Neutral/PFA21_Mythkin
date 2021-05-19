@@ -82,47 +82,10 @@ public class Character : MonoBehaviour
     {
         if (IsClimbing)
         {
-            if (!isInPosition)
-            {
-                GetInPosition();
-            }
-
-            if (!isLerping)
-            {
-                Vector2 inputs = GetInputs();
-                float m = Mathf.Abs(inputs.x) + Mathf.Abs(inputs.y);
-
-                Vector3 h = helper.right * inputs.x;
-                Vector3 v = helper.up * inputs.y;
-                Vector3 moveDir = (h + v).normalized;
-
-                bool canMove = CanMove(moveDir);
-                if (!canMove || moveDir == Vector3.zero) return;
-
-                t = 0;
-                isLerping = true;
-                startPos = transform.position;
-                //Vector3 tp = helper.position - transform.position;
-                targetPos = helper.position;
-
-            }
-            else
-            {
-                t += Time.deltaTime * MoveSpeed;
-                if (t > 1)
-                {
-                    t = 1;
-                    isLerping = false;
-                }
-
-                Vector3 cp = Vector3.Lerp(startPos, targetPos, t);
-                transform.position = cp;
-                transform.rotation = Quaternion.Slerp(transform.rotation, helper.rotation, Time.deltaTime * rotationSpeed);
-            }
+            Climb();
         }
         else
         {
-            CheckForClimb();
             Move();
         }
 
@@ -165,11 +128,14 @@ public class Character : MonoBehaviour
         }
         Debug.DrawRay(transform.position, _rb.velocity, Color.green);
 
+        if (inputs.y > 0) CheckForClimb();
+
         // noises
         MakeMovingNoises();
     }
     void Climb()
     {
+        /*
         Debug.DrawRay(_model.position, treeNormal * 100, Color.cyan);
 
         float distanceToTree = Vector3.Distance(transform.position, treeColPoint);
@@ -192,10 +158,48 @@ public class Character : MonoBehaviour
             GameManager.Instance.ChangeImageColor(Color.red);
         }
         _rb.velocity = movement;
+        */
+        if (!isInPosition)
+        {
+            GetInPosition();
+        }
+
+        if (!isLerping)
+        {
+            Vector2 inputs = GetInputs();
+            float m = Mathf.Abs(inputs.x) + Mathf.Abs(inputs.y);
+
+            Vector3 h = helper.right * inputs.x;
+            Vector3 v = helper.up * inputs.y;
+            Vector3 moveDir = (h + v).normalized;
+
+            bool canMove = CanMove(moveDir);
+            if (!canMove || moveDir == Vector3.zero) return;
+
+            t = 0;
+            isLerping = true;
+            startPos = transform.position;
+            //Vector3 tp = helper.position - transform.position;
+            targetPos = helper.position;
+
+        }
+        else
+        {
+            t += Time.deltaTime * MoveSpeed;
+            if (t > 1)
+            {
+                t = 1;
+                isLerping = false;
+            }
+
+            Vector3 cp = Vector3.Lerp(startPos, targetPos, t);
+            transform.position = cp;
+            _model.rotation = Quaternion.Slerp(_model.rotation, helper.rotation, t);
+        }
     }
     void CheckForClimb()
     {
-        Vector3 origin = _model.position;
+        Vector3 origin = transform.position;
         origin.y += 1.4f;
         Vector3 dir = _model.forward;
         RaycastHit hit;
@@ -208,7 +212,7 @@ public class Character : MonoBehaviour
     void InitForClimb(RaycastHit hit)
     {
         IsClimbing = true;
-        helper.transform.rotation = Quaternion.LookRotation(-hit.normal);
+        helper.rotation = Quaternion.LookRotation(-hit.normal);
         startPos = transform.position;
         targetPos = hit.point + (hit.normal * offsetFromWall);
         t = 0;
@@ -271,7 +275,7 @@ public class Character : MonoBehaviour
 
         Vector3 tp = Vector3.Lerp(startPos, targetPos, t);
         transform.position = tp;
-        _model.rotation = Quaternion.Slerp(transform.rotation, helper.rotation, t);
+        _model.rotation = Quaternion.Slerp(_model.rotation, helper.rotation, t);
     }
     Vector3 PosWithOffset(Vector3 origin, Vector3 target)
     {
@@ -347,6 +351,18 @@ public class Character : MonoBehaviour
     {
         if ((int)ability < 0 || (int)ability >= _canUseAbility.Length) return;
         _canUseAbility[(int)ability] = true;
+    }
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (IsClimbing)
+        {
+            for (int i = 0; i < collision.contactCount; i++)
+            {
+                if (Vector3.Angle(collision.contacts[i].normal, Vector3.up) < 15f) IsClimbing = false;
+            }
+        }
     }
 
     /*
