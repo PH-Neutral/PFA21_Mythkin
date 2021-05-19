@@ -13,12 +13,25 @@ public class PlayerCharacter : MonoBehaviour {
             return !_charaCtrl.isGrounded && _isOnClimbWall;
         }
     }
+    public bool CanOpenRoot
+    {
+        get
+        {
+            return _canOpenRoot;
+        }
+        set
+        {
+            _canOpenRoot = value;
+            UIManager.Instance.rootIndicator.SetActive(value);
+        }
+    }
     float Radius {
         get { return _charaCtrl.radius + _charaCtrl.skinWidth + 0.05f; }
     }
     float Height {
         get { return _charaCtrl.height + _charaCtrl.skinWidth + 0.05f; }
     }
+    public float interactionMaxDistance = 3f;
     [SerializeField] PlayerCamera _playerCam;
     [SerializeField] Transform _bodyCenter, _model, _camCenter;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
@@ -28,8 +41,8 @@ public class PlayerCharacter : MonoBehaviour {
     CharacterController _charaCtrl;
     Vector3 _movement = Vector3.zero, _wallPoint;
     RaycastHit _declimbHit;
-    bool _wasClimbing = true, _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false;
-    bool _declimbPart1 = true;
+    bool _wasClimbing = true, _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
+    bool _canOpenRoot = false;
     float deltaTime;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
@@ -51,6 +64,8 @@ public class PlayerCharacter : MonoBehaviour {
         if(_isDeclimbingUp) {
             Declimb();
         }
+
+        if (CanOpenRoot && Input.GetKey(KeyCode.E)) OpenRoot();
 
         _wasClimbing = _isOnClimbWall;
     }
@@ -148,6 +163,10 @@ public class PlayerCharacter : MonoBehaviour {
             transform.localRotation = _playerCam.transform.localRotation;
             _playerCam.transform.localRotation = Quaternion.identity;
         }*/
+    }
+    void OpenRoot()
+    {
+
     }
     bool IsOnGround() {
         RaycastHit hit;
