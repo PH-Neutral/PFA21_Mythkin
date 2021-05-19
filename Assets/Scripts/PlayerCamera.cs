@@ -4,15 +4,25 @@ using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
 {
+    public Transform Reference {
+        get { return _reference; }
+        set {
+            _reference = value;
+            SetPositionToRef();
+        }
+    }
+
     [SerializeField] Transform _swivel, _stick;
-    Camera _camera;
     [SerializeField] float _zoomNear, _zoomFar, _rotationLowest, _rotationHighest;
-    float _currentRotation = 0;
     [SerializeField] bool invertY = true;
+    Transform _reference;
+    float _currentRotation = 0;
     private void Awake()
     {
-        _camera = GetComponentInChildren<Camera>();
         _currentRotation = _swivel.transform.localRotation.eulerAngles.x;
+    }
+    private void LateUpdate() {
+        SetPositionToRef();
     }
     public void RotateVertical(float speed)
     {
@@ -26,5 +36,8 @@ public class PlayerCamera : MonoBehaviour
     public void Zoom(float speed)
     {
 
+    }
+    void SetPositionToRef() {
+        transform.position = Reference.position;
     }
 }
