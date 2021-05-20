@@ -8,6 +8,22 @@ public static class Utils {
 
     #region MISC
 
+    public static bool LinePlaneIntersection(out Vector3 intersection, Vector3 pointOnPlane, Vector3 planeNormal, Vector3 pointOnLine, Vector3 lineDirection) {
+        intersection = pointOnPlane;
+        float a, b, x;
+        a = Vector3.Dot(pointOnPlane - pointOnLine, planeNormal);
+        b = Vector3.Dot(lineDirection, planeNormal);
+        bool isParallel = b == 0, isPointOnPlane = a == 0;
+        if(isPointOnPlane) {
+            intersection = pointOnLine;
+            return true;
+        } else if(!isParallel) {
+            x = a / b;
+            intersection = x * lineDirection + pointOnLine;
+            return true;
+        }
+        return false;
+    }
     public static Vector2 CartToPolar(Vector2 coord) {
         if(coord == Vector2.zero) return Vector2.zero;
         Vector2 vMax;
@@ -20,10 +36,24 @@ public static class Utils {
         }
         return coord / vMax.magnitude;
     }
+    public static Vector3 Multiply(this Vector3 vector, Vector3 other) {
+        return new Vector3(vector.x * other.x, vector.y * other.y, vector.z * other.z);
+    }
     public static float ChangePrecision(this float f, int nbDecimals) {
         return ((int)(f * Mathf.Pow(10, nbDecimals))) / Mathf.Pow(10, nbDecimals);
     }
     #endregion
+
+    #region SPECIFICS
+    public static Vector3[] directions = new Vector3[] {
+        Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back
+    };
+
+    public static Vector3 GetVector(this TunnelEntrance.Direction dir) {
+        return directions[(int)dir];
+    }
+    #endregion
+
     #region SOUND
     public static float distanceUnit = 0.5f; // in m
     public static float levelStep = 3; // in dB

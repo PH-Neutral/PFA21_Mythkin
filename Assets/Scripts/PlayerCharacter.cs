@@ -32,7 +32,8 @@ public class PlayerCharacter : MonoBehaviour {
         get { return _charaCtrl.height + _charaCtrl.skinWidth + 0.05f; }
     }
     public float interactionMaxDistance = 3f;
-    [SerializeField] PlayerCamera _playerCam;
+    public PlayerCamera playerCam;
+
     [SerializeField] Transform _bodyCenter, _model, _camCenter;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _maxVelocity = 50, _lerpMoveTime = 0.5f; // in sec
@@ -49,7 +50,7 @@ public class PlayerCharacter : MonoBehaviour {
         _charaCtrl = GetComponent<CharacterController>();
     }
     private void Start() {
-        _playerCam.Reference = _camCenter;
+        playerCam.Reference = _camCenter;
     }
     private void Update() {
         deltaTime = Time.deltaTime;
@@ -88,7 +89,7 @@ public class PlayerCharacter : MonoBehaviour {
         }
 
         if(flatInputs.magnitude > 0) {
-            SlerpRotation(transform, _playerCam.transform.TransformDirection(flatInputs), _rotationSpeed);
+            SlerpRotation(transform, playerCam.transform.TransformDirection(flatInputs), _rotationSpeed);
         }
         Vector3 motion;
         Vector3 slopeVector = GetSlopeVector();
@@ -96,14 +97,14 @@ public class PlayerCharacter : MonoBehaviour {
         if(_charaCtrl.isGrounded) {
             motion = new Vector3(inputs.x * Speed, _movement.y, inputs.z * Speed);
             if(inSlopeLimit && inputs.y > 0) motion.y = inputs.y;
-            _movement = _playerCam.transform.TransformDirection(motion);
+            _movement = playerCam.transform.TransformDirection(motion);
 
         } else {
             //if(_wasGrounded && _movement.y < -0.5f) _movement.y = -0.5f;
             motion = flatInputs * Speed * _inAirMoveRatio * Time.deltaTime;
             _movement.x *= (1 - 0.8f * deltaTime);
             _movement.z *= (1 - 0.8f * deltaTime);
-            _movement += _playerCam.transform.TransformDirection(motion);
+            _movement += playerCam.transform.TransformDirection(motion);
         }
         if(_charaCtrl.isGrounded && !inSlopeLimit) {
             Debug.Log($"Slope too steep! ({Vector3.Angle(Vector3.up, slopeVector) - 90})");
@@ -178,9 +179,9 @@ public class PlayerCharacter : MonoBehaviour {
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        _playerCam.RotateHorizontal(inputs.x);
-        _playerCam.RotateVertical(inputs.y);
-        _playerCam.Zoom(Input.mouseScrollDelta.y);
+        playerCam.RotateHorizontal(inputs.x);
+        playerCam.RotateVertical(inputs.y);
+        playerCam.Zoom(Input.mouseScrollDelta.y);
         //transform.localRotation = _playerCam.transform.localRotation;
         /*/ apply camera rotation to character
         if (!_isOnClimbWall) {
@@ -406,5 +407,16 @@ public class PlayerCharacter : MonoBehaviour {
             return hit.point;
         }
         return rayOrigin + rayDir;
+    }
+
+    private void OnTriggerStay(Collider other) {
+        if (other.TryGetComponent(out TunnelEntrance tEntrance)) {
+            playerCam.LerpZoom(tEntrance.GetCamLerpRatio(transform.position, true));
+        }
+    }
+    private void OnTriggerExit(Collider other) {
+        if(other.TryGetComponent(out TunnelEntrance tEntrance)) {
+            playerCam.LerpZoom(tEntrance.GetCamLerpRatio(transform.position, true));
+        }
     }
 }
