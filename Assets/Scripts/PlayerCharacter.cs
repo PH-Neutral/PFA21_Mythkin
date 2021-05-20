@@ -35,12 +35,13 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] PlayerCamera _playerCam;
     [SerializeField] Transform _bodyCenter, _model, _camCenter;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
-    [SerializeField] float _inAirMoveRatio = 1, _terminalVelocity = 10, _lerpMoveTime = 0.5f; // in sec
+    [SerializeField] float _inAirMoveRatio = 1, _maxVelocity = 50, _lerpMoveTime = 0.5f; // in sec
     [SerializeField] float _maxStepHeight = 0.1f;
     [SerializeField] float _climbCheckOffset = 0.2f, _wallDistanceOffset = 0.1f;
     CharacterController _charaCtrl;
     Vector3 _movement = Vector3.zero, _wallPoint;
     RaycastHit _declimbHit;
+    bool _wasGrounded = false;
     bool _wasClimbing = true, _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
     bool _canOpenRoot = false;
     float deltaTime;
@@ -68,6 +69,16 @@ public class PlayerCharacter : MonoBehaviour {
         if (CanOpenRoot && Input.GetKey(KeyCode.E)) OpenRoot();
 
         _wasClimbing = _isOnClimbWall;
+        _wasGrounded = _charaCtrl.isGrounded;
+    }
+    /// <summary>
+    /// Return inputs as such (x: horizontal, y: jumpStrength, z: vertical).
+    /// </summary>
+    /// <returns></returns>
+    Vector3 GetInputs() {
+        Vector2 inputs = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        inputs = Utils.CartToPolar(inputs);
+        return new Vector3(inputs.x, Input.GetKeyDown(KeyCode.Space) ? _jumpHeight : 0, inputs.y);
     }
     void Move() {
         Vector3 inputs = GetInputs();
@@ -76,21 +87,34 @@ public class PlayerCharacter : MonoBehaviour {
             _movement = Vector3.zero;
         }
 
-        //if(flatInputs.magnitude > 0) SlerpRotation(_model, transform.TransformDirection(flatInputs), _rotationSpeed);
         if(flatInputs.magnitude > 0) {
             SlerpRotation(transform, _playerCam.transform.TransformDirection(flatInputs), _rotationSpeed);
         }
-        // horizontal movements
+        Vector3 motion;
+        Vector3 slopeVector = GetSlopeVector();
+        bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeVector) - 90 < _charaCtrl.slopeLimit;
         if(_charaCtrl.isGrounded) {
-            _movement = new Vector3(inputs.x * Speed, _movement.y, inputs.z * Speed);
-            _movement.y = inputs.y > 0 ? inputs.y : -0.5f;
-        } else {
-            _movement += flatInputs * Speed * _inAirMoveRatio * Time.deltaTime;
-        }
-        _movement.y = Mathf.Clamp(_movement.y - 9.81f * deltaTime, -_terminalVelocity, _terminalVelocity);
+            motion = new Vector3(inputs.x * Speed, _movement.y, inputs.z * Speed);
+            if(inSlopeLimit && inputs.y > 0) motion.y = inputs.y;
+            _movement = _playerCam.transform.TransformDirection(motion);
 
-        _charaCtrl.Move(_playerCam.transform.TransformDirection(_movement) * deltaTime);
-        //Debug.Log(_charaCtrl.velocity);
+        } else {
+            //if(_wasGrounded && _movement.y < -0.5f) _movement.y = -0.5f;
+            motion = flatInputs * Speed * _inAirMoveRatio * Time.deltaTime;
+            _movement.x *= (1 - 0.8f * deltaTime);
+            _movement.z *= (1 - 0.8f * deltaTime);
+            _movement += _playerCam.transform.TransformDirection(motion);
+        }
+        if(_charaCtrl.isGrounded && !inSlopeLimit) {
+            Debug.Log($"Slope too steep! ({Vector3.Angle(Vector3.up, slopeVector) - 90})");
+            _movement += slopeVector * Vector3.Dot(slopeVector, Utils.gravity) * deltaTime;
+        } else if(_wasGrounded && _movement.y < -0.5f) {
+            _movement.y = -0.5f;
+        } else {
+            _movement += Utils.gravity * deltaTime;
+        }
+        _movement = Vector3.ClampMagnitude(_movement, _maxVelocity);
+        _charaCtrl.Move(_movement * deltaTime);
     }
     void Climb() {
         Vector3 inputs = GetInputs();
@@ -126,7 +150,7 @@ public class PlayerCharacter : MonoBehaviour {
         // movement
         _movement = new Vector3(inputs.x, inputs.z, 0) * _climbSpeed;
         if(isGrounded && inputs.z < 0) {
-            _movement = new Vector3(inputs.x, -_terminalVelocity, inputs.z) * Speed;
+            _movement = new Vector3(inputs.x, -_maxVelocity, inputs.z) * Speed;
         }
         bool canMoveHori = CanClimbHorizontal(inputs.x);
         bool canMoveVert = CanClimbVertical(inputs.z);
@@ -170,14 +194,25 @@ public class PlayerCharacter : MonoBehaviour {
     }
     bool IsOnGround() {
         RaycastHit hit;
-        Vector3 rayOrigin = _bodyCenter.position;
-        Vector3 rayDir = -transform.up * Height * 0.5f;
+        Vector3 rayOrigin = transform.position;
+        Vector3 rayDir = -transform.up * _charaCtrl.skinWidth * 2;
         int layerMaskTerrain = 1 << LayerMask.NameToLayer("Terrain");
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
             // there is terrain under our feet
             return true;
         }
         return false;
+    }
+    Vector3 GetSlopeVector() {
+        RaycastHit hit;
+        Vector3 rayOrigin = transform.position;
+        Vector3 rayDir = -transform.up * _charaCtrl.skinWidth * 2;
+        int layerMaskTerrain = 1 << LayerMask.NameToLayer("Terrain");
+        if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
+            // calculate downward slope vector
+            return Vector3.Cross(Vector3.Cross(hit.normal, Vector3.down), hit.normal).normalized;
+        }
+        return Vector3.down;
     }
     bool FindDeclimbHitPoint(out RaycastHit hitPoint) {
         Vector3 rayOrigin = _bodyCenter.position;
@@ -334,15 +369,6 @@ public class PlayerCharacter : MonoBehaviour {
         // no surface blocks the "up/down -> forward -> down/up" direction
         Debug.DrawRay(rayOrigin, rayDir, Color.green);
         return true;
-    }
-    /// <summary>
-    /// Return inputs as such (x: horizontal, y: jumpStrength, z: vertical).
-    /// </summary>
-    /// <returns></returns>
-    Vector3 GetInputs() {
-        Vector2 inputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        inputs = Utils.CartToPolar(inputs);
-        return new Vector3(inputs.x, Input.GetKeyDown(KeyCode.Space) ? _jumpHeight : 0, inputs.y);
     }
     bool LerpPosition(Vector3 targetPos, float lerpSpeed) {
         float t = lerpSpeed * Time.deltaTime / Vector3.Distance(transform.position, targetPos);

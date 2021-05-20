@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utils {
+    public static Vector3 gravity = Vector3.down * 9.81f;
     public static float floorHeight = 2;
 
     #region MISC
