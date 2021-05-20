@@ -33,12 +33,14 @@ public class PlayerCharacter : MonoBehaviour {
     }
     public float interactionMaxDistance = 3f;
     [SerializeField] PlayerCamera _playerCam;
-    [SerializeField] Transform _bodyCenter, _model, _camCenter;
+    [SerializeField] Transform _bodyCenter, _model, _camCenter, throwPoint;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _terminalVelocity = 10, _lerpMoveTime = 0.5f; // in sec
     [SerializeField] float _maxStepHeight = 0.1f;
     [SerializeField] float _climbCheckOffset = 0.2f, _wallDistanceOffset = 0.1f;
+    [SerializeField] float _throwAngleOffset = 45f, _throwForce = 5f;
     CharacterController _charaCtrl;
+    BombTrajectory _bombTrajectory;
     Vector3 _movement = Vector3.zero, _wallPoint;
     RaycastHit _declimbHit;
     Root currentRoot;
@@ -47,12 +49,21 @@ public class PlayerCharacter : MonoBehaviour {
     float deltaTime;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
+        _bombTrajectory = GetComponentInChildren<BombTrajectory>();
     }
     private void Start() {
         _playerCam.Reference = _camCenter;
     }
     private void Update() {
         deltaTime = Time.deltaTime;
+        
+        //Throw test
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            _bombTrajectory.ShowBombTrajectory(FindThrowVector());
+        }
+        //Throw test
+
 
         if (!_isDeclimbingUp) {
             if(!_wasClimbing) _isOnClimbWall = CheckForClimb(true, false) && CanClimbHorizontal(-1) && CanClimbHorizontal(1);
@@ -185,6 +196,10 @@ public class PlayerCharacter : MonoBehaviour {
             else CanOpenRoot = false;
         }
         else CanOpenRoot = false;
+    }
+    Vector3 FindThrowVector()
+    {
+        return Quaternion.Euler(-_throwAngleOffset, 0, 0) * Vector3.forward * _throwForce;
     }
     bool IsOnGround() {
         RaycastHit hit;
