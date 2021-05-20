@@ -647,13 +647,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06518166f6adbc841bb730a492a19a1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cam: {fileID: 0}
   _swivel: {fileID: 927084403}
   _stick: {fileID: 1591679694}
-  _zoomNear: 0
-  _zoomFar: 0
   _rotationLowest: -45
   _rotationHighest: 45
+  _rotationSpeed: 100
+  _zoomNear: -1.5
+  _zoomFar: -5
+  _zoomSpeed: 1
   invertY: 1
+  invertZoom: 0
 --- !u!1 &348215053
 GameObject:
   m_ObjectHideFlags: 0
@@ -2198,7 +2202,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rootIndicator: {fileID: 84031057}
   bombIndicator: {fileID: 1783351125}
-  player: {fileID: 1237475687}
 --- !u!1 &833711870
 GameObject:
   m_ObjectHideFlags: 0
@@ -2857,6 +2860,7 @@ GameObject:
   - component: {fileID: 1186302761}
   - component: {fileID: 1186302760}
   - component: {fileID: 1186302759}
+  - component: {fileID: 1186302762}
   m_Layer: 10
   m_Name: roots
   m_TagString: Roots
@@ -2940,6 +2944,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1186302757}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1186302762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1186302757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83666989b6940ea499fa70ed6f327b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  openDuration: 5
 --- !u!1 &1195080092
 GameObject:
   m_ObjectHideFlags: 0
@@ -3138,7 +3155,6 @@ MonoBehaviour:
   _sprintRatio: 1.5
   _climbSpeed: 2
   _rotationSpeed: 360
-  _camRotateSpeed: 100
   _jumpHeight: 5
   _inAirMoveRatio: 1
   _terminalVelocity: 10
@@ -4589,13 +4605,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06518166f6adbc841bb730a492a19a1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cam: {fileID: 0}
   _swivel: {fileID: 5712730318904572041}
   _stick: {fileID: 5712730320072582519}
-  _zoomNear: 0
-  _zoomFar: 0
   _rotationLowest: -45
   _rotationHighest: 45
+  _rotationSpeed: 100
+  _zoomNear: 0
+  _zoomFar: 0
+  _zoomSpeed: 1
   invertY: 1
+  invertZoom: 0
 --- !u!1 &5712730318283234718
 GameObject:
   m_ObjectHideFlags: 0

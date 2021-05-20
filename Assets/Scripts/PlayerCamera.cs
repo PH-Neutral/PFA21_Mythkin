@@ -11,6 +11,7 @@ public class PlayerCamera : MonoBehaviour
             SetPositionToRef();
         }
     }
+    public Camera cam;
 
     [SerializeField] Transform _swivel, _stick;
     [SerializeField] float _rotationLowest, _rotationHighest, _rotationSpeed = 100;
@@ -23,6 +24,8 @@ public class PlayerCamera : MonoBehaviour
     {
         _currentRotation = _swivel.transform.localRotation.eulerAngles.x;
         _targetZoom = _stick.localPosition;
+
+        cam = GetComponentInChildren<Camera>();
     }
     private void Update() {
         

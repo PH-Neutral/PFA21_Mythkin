@@ -41,6 +41,7 @@ public class PlayerCharacter : MonoBehaviour {
     CharacterController _charaCtrl;
     Vector3 _movement = Vector3.zero, _wallPoint;
     RaycastHit _declimbHit;
+    Root currentRoot;
     bool _wasClimbing = true, _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
     bool _canOpenRoot = false;
     float deltaTime;
@@ -64,8 +65,8 @@ public class PlayerCharacter : MonoBehaviour {
         if(_isDeclimbingUp) {
             Declimb();
         }
-
-        if (CanOpenRoot && Input.GetKey(KeyCode.E)) OpenRoot();
+        CheckRoots();
+        if (CanOpenRoot && Input.GetKey(KeyCode.E)) currentRoot.Open();
 
         _wasClimbing = _isOnClimbWall;
     }
@@ -164,9 +165,26 @@ public class PlayerCharacter : MonoBehaviour {
             _playerCam.transform.localRotation = Quaternion.identity;
         }*/
     }
-    void OpenRoot()
+    void CheckRoots()
     {
+        RaycastHit hit;
+        if (Physics.Raycast(_playerCam.cam.transform.position, _playerCam.cam.transform.forward, out hit, 100, 1 << LayerMask.NameToLayer("Interactibles")))
+        {
+            if (Vector3.Distance(transform.position, hit.point) > interactionMaxDistance)
+            {
+                CanOpenRoot = false;
+                return;
+            }
 
+            if (hit.collider.CompareTag("Roots"))
+            {
+                currentRoot = hit.collider.GetComponent<Root>();
+                CanOpenRoot = true;
+                return;
+            }
+            else CanOpenRoot = false;
+        }
+        else CanOpenRoot = false;
     }
     bool IsOnGround() {
         RaycastHit hit;
