@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
 {
+    public Quaternion xRotation {
+        get {
+            return _swivel.localRotation;
+        }
+    }
     public Transform playerHead;
     public Camera cam;
     public float maxZoomRatio = 1;

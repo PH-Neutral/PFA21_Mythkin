@@ -4,19 +4,46 @@ using UnityEngine;
 
 public class BombTrajectory : MonoBehaviour
 {
-    [SerializeField] float maxLenght = 5f, precision = 0.2f, lastPointDisctance = 0.1f;
+    [SerializeField] float maxLenght = 5f, precision = 0.2f, _throwForce, _throwAngleOffset;
     [SerializeField] LineRenderer trajectoryLine;
-    float g = Physics.gravity.magnitude;
+    [SerializeField] GameObject _bombPrefab;
+    [SerializeField] PlayerCamera _playerCamera;
 
-    public void ShowBombTrajectory(Vector3 throwVector)
+    public bool IsDisplaying
+    {
+        get
+        {
+            return trajectoryLine.enabled;
+        }
+        set
+        {
+            trajectoryLine.enabled = value;
+        }
+    }
+    Vector3 throwVector;
+
+    public void SetBombTrajectory()
     {
         List<Vector3> trajectoryPoints = new List<Vector3>();
-        Vector3 projectilePosition;
+        Vector3 projectilePosition, rayOrigin, rayDir;
+        RaycastHit hit;
 
-        for (float i = 0f; i < maxLenght; i += precision)
+        throwVector = FindThrowVector();
+
+        for (float t = 0f, i = 0; t < maxLenght; t += precision, i++)
         {
-            projectilePosition = transform.position + Camera.main.transform.TransformDirection(ProjectilePosition(throwVector, i));
-            if (Physics.Raycast(projectilePosition, Vector3.down, lastPointDisctance)) break;
+            projectilePosition = ProjectilePosition(throwVector, t);
+
+            if (i > 0)
+            {
+                rayOrigin = transform.TransformPoint(trajectoryPoints[(int)i - 1]);
+                rayDir = transform.TransformDirection(projectilePosition - trajectoryPoints[(int)i - 1]);
+                if (Physics.Raycast(rayOrigin, rayDir, out hit, rayDir.magnitude, 1<<LayerMask.NameToLayer("Terrain") | 1<<LayerMask.NameToLayer("Interactibles")))
+                {
+                    trajectoryPoints.Add(transform.InverseTransformPoint(hit.point));
+                    break;
+                }
+            }
 
             trajectoryPoints.Add(projectilePosition);
         }
@@ -27,7 +54,16 @@ public class BombTrajectory : MonoBehaviour
     {
         Debug.DrawRay(transform.position, throwVector, Color.blue);
         return new Vector3(0,
-                            throwVector.magnitude * t * Mathf.Sin(Vector3.Angle(Vector3.forward, throwVector) * Mathf.Deg2Rad) - 0.5f * g * Mathf.Pow(t, 2),
+                            throwVector.magnitude * t * Mathf.Sin(Vector3.Angle(Vector3.forward, throwVector) * Mathf.Deg2Rad) - 0.5f * Utils.gravity.magnitude * Mathf.Pow(t, 2),
                             throwVector.magnitude * t * Mathf.Cos(Vector3.Angle(Vector3.forward, throwVector) * Mathf.Deg2Rad));
+    }
+    public void ThrowBomb()
+    {
+        GameObject bombInstance = Instantiate(_bombPrefab, transform.position, transform.rotation);
+        bombInstance.GetComponent<Rigidbody>().velocity = transform.TransformDirection(throwVector);
+    }
+    Vector3 FindThrowVector()
+    {
+        return  _playerCamera.xRotation * Quaternion.Euler(-_throwAngleOffset, 0, 0) * Vector3.forward * _throwForce;
     }
 }

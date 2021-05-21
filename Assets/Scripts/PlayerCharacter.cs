@@ -40,6 +40,7 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] float _maxStepHeight = 0.1f;
     [SerializeField] float _climbCheckOffset = 0.2f, _wallDistanceOffset = 0.1f;
     [SerializeField] float _throwAngleOffset = 45f, _throwForce = 5f;
+    [SerializeField] GameObject _bombPrefab;
     CharacterController _charaCtrl;
     BombTrajectory _bombTrajectory;
     Vector3 _movement = Vector3.zero, _wallPoint;
@@ -47,7 +48,7 @@ public class PlayerCharacter : MonoBehaviour {
     Root currentRoot;
     bool _wasGrounded = false;
     bool _wasClimbing = true, _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
-    bool _canOpenRoot = false;
+    bool _canOpenRoot = false, _isAiming = false;
     float deltaTime;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
@@ -58,11 +59,16 @@ public class PlayerCharacter : MonoBehaviour {
     }
     private void Update() {
         deltaTime = Time.deltaTime;
-        
+
+
+        _bombTrajectory.IsDisplaying = _isAiming = Input.GetKey(KeyCode.Alpha1);
         //Throw test
-        if (Input.GetKey(KeyCode.Alpha1))
-        {
-            _bombTrajectory.ShowBombTrajectory(FindThrowVector());
+        if (_isAiming){
+            _bombTrajectory.SetBombTrajectory();
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                _bombTrajectory.ThrowBomb();
+            }
         }
         //Throw test
 
@@ -99,8 +105,10 @@ public class PlayerCharacter : MonoBehaviour {
         if (_wasClimbing) {
             _movement = Vector3.zero;
         }
-
-        if(flatInputs.magnitude > 0) {
+        if (_isAiming){
+            SlerpRotation(transform, new Vector3(playerCam.transform.forward.x, 0, playerCam.transform.forward.z), _rotationSpeed);
+        }
+        else if(flatInputs.magnitude > 0) {
             SlerpRotation(transform, playerCam.transform.TransformDirection(flatInputs), _rotationSpeed);
         }
         Vector3 motion;
@@ -220,10 +228,6 @@ public class PlayerCharacter : MonoBehaviour {
             else CanOpenRoot = false;
         }
         else CanOpenRoot = false;
-    }
-    Vector3 FindThrowVector()
-    {
-        return Quaternion.Euler(-_throwAngleOffset, 0, 0) * Vector3.forward * _throwForce;
     }
     bool IsOnGround() {
         RaycastHit hit;
