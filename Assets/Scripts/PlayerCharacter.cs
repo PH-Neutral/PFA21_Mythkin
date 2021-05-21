@@ -34,26 +34,38 @@ public class PlayerCharacter : MonoBehaviour {
     public float interactionMaxDistance = 3f;
     public PlayerCamera playerCam;
 
-    [SerializeField] Transform _bodyCenter, _model, _camCenter;
+    [SerializeField] Transform _bodyCenter, _model, _camCenter, throwPoint;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _maxVelocity = 50, _lerpMoveTime = 0.5f; // in sec
     [SerializeField] float _maxStepHeight = 0.1f;
     [SerializeField] float _climbCheckOffset = 0.2f, _wallDistanceOffset = 0.1f;
+    [SerializeField] float _throwAngleOffset = 45f, _throwForce = 5f;
     CharacterController _charaCtrl;
+    BombTrajectory _bombTrajectory;
     Vector3 _movement = Vector3.zero, _wallPoint;
     RaycastHit _declimbHit;
+    Root currentRoot;
     bool _wasGrounded = false;
     bool _wasClimbing = true, _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
     bool _canOpenRoot = false;
     float deltaTime;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
+        _bombTrajectory = GetComponentInChildren<BombTrajectory>();
     }
     private void Start() {
         playerCam.Reference = _camCenter;
     }
     private void Update() {
         deltaTime = Time.deltaTime;
+        
+        //Throw test
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            _bombTrajectory.ShowBombTrajectory(FindThrowVector());
+        }
+        //Throw test
+
 
         if (!_isDeclimbingUp) {
             if(!_wasClimbing) _isOnClimbWall = CheckForClimb(true, false) && CanClimbHorizontal(-1) && CanClimbHorizontal(1);
@@ -66,8 +78,8 @@ public class PlayerCharacter : MonoBehaviour {
         if(_isDeclimbingUp) {
             Declimb();
         }
-
-        if (CanOpenRoot && Input.GetKey(KeyCode.E)) OpenRoot();
+        CheckRoots();
+        if (CanOpenRoot && Input.GetKey(KeyCode.E)) currentRoot.Open();
 
         _wasClimbing = _isOnClimbWall;
         _wasGrounded = _charaCtrl.isGrounded;
@@ -189,9 +201,30 @@ public class PlayerCharacter : MonoBehaviour {
             _playerCam.transform.localRotation = Quaternion.identity;
         }*/
     }
-    void OpenRoot()
+    void CheckRoots()
     {
+        RaycastHit hit;
+        if (Physics.Raycast(playerCam.cam.transform.position, playerCam.cam.transform.forward, out hit, 100, 1 << LayerMask.NameToLayer("Interactibles")))
+        {
+            if (Vector3.Distance(transform.position, hit.point) > interactionMaxDistance)
+            {
+                CanOpenRoot = false;
+                return;
+            }
 
+            if (hit.collider.CompareTag("Roots"))
+            {
+                currentRoot = hit.collider.GetComponent<Root>();
+                CanOpenRoot = true;
+                return;
+            }
+            else CanOpenRoot = false;
+        }
+        else CanOpenRoot = false;
+    }
+    Vector3 FindThrowVector()
+    {
+        return Quaternion.Euler(-_throwAngleOffset, 0, 0) * Vector3.forward * _throwForce;
     }
     bool IsOnGround() {
         RaycastHit hit;
