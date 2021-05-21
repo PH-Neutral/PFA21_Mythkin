@@ -11,6 +11,13 @@ public class PlayerCamera : MonoBehaviour
             SetPositionToRef();
         }
     }
+    public Quaternion xRotation
+    {
+        get
+        {
+            return _swivel.localRotation;
+        }
+    }
     public Camera cam;
 
     [SerializeField] Transform _swivel, _stick;
