@@ -4,33 +4,29 @@ using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
 {
-    public Transform Reference {
-        get { return _reference; }
-        set {
-            _reference = value;
-            SetPositionToRef();
-        }
-    }
+    public Transform playerHead;
     public Camera cam;
+    public float maxZoomRatio = 1;
 
     [SerializeField] Transform _swivel, _stick;
     [SerializeField] float _rotationLowest, _rotationHighest, _rotationSpeed = 100;
-    [SerializeField] float _preferedZoom = 2;
+    [SerializeField] float _preferedZoom = 2, _fpsModeThreshold = 1;
     [SerializeField] bool invertY = true, invertZoom = false;
-    Transform _reference;
+    Transform _camRef, _headRef;
     //Vector3 _targetZoom = Vector3.zero;
-    float _currentRotation = 0;
+    float _currentRotation = 0, _fpsModeRatio = 1;
     private void Awake() {
         cam = GetComponentInChildren<Camera>();
         _currentRotation = _swivel.transform.localRotation.eulerAngles.x;
         LerpZoom(1);
     }
-    private void Update() {
-        
-    }
     private void LateUpdate() {
-        //LerpZoom();
-        SetPositionToRef();
+        AdjustCamera();
+    }
+    public void SetReferences(Transform head, Transform cameraPivot) {
+        _headRef = head;
+        _camRef = cameraPivot;
+        AdjustCamera();
     }
     public void RotateVertical(float speedRatio)
     {
@@ -42,15 +38,22 @@ public class PlayerCamera : MonoBehaviour
         if(speedRatio == 0) return;
         transform.localRotation = Quaternion.Euler(0, speedRatio * _rotationSpeed * Time.deltaTime, 0) * transform.localRotation;
     }
-    public void Zoom(float speedRatio) {
-        /*if(speedRatio == 0) return;
-        _targetZoom.z = Mathf.Clamp(_stick.localPosition.z + speedRatio * _zoomSpeed, _zoomFar, _zoomNear);*/
-    }
     public void LerpZoom(float t) {
         _stick.localPosition = Vector3.Lerp(Vector3.zero, Vector3.back * _preferedZoom, t);
-
+        _fpsModeRatio = Mathf.Clamp01(t * _preferedZoom / _fpsModeThreshold);
     }
-    void SetPositionToRef() {
-        transform.position = Reference.position;
+    void AdjustCamera() {
+        float zoomRatio = maxZoomRatio;
+        Vector3 rayOrigin = transform.position;
+        Vector3 rayDir = -transform.forward * _preferedZoom * maxZoomRatio;
+        int layerMask = 1 << LayerMask.NameToLayer(Utils.layer_Terrain) | 1 << LayerMask.NameToLayer(Utils.layer_Environment) | 1 << LayerMask.NameToLayer(Utils.layer_Enemies);
+        if (Physics.Raycast(rayOrigin, rayDir, out RaycastHit hit, rayDir.magnitude, layerMask)) {
+            zoomRatio = Vector3.Distance(rayOrigin, hit.point) / _preferedZoom;
+        }
+        LerpZoom(zoomRatio);
+        AdjustPosition();
+    }
+    void AdjustPosition() {
+        transform.position = Vector3.Lerp(_headRef.position, _camRef.position, _fpsModeRatio);
     }
 }
