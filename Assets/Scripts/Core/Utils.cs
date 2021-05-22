@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utils {
-    public const string layer_Interactible = "Interactibles", layer_Terrain = "Terrain", layer_Environment = "Environment", 
+    public const string layer_Interactibles = "Interactibles", layer_Terrain = "Terrain", layer_Environment = "Environment", 
         layer_Enemies = "Enemies", layer_Player = "Player";
-    public static Vector3 gravity = Vector3.down * 9.81f;
     public static float floorHeight = 2;
 
     #region MISC
@@ -43,6 +42,9 @@ public static class Utils {
     }
     public static float ChangePrecision(this float f, int nbDecimals) {
         return ((int)(f * Mathf.Pow(10, nbDecimals))) / Mathf.Pow(10, nbDecimals);
+    }
+    public static int ToLayerMask(this string layerName) {
+        return 1<<LayerMask.NameToLayer(layerName);
     }
     #endregion
 

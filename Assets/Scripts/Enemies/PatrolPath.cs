@@ -8,12 +8,12 @@ public class PatrolPath : MonoBehaviour {
         public Transform point;
         public float speedToPoint;
         public float waitingDuration;
-
+        /*
         public WayPoint(Transform point, float speedToPoint, float waitingDuration) {
             this.point = point;
             this.speedToPoint = speedToPoint;
             this.waitingDuration = waitingDuration;
-        }
+        }*/
     }
     [System.Serializable]
     public enum Mode {

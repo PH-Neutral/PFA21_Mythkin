@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     }
     public void ChangeImageColor(Color color)
     {
+        if(image == null) return;
         image.color = color;
     }
 }

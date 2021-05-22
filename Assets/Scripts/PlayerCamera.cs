@@ -9,21 +9,19 @@ public class PlayerCamera : MonoBehaviour
             return _swivel.localRotation;
         }
     }
+    [HideInInspector] public Camera cam;
     public Transform playerHead;
-    public Camera cam;
     public float maxZoomRatio = 1;
 
     [SerializeField] Transform _swivel, _stick;
     [SerializeField] float _rotationLowest, _rotationHighest, _rotationSpeed = 100;
     [SerializeField] float _preferedZoom = 2, _fpsModeThreshold = 1;
-    [SerializeField] bool invertY = true, invertZoom = false;
+    [SerializeField] bool _invertVertical = true, _invertHorizontal = false;
     Transform _camRef, _headRef;
-    //Vector3 _targetZoom = Vector3.zero;
     float _currentRotation = 0, _fpsModeRatio = 1;
     private void Awake() {
         cam = GetComponentInChildren<Camera>();
         _currentRotation = _swivel.transform.localRotation.eulerAngles.x;
-        LerpZoom(1);
     }
     private void LateUpdate() {
         AdjustCamera();
@@ -36,12 +34,12 @@ public class PlayerCamera : MonoBehaviour
     public void RotateVertical(float speedRatio)
     {
         if(speedRatio == 0) return;
-        _currentRotation = Mathf.Clamp(_currentRotation + (invertY ? -1 : 1) * speedRatio * _rotationSpeed * Time.deltaTime, _rotationLowest, _rotationHighest);
+        _currentRotation = Mathf.Clamp(_currentRotation + (_invertVertical ? -1 : 1) * speedRatio * _rotationSpeed * Time.deltaTime, _rotationLowest, _rotationHighest);
         _swivel.transform.localRotation = Quaternion.Euler(_currentRotation, 0, 0);
     }
     public void RotateHorizontal(float speedRatio) {
         if(speedRatio == 0) return;
-        transform.localRotation = Quaternion.Euler(0, speedRatio * _rotationSpeed * Time.deltaTime, 0) * transform.localRotation;
+        transform.localRotation = Quaternion.Euler(0, (_invertHorizontal ? -1 : 1) * speedRatio * _rotationSpeed * Time.deltaTime, 0) * transform.localRotation;
     }
     public void LerpZoom(float t) {
         _stick.localPosition = Vector3.Lerp(Vector3.zero, Vector3.back * _preferedZoom, t);
@@ -51,7 +49,7 @@ public class PlayerCamera : MonoBehaviour
         float zoomRatio = maxZoomRatio;
         Vector3 rayOrigin = transform.position;
         Vector3 rayDir = -transform.forward * _preferedZoom * maxZoomRatio;
-        int layerMask = 1 << LayerMask.NameToLayer(Utils.layer_Terrain) | 1 << LayerMask.NameToLayer(Utils.layer_Environment) | 1 << LayerMask.NameToLayer(Utils.layer_Enemies);
+        int layerMask = Utils.layer_Terrain.ToLayerMask() | Utils.layer_Environment.ToLayerMask() | Utils.layer_Enemies.ToLayerMask();
         if (Physics.Raycast(rayOrigin, rayDir, out RaycastHit hit, rayDir.magnitude, layerMask)) {
             zoomRatio = Vector3.Distance(rayOrigin, hit.point) / _preferedZoom;
         }

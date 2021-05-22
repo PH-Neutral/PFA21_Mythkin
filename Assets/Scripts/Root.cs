@@ -2,23 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Root : MonoBehaviour
-{
-    Collider col;
+public class Root : MonoBehaviour {
     public float openDuration = 5f;
+
+    Collider _coll;
+    Renderer _rend;
     private void Awake()
     {
-        col = GetComponent<Collider>();
+        _coll = GetComponent<Collider>();
+        _rend = GetComponent<Renderer>();
     }
     public void Open()
     {
-        col.enabled = false;
-        GetComponent<Renderer>().enabled = false;
+        _coll.enabled = _rend.enabled = false;
         Invoke(nameof(Close), openDuration);
     }
     public void Close()
     {
-        col.enabled = true;
-        GetComponent<Renderer>().enabled = true;
+        CancelInvoke(nameof(Close));
+        _coll.enabled = _rend.enabled = true;
     }
 }
