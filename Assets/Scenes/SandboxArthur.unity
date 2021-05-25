@@ -648,14 +648,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 286350647}
+  playerHead: {fileID: 0}
+  maxZoomRatio: 1
   _swivel: {fileID: 927084403}
   _stick: {fileID: 1591679694}
   _rotationLowest: -45
   _rotationHighest: 45
   _rotationSpeed: 100
   _preferedZoom: 2
-  invertY: 1
-  invertZoom: 0
+  _fpsModeThreshold: 1
+  _invertVertical: 1
+  _invertHorizontal: 0
 --- !u!1 &348215053
 GameObject:
   m_ObjectHideFlags: 0
@@ -3145,26 +3148,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db59eacff9a5935489c10b5d2957938d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionMaxDistance: 3
+  interactionRange: 3
   playerCam: {fileID: 340825979}
   _bodyCenter: {fileID: 675442471}
   _model: {fileID: 1919080661}
   _camCenter: {fileID: 1164078228}
   throwPoint: {fileID: 1733564917}
+  _head: {fileID: 1975283369}
   _moveSpeed: 5
   _sprintRatio: 1.5
   _climbSpeed: 2
   _rotationSpeed: 360
   _jumpHeight: 5
   _inAirMoveRatio: 1
-  _maxVelocity: 50
-  _lerpMoveTime: 0.5
-  _maxStepHeight: 0.1
-  _climbCheckOffset: 0.2
+  _groundPullMagnitude: 5
+  _slideAcceleration: 2
+  _climbCheckDistanceOffset: 0.2
   _wallDistanceOffset: 0.1
-  _throwAngleOffset: 45
-  _throwForce: 15
-  _bombPrefab: {fileID: 3749080946834312942, guid: 9997c9e07ed3bbd41891c3fd6868778a, type: 3}
 --- !u!143 &1237475688
 CharacterController:
   m_ObjectHideFlags: 0
@@ -3767,13 +3767,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90f8fa498af537343963fe834e6c93ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxLenght: 5
-  precision: 0.05
+  playerCamera: {fileID: 0}
+  _lengthDisplayed: 5
+  _precision: 0.05
   _throwForce: 10
   _throwAngleOffset: 45
-  trajectoryLine: {fileID: 1733564919}
   _bombPrefab: {fileID: 3749080946834312942, guid: 9997c9e07ed3bbd41891c3fd6868778a, type: 3}
-  _playerCamera: {fileID: 340825979}
+  showDebug: 1
 --- !u!120 &1733564919
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -4758,14 +4758,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 0}
+  playerHead: {fileID: 0}
+  maxZoomRatio: 1
   _swivel: {fileID: 5712730318904572041}
   _stick: {fileID: 5712730320072582519}
   _rotationLowest: -45
   _rotationHighest: 45
   _rotationSpeed: 100
   _preferedZoom: 2
-  invertY: 1
-  invertZoom: 0
+  _fpsModeThreshold: 1
+  _invertVertical: 1
+  _invertHorizontal: 0
 --- !u!1 &5712730318283234718
 GameObject:
   m_ObjectHideFlags: 0

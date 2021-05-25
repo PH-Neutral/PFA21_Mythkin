@@ -46,8 +46,8 @@ public class PlayerCharacter : MonoBehaviour {
         deltaTime = Time.deltaTime;
         _isJumping = Input.GetKey(KeyCode.Space);
         _isInteracting = Input.GetKeyDown(KeyCode.E);
-        _isAiming = Input.GetMouseButton(1);
-        _isThrowing = Input.GetMouseButtonDown(0);
+        _isAiming = Input.GetKey(KeyCode.Alpha1);
+        _isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
 
         Look();
         HandleMovement();
@@ -81,12 +81,14 @@ public class PlayerCharacter : MonoBehaviour {
     void HandleThrowing() {
         if(_trajectoryHandler == null) return;
         _trajectoryHandler.IsDisplaying = _isAiming;
-        if(_isAiming) {
+        if (_isAiming){
             _trajectoryHandler.SetBombTrajectory();
-            if(_isThrowing) {
+            if (_isThrowing)
+            {
                 _trajectoryHandler.ThrowBomb();
             }
-        }
+        } 
+        
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
