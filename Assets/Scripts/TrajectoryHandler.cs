@@ -19,9 +19,11 @@ public class TrajectoryHandler : MonoBehaviour {
     [SerializeField] bool showDebug = true;
     LineRenderer _lr;
     Vector3 _throwVector;
+    float _bombRadius;
 
     private void Awake() {
         _lr = GetComponent<LineRenderer>();
+        _bombRadius = _bombPrefab.GetComponent<SphereCollider>().radius;
     }
     public void SetBombTrajectory(bool displayTrajectory = true)
     {
@@ -40,9 +42,9 @@ public class TrajectoryHandler : MonoBehaviour {
             {
                 rayOrigin = transform.TransformPoint(trajectoryPoints[(int)i - 1]);
                 rayDir = transform.TransformDirection(projectilePosition - trajectoryPoints[(int)i - 1]);
-                if(Physics.Raycast(rayOrigin, rayDir, out hit, rayDir.magnitude, Utils.layer_Terrain.ToLayerMask() | Utils.layer_Interactibles.ToLayerMask()))
+                if(Physics.SphereCast(rayOrigin, _bombRadius, rayDir, out hit, rayDir.magnitude, Utils.layer_Terrain.ToLayerMask() | Utils.layer_Interactibles.ToLayerMask()))
                 {
-                    trajectoryPoints.Add(transform.InverseTransformPoint(hit.point));
+                    trajectoryPoints.Add(transform.InverseTransformPoint(hit.point + hit.normal * _bombRadius));
                     break;
                 }
             }
