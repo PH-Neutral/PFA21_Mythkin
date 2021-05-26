@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerCharacter : MonoBehaviour {
     public float Speed {
         get {
-            return _moveSpeed * (Input.GetKey(KeyCode.LeftShift) ? _sprintRatio : 1);
+            return _moveSpeed * (_isRunning ? _sprintRatio : 1);
         }
     }
     public bool IsClimbing {
@@ -22,17 +22,19 @@ public class PlayerCharacter : MonoBehaviour {
     public float interactionRange = 3f;
     public PlayerCamera playerCam;
 
-    [SerializeField] Transform _bodyCenter, _model, _camCenter, throwPoint, _head;
+    [SerializeField] Transform _bodyCenter, _model, _camCenter, _throwPoint, _head;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5, _slideAcceleration = 2;
     [SerializeField] float _climbCheckDistanceOffset = 0.2f, _wallDistanceOffset = 0.1f;
+    [SerializeField] float _soundRadiusRun = 10f, _soundRadiusWalk = 5f;
+    [SerializeField] MeshRenderer _fakebomb; //temporary. Will need to do it by animation
     CharacterController _charaCtrl;
     TrajectoryHandler _trajectoryHandler;
-    Vector3 _movement = Vector3.zero, _wallPoint;
+    Vector3 _movement = Vector3.zero, _wallPoint, _inputs = Vector3.zero;
     RaycastHit _declimbHit;
     bool _wasGrounded = false, _wasClimbing = true;
     bool _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
-    bool _isAiming = false, _isThrowing = false, _isInteracting = false, _isJumping = false;
+    bool _isAiming = false, _isThrowing = false, _isInteracting = false, _isJumping = false, _isRunning = false;
     float deltaTime;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
@@ -48,11 +50,14 @@ public class PlayerCharacter : MonoBehaviour {
         _isInteracting = Input.GetKeyDown(KeyCode.E);
         _isAiming = Input.GetKey(KeyCode.Alpha1);
         _isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
+        _isRunning = Input.GetKey(KeyCode.LeftShift);
+        _inputs = GetInputs();
 
         Look();
         HandleMovement();
         HandleInteractions();
         HandleThrowing();
+        if (_inputs != Vector3.zero) EmitSound();
 
         _wasClimbing = _isOnClimbWall;
         _wasGrounded = _charaCtrl.isGrounded;
@@ -77,6 +82,13 @@ public class PlayerCharacter : MonoBehaviour {
             if(_isInteracting) root.Open();
         }
         if(UIManager.Instance != null) UIManager.Instance.rootIndicator.SetActive(root != null);
+
+        // Plants
+        BombPlant bombPlant;
+        if ((bombPlant = CheckPlantInteraction()) != null)
+        {
+            if (_isInteracting) bombPlant.PickBomb();
+        }
     }
     void HandleThrowing() {
         if(_trajectoryHandler == null) return;
@@ -112,8 +124,7 @@ public class PlayerCharacter : MonoBehaviour {
         return new Vector3(inputs.x, _isJumping ? _jumpHeight : 0, inputs.y);
     }
     Vector3 Move() {
-        Vector3 inputs = GetInputs();
-        Vector3 flatInputs = new Vector3(inputs.x, 0, inputs.z);
+        Vector3 flatInputs = new Vector3(_inputs.x, 0, _inputs.z);
 
         if(_wasClimbing) _movement = Vector3.zero;
         if(_isAiming) SlerpRotation(transform, new Vector3(playerCam.transform.forward.x, 0, playerCam.transform.forward.z), _rotationSpeed);
@@ -127,8 +138,8 @@ public class PlayerCharacter : MonoBehaviour {
         bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeNormal) < _charaCtrl.slopeLimit;
         //Debug.Log($"slope angle: {slopeAngle} deg");
         if(_charaCtrl.isGrounded) {
-            motion = new Vector3(inputs.x * Speed, _movement.y, inputs.z * Speed);
-            if(inSlopeLimit && inputs.y > 0) motion.y = inputs.y;
+            motion = new Vector3(_inputs.x * Speed, _movement.y, _inputs.z * Speed);
+            if(inSlopeLimit && _inputs.y > 0) motion.y = _inputs.y;
             _movement = playerCam.transform.TransformDirection(motion);
 
             if(!inSlopeLimit) {
@@ -407,6 +418,45 @@ public class PlayerCharacter : MonoBehaviour {
             }
         }
         return null;
+    }
+    BombPlant CheckPlantInteraction()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(playerCam.cam.transform.position, playerCam.cam.transform.forward, out hit, 20, Utils.layer_Interactibles.ToLayerMask()))
+        {
+            if (Vector3.Distance(transform.position, hit.point) > interactionRange)
+            {
+                return null;
+            }
+
+            if (hit.collider.CompareTag("BombPlant"))
+            {
+                return hit.collider.GetComponent<BombPlant>();
+            }
+        }
+        return null;
+    }
+    void GetBomb()
+    {
+        _fakebomb.enabled = true;
+    }
+    #endregion
+    #region SOUNDMANAGEMENT
+    void EmitSound()
+    {
+        Vector3 relativePos;
+        float soundLevel;
+        float soundRadius = _isRunning ? _soundRadiusRun : _soundRadiusWalk;
+        RaycastHit[] hits = Physics.SphereCastAll(transform.position, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider.TryGetComponent(out Enemy enemy))
+            {
+                relativePos = transform.position - enemy.transform.position;
+                soundLevel = Utils.CalculateSoundLevel(soundRadius, relativePos.magnitude);
+                enemy.HearSound(relativePos, soundLevel);
+            }
+        }
     }
     #endregion
     bool CanDeclimbUp() {
