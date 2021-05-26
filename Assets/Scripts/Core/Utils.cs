@@ -81,14 +81,19 @@ public static class Utils {
     {
         Vector3 relativePos;
         float soundLevel;
-        RaycastHit[] hits = Physics.SphereCastAll(soundPosition, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f);
+        Ray ray;
+        RaycastHit[] hits = Physics.SphereCastAll(soundPosition, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f, layer_Enemies.ToLayerMask());
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider.TryGetComponent(out Enemy enemy))
             {
+                ray = new Ray(soundPosition, enemy.sightCenter.position - soundPosition);
+                float dist = Vector3.Distance(enemy.sightCenter.position, soundPosition);
+                //Debug.Log("yDiff: " + yDiff);
+                if(Physics.Raycast(ray, dist, layer_Terrain.ToLayerMask())) continue;
                 relativePos = soundPosition - enemy.transform.position;
-                soundLevel = Utils.CalculateSoundLevel(soundRadius, relativePos.magnitude);
-                if (Mathf.Abs(enemy.transform.position.y - soundPosition.y) < 6f /*layer thickness (put a real var later)*/)
+                soundLevel = CalculateSoundLevel(soundRadius, relativePos.magnitude);
+                if (Mathf.Abs(enemy.transform.position.y - soundPosition.y) < 3f /*layer thickness (put a real var later)*/)
                 enemy.HearSound(relativePos, soundLevel);
             }
         }

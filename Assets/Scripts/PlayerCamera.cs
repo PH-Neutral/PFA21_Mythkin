@@ -18,6 +18,7 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] float _rotationLowest, _rotationHighest, _rotationSpeed = 100;
     [SerializeField] float _preferedZoom = 2, _fpsModeThreshold = 1;
     [SerializeField] bool _invertVertical = true, _invertHorizontal = false;
+    PlayerCharacter _player;
     Transform _camRef, _headRef;
     float _currentRotation = 0, _fpsModeRatio = 1;
     float _camSphereRadius;
@@ -30,7 +31,8 @@ public class PlayerCamera : MonoBehaviour
     private void LateUpdate() {
         AdjustCamera();
     }
-    public void SetReferences(Transform head, Transform cameraPivot) {
+    public void SetReferences(PlayerCharacter player, Transform head, Transform cameraPivot) {
+        _player = player;
         _headRef = head;
         _camRef = cameraPivot;
         AdjustCamera();
@@ -59,6 +61,7 @@ public class PlayerCamera : MonoBehaviour
         }
         LerpZoom(zoomRatio);
         AdjustPosition();
+        _player.HideMeshes(_fpsModeRatio < 1);
     }
     void AdjustPosition() {
         transform.position = Vector3.Lerp(_headRef.position, _camRef.position, _fpsModeRatio);

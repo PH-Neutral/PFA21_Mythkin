@@ -8,6 +8,11 @@ public class PlayerCharacter : MonoBehaviour {
             return _moveSpeed * (_isRunning ? _sprintRatio : 1);
         }
     }
+    public float ClimbSpeed {
+        get {
+            return _climbSpeed * (_isRunning ? _sprintRatio : 1);
+        }
+    }
     public bool IsClimbing {
         get {
             return !_charaCtrl.isGrounded && _isOnClimbWall;
@@ -22,7 +27,7 @@ public class PlayerCharacter : MonoBehaviour {
     public float interactionRange = 3f;
     public PlayerCamera playerCam;
 
-    [SerializeField] Transform _bodyCenter, _model, _camCenter, _throwPoint, _head;
+    [SerializeField] Transform _bodyCenter, _camCenter, _throwPoint, _head, _model;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5, _slideAcceleration = 2;
     [SerializeField] float _climbCheckDistanceOffset = 0.2f, _wallDistanceOffset = 0.1f;
@@ -30,6 +35,8 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] MeshRenderer _fakebomb; //temporary. Will need to do it by animation
     CharacterController _charaCtrl;
     TrajectoryHandler _trajectoryHandler;
+    Renderer[] _renderers;
+    bool _isModelHidden = false;
     Vector3 _movement = Vector3.zero, _wallPoint, _inputs = Vector3.zero;
     RaycastHit _declimbHit;
     bool _wasGrounded = false, _wasClimbing = true;
@@ -41,15 +48,16 @@ public class PlayerCharacter : MonoBehaviour {
         _charaCtrl = GetComponent<CharacterController>();
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
         if(_trajectoryHandler != null) _trajectoryHandler.playerCamera = playerCam;
+        _renderers = _model.GetComponentsInChildren<Renderer>();
     }
     private void Start() {
-        playerCam.SetReferences(_head,_camCenter);
+        playerCam.SetReferences(this, _head,_camCenter);
     }
     private void Update() {
         deltaTime = Time.deltaTime;
         _isJumping = Input.GetKey(KeyCode.Space);
         _isInteracting = Input.GetKeyDown(KeyCode.E);
-        _isAiming = Input.GetKey(KeyCode.Alpha1);
+        if(Input.GetKeyDown(KeyCode.Alpha1)) _isAiming = _hasBomb ? !_isAiming : false;
         _isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
         _isRunning = Input.GetKey(KeyCode.LeftShift);
         _inputs = GetInputs();
@@ -57,8 +65,8 @@ public class PlayerCharacter : MonoBehaviour {
         Look();
         HandleMovement();
         HandleInteractions();
-        if (_hasBomb) HandleThrowing();
-        if (_inputs != Vector3.zero) EmitSound();
+        HandleThrowing();
+        HandleSound();
 
         _wasClimbing = _isOnClimbWall;
         _wasGrounded = _charaCtrl.isGrounded;
@@ -99,6 +107,8 @@ public class PlayerCharacter : MonoBehaviour {
     }
     void HandleThrowing() {
         if(_trajectoryHandler == null) return;
+        if(!_hasBomb) return;
+
         _trajectoryHandler.IsDisplaying = _isAiming;
         if (_isAiming){
             _trajectoryHandler.SetBombTrajectory();
@@ -111,6 +121,11 @@ public class PlayerCharacter : MonoBehaviour {
             }
         } 
         
+    }
+    void HandleSound() {
+        if(_inputs != Vector3.zero) {
+            Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f);
+        }
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
@@ -155,8 +170,9 @@ public class PlayerCharacter : MonoBehaviour {
             if(!inSlopeLimit) {
                 //Debug.Log($"Slope too steep! ({Vector3.Angle(Vector3.up, slopeNormal)}deg)");
                 //_movement += slopeVector * Vector3.Dot(slopeVector, Physics.gravity) * deltaTime;
-                Vector3 slideVector = new Vector3(slopeNormal.x, 0, slopeNormal.z);
-                _movement += slideVector * _slideAcceleration * deltaTime;
+
+                //Vector3 slideVector = new Vector3(slopeNormal.x, 0, slopeNormal.z);
+                //_movement += slideVector * _slideAcceleration * deltaTime;
             }
         } else {
             //if(_wasGrounded && _movement.y < -0.5f) _movement.y = -0.5f;
@@ -218,10 +234,10 @@ public class PlayerCharacter : MonoBehaviour {
         }
         // find closest wall point with offset
         if(!_wasClimbing) {
-            _wallPoint = FindClosestWallPoint(_bodyCenter, Vector3.zero, 90, 1);
+            _wallPoint = FindClosestWallPoint(_bodyCenter.position, Vector3.zero, 90, 1);
         }
         if(!_isLerpingToWall) {
-            _wallPoint = FindClosestWallPoint(_bodyCenter, Vector3.zero, 90, 1);
+            _wallPoint = FindClosestWallPoint(_bodyCenter.position, Vector3.zero, 90, 1);
         }
         Vector3 wallDir = _wallPoint - _bodyCenter.position;
         Vector3 dirToOffsettedPoint = wallDir - wallDir.normalized * (Radius + _wallDistanceOffset);
@@ -230,14 +246,14 @@ public class PlayerCharacter : MonoBehaviour {
         }
         // lerping to adapt to the wall
         if(_isLerpingToWall) {
-            if(!SlerpRotation(_model, wallDir, _rotationSpeed) && !LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
+            if(!SlerpRotation(transform, wallDir, _rotationSpeed) && !LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
                 return Vector3.zero;
             }
             _isLerpingToWall = false;
         }
 
         // movement
-        _movement = new Vector3(inputs.x, inputs.z, 0) * _climbSpeed;
+        _movement = new Vector3(inputs.x, inputs.z, 0) * ClimbSpeed;
         if(isGrounded && inputs.z < 0) {
             _movement = new Vector3(inputs.x, -_groundPullMagnitude, inputs.z) * Speed;
         }
@@ -245,14 +261,14 @@ public class PlayerCharacter : MonoBehaviour {
         bool canMoveVert = CanClimbVertical(inputs.z);
         if(!canMoveHori) _movement.x = 0;
         if(!canMoveVert) _movement.y = 0;
-        return _model.TransformDirection(_movement);
+        return transform.TransformDirection(_movement);
     }
     void Declimb() {
         if(_declimbPart1) {
             // transform.pos to up
             Vector3 vHit = _declimbHit.point - transform.position;
-            float upMagn = vHit.magnitude * Mathf.Sin(Vector3.Angle(vHit, _bodyCenter.forward) * Mathf.Deg2Rad);
-            Vector3 lerpPoint1 = transform.position + _bodyCenter.up * upMagn;
+            float upMagn = vHit.magnitude * Mathf.Sin(Vector3.Angle(vHit, transform.forward) * Mathf.Deg2Rad);
+            Vector3 lerpPoint1 = transform.position + transform.up * upMagn;
             if(LerpPosition(lerpPoint1, _climbSpeed)) {
                 _declimbPart1 = false;
             }
@@ -274,15 +290,15 @@ public class PlayerCharacter : MonoBehaviour {
         }
         return false;
     }
-    Vector3 FindClosestWallPoint(Transform origin, Vector3 offset, float maxAngle = 90, float stepAngle = 1) {
-        Vector3 rayOrigin = origin.position + origin.TransformDirection(offset);
-        Vector3 centerDir = origin.forward * (Radius + _wallDistanceOffset);
+    Vector3 FindClosestWallPoint(Vector3 origin, Vector3 offset, float maxAngle = 90, float stepAngle = 1) {
+        Vector3 rayOrigin = origin + transform.TransformDirection(offset);
+        Vector3 centerDir = transform.forward * (Radius + _wallDistanceOffset);
         Vector3 hitPoint = rayOrigin + centerDir * 1.5f;
         int layerMask = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
         for(float i = -maxAngle; i <= maxAngle; i += stepAngle) {
             Quaternion iRot = Quaternion.Euler(0, i, 0);
             if(Physics.Raycast(rayOrigin, iRot * centerDir.normalized, out RaycastHit hit, (hitPoint - rayOrigin).magnitude, layerMask)) {
-                Debug.DrawLine(origin.position, hit.point, Color.red, 1);
+                Debug.DrawLine(origin, hit.point, Color.red, 1);
                 hitPoint = hit.point;
             }
         }
@@ -290,14 +306,14 @@ public class PlayerCharacter : MonoBehaviour {
     }
     bool FindDeclimbHitPoint(out RaycastHit hitPoint) {
         Vector3 rayOrigin = _bodyCenter.position;
-        Vector3 rayDir = _bodyCenter.forward * (Radius * 2 + _wallDistanceOffset);
+        Vector3 rayDir = transform.forward * (Radius * 2 + _wallDistanceOffset);
         int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hitPoint, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "forward" direction
             return false;
         }
         rayOrigin += rayDir;
-        rayDir = -_bodyCenter.up * Height * 0.5f;
+        rayDir = -transform.up * Height * 0.5f;
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hitPoint, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "forward -> down" direction
             return true;
@@ -307,7 +323,7 @@ public class PlayerCharacter : MonoBehaviour {
     bool CheckForClimbMiddle() {
         RaycastHit hit;
         Vector3 rayOrigin = _bodyCenter.position;
-        Vector3 rayDir = _bodyCenter.forward * (Radius + _wallDistanceOffset);
+        Vector3 rayDir = transform.forward * (Radius + _wallDistanceOffset);
         int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.layer_Environment);
         int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
@@ -321,8 +337,8 @@ public class PlayerCharacter : MonoBehaviour {
     }
     bool CheckForClimbDown() {
         RaycastHit hit;
-        Vector3 rayOrigin = _model.position;
-        Vector3 rayDir = _bodyCenter.forward * (Radius + _wallDistanceOffset);
+        Vector3 rayOrigin = transform.position;
+        Vector3 rayDir = transform.forward * (Radius + _wallDistanceOffset);
         int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.layer_Environment);
         int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
@@ -349,7 +365,7 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.blue);
 
         rayOrigin += rayDir;
-        rayDir = _model.forward * (Radius + _wallDistanceOffset * 2);
+        rayDir = transform.forward * (Radius + _wallDistanceOffset * 2);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down -> forward" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.red);
@@ -362,7 +378,7 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.red);
 
         rayOrigin += rayDir;
-        rayDir = Mathf.Sign(-vInput) * _model.up * (Height + _climbCheckDistanceOffset);
+        rayDir = Mathf.Sign(-vInput) * transform.up * (Height + _climbCheckDistanceOffset);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down -> forward -> down/up" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.green);
@@ -376,7 +392,7 @@ public class PlayerCharacter : MonoBehaviour {
         if(hInput == 0) return false;
         RaycastHit hit;
         Vector3 rayOrigin = _bodyCenter.position;
-        Vector3 rayDir = Mathf.Sign(hInput) * _model.right * (Radius + _climbCheckDistanceOffset);
+        Vector3 rayDir = Mathf.Sign(hInput) * transform.right * (Radius + _climbCheckDistanceOffset);
         int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.layer_Environment);
         int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
@@ -387,7 +403,7 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.blue);
 
         rayOrigin += rayDir;
-        rayDir = _model.forward * (Radius + _wallDistanceOffset * 2);
+        rayDir = transform.forward * (Radius + _wallDistanceOffset * 2);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "right/left -> forward" direction
             if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
@@ -400,7 +416,7 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.red);
 
         rayOrigin += rayDir;
-        rayDir = Mathf.Sign(-hInput) * _model.right * (_climbCheckDistanceOffset);
+        rayDir = Mathf.Sign(-hInput) * transform.right * (_climbCheckDistanceOffset);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "right/left -> forward -> left/right" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.green);
@@ -415,16 +431,11 @@ public class PlayerCharacter : MonoBehaviour {
     Root CheckRootsInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerCam.cam.transform.position, playerCam.cam.transform.forward, out hit, 20, Utils.layer_Interactibles.ToLayerMask()))
+        if (Physics.Raycast(playerCam.transform.position, playerCam.cam.transform.forward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
         {
-            if (Vector3.Distance(transform.position, hit.point) > interactionRange)
+            if (hit.collider.TryGetComponent(out Root root))
             {
-                return null;
-            }
-
-            if (hit.collider.CompareTag("Roots")) // use trygetcomponent
-            {
-                return hit.collider.GetComponent<Root>();
+                return root;
             }
         }
         return null;
@@ -432,13 +443,8 @@ public class PlayerCharacter : MonoBehaviour {
     BombPlant CheckPlantInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerCam.cam.transform.position, playerCam.cam.transform.forward, out hit, 20, Utils.layer_Interactibles.ToLayerMask()))
+        if (Physics.Raycast(playerCam.transform.position, playerCam.cam.transform.forward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
         {
-            if (Vector3.Distance(transform.position, hit.point) > interactionRange)
-            {
-                return null;
-            }
-
             if (hit.collider.TryGetComponent(out BombPlant bp)){
                 if (bp._gotABomb){
                     return bp;
@@ -453,28 +459,18 @@ public class PlayerCharacter : MonoBehaviour {
         _hasBomb = true;
     }
     #endregion
-    #region SOUNDMANAGEMENT
-    void EmitSound()
-    {
-        Vector3 relativePos;
-        float soundLevel;
-        float soundRadius = _isRunning ? _soundRadiusRun : _soundRadiusWalk;
-        RaycastHit[] hits = Physics.SphereCastAll(transform.position, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f);
-        for (int i = 0; i < hits.Length; i++)
-        {
-            if (hits[i].collider.TryGetComponent(out Enemy enemy))
-            {
-                relativePos = transform.position - enemy.transform.position;
-                soundLevel = Utils.CalculateSoundLevel(soundRadius, relativePos.magnitude);
-                enemy.HearSound(relativePos, soundLevel);
-            }
+
+    public void HideMeshes(bool hide) {
+        if(_isModelHidden == hide) return;
+        _isModelHidden = hide;
+        for(int i = 0; i < _renderers.Length; i++) {
+            _renderers[i].enabled = !hide;
         }
     }
-    #endregion
     bool CanDeclimbUp() {
         RaycastHit hit;
         Vector3 rayOrigin = _bodyCenter.position;
-        Vector3 rayDir = _model.up * (Height * 0.5f + _climbCheckDistanceOffset);
+        Vector3 rayDir = transform.up * (Height * 0.5f + _climbCheckDistanceOffset);
         int layerMaskWall = Utils.layer_Terrain.ToLayerMask();
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down" direction
@@ -484,7 +480,7 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.blue);
 
         rayOrigin += rayDir;
-        rayDir = _model.forward * (Radius + _wallDistanceOffset);
+        rayDir = transform.forward * (Radius + _wallDistanceOffset);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down -> forward" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.red);
@@ -493,7 +489,7 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.red);
 
         rayOrigin += rayDir;
-        rayDir = -_model.up * (Height * 0.5f + _climbCheckDistanceOffset);
+        rayDir = -transform.up * (Height * 0.5f + _climbCheckDistanceOffset);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down -> forward -> down/up" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.green);

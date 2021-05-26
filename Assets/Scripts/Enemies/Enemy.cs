@@ -52,7 +52,7 @@ public class Enemy : MonoBehaviour
         get { return moveSpeed * sprintRatio; }
     }
     [SerializeField] float moveSpeed = 3, sprintRatio = 2, rotationSpeed = 50;
-    [SerializeField] Transform eyeLeft, eyeRight;
+    [SerializeField] public Transform eyeLeft, eyeRight, sightCenter;
     [SerializeField] float rangeOfSight = 50, fieldOfView = 120, grassVerticalViewAngleMax = 50;
     [SerializeField] float searchLookDuration = 1f;
     [SerializeField] float beforeAttackTime = 1, attackReloadTime = 2.5f;
@@ -80,6 +80,7 @@ public class Enemy : MonoBehaviour
     }
     private void Start()
     {
+        if(target == null) target = FindObjectOfType<PlayerCharacter>().transform;
         State = debugState;
         // set initial position and orientation
         if(patrolPath != null && patrolPath.wayPoints.Length > 0) {
@@ -133,17 +134,14 @@ public class Enemy : MonoBehaviour
     }
     public void HearSound(Vector3 soundVector, float soundLevel)
     {
-        if (debugLogs)
-        {
-            Debug.Log($"The enemy \"{name}\" encountered a sound of {soundLevel.ChangePrecision(4)}dB coming from {soundVector.magnitude.ChangePrecision(2)}m away."
-                + $"\nIts minimum hearing level is {hearingLevelMin.ChangePrecision(4)}dB so "
-                + (soundLevel > hearingLevelMin ? " IT HEARD IT!" : "it didn't hear it..."));
-        }
         if (soundLevel > hearingLevelMin)
         {
             // if sound is loud enough for the enemy to hear, then raise flag and save sound direction
             _lastSoundVector = soundVector;
             _soundHeard = true;
+            if(debugLogs) {
+                Debug.Log($"The enemy \"{name}\" heard a sound of intensity {soundLevel.ChangePrecision(0)} coming from {soundVector.magnitude.ChangePrecision(2)}m away.");
+            }
         }
     }
     void Attack()
@@ -296,12 +294,13 @@ public class Enemy : MonoBehaviour
             }
         }
     }
-    bool Look(out Vector3 targetPos)
-    {
-        bool detectionLeft = DetectTarget(eyeLeft, target.gameObject);
-        bool detectionRight = DetectTarget(eyeRight, target.gameObject);
+    bool Look(out Vector3 targetPos) {
         targetPos = target.position;
-        return (detectionLeft || detectionRight);
+
+        //bool detectionLeft = DetectTarget(eyeLeft, target.gameObject);
+        //bool detectionRight = DetectTarget(eyeRight, target.gameObject);
+        //return (detectionLeft || detectionRight);
+        return DetectTarget(sightCenter, target.gameObject);
     }
     bool DetectTarget(Transform origin, GameObject target)
     {

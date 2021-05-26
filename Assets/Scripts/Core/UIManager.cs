@@ -5,6 +5,7 @@ using UnityEngine;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
+
     public GameObject rootIndicator, bombIndicator;
 
     private void Awake()

@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.AI;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public Character player;
-    public Image image;
+    public NavMeshSurface terrain;
 
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
 
@@ -23,9 +24,15 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    public void ChangeImageColor(Color color)
-    {
-        if(image == null) return;
-        image.color = color;
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            Application.Quit();
+        } else if(Input.GetKeyDown(KeyCode.Backspace)) {
+            SceneManager.LoadScene(0);
+
+        }
+    }
+    public void UpdateNavMesh() {
+        terrain.BuildNavMesh();
     }
 }

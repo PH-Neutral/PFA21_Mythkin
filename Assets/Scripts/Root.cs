@@ -16,10 +16,12 @@ public class Root : MonoBehaviour {
     {
         _coll.enabled = _rend.enabled = false;
         Invoke(nameof(Close), openDuration);
+        GameManager.Instance.UpdateNavMesh();
     }
     public void Close()
     {
         CancelInvoke(nameof(Close));
         _coll.enabled = _rend.enabled = true;
+        GameManager.Instance.UpdateNavMesh();
     }
 }
