@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PatrolPath : MonoBehaviour {
     [System.Serializable]
-    public struct WayPoint {
+    public struct Waypoint {
         public Transform point;
         public float speedToPoint;
         public float waitingDuration;
@@ -20,9 +20,32 @@ public class PatrolPath : MonoBehaviour {
         BackAndForth, Loop
     }
 
+    public int Length {
+        get {
+            return wayPoints.Length;
+        }
+    }
     public Mode mode = Mode.BackAndForth;
-    public WayPoint[] wayPoints = new WayPoint[0];
+    public Waypoint[] wayPoints = new Waypoint[0];
     [SerializeField] float _gizmoSphereRadius = 0.5f;
+
+    public int GetNextIndex(int currentIndex, ref bool baseDirection) {
+        int nextIndex = currentIndex;
+        if(mode == Mode.BackAndForth) {
+            if(currentIndex + 1 == Length) {
+                baseDirection = false;
+            } else if(currentIndex == 0) {
+                baseDirection = true;
+            }
+        }
+        nextIndex += (baseDirection ? 1 : -1); // next wayPoint index
+        if(nextIndex < 0) nextIndex = Length - 1;
+        else if(nextIndex >= Length) nextIndex = 0;
+        return nextIndex;
+    }
+    public Waypoint GetWaypoint(int index) {
+        return wayPoints[index];
+    }
 
     private void OnDrawGizmos() {
         Vector3 origin, target;

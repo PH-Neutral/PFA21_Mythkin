@@ -503,4 +503,11 @@ public class PlayerCharacter : MonoBehaviour {
             playerCam.maxZoomRatio = tEntrance.GetCamLerpRatio(transform.position, true);
         }
     }
+
+    private void OnDrawGizmosSelected() {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, _soundRadiusWalk);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, _soundRadiusRun);
+    }
 }

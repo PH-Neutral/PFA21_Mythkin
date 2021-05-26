@@ -27,6 +27,7 @@ public class Enemy : MonoBehaviour
                     break;
                 case EnemyState.Attack:
                     newMat = GameManager.Instance.matEnemyAttack;
+                    _attackReloadTimer = attackReloadTime;
                     //_beforeAttackTimer = 0;
                     break;
             }
@@ -54,11 +55,13 @@ public class Enemy : MonoBehaviour
     [SerializeField] Transform eyeLeft, eyeRight;
     [SerializeField] float rangeOfSight = 50, fieldOfView = 120, grassVerticalViewAngleMax = 50;
     [SerializeField] float searchLookDuration = 1f;
-    [SerializeField] float beforeAttackTime = 0.5f, attackReloadTime = 2.5f;
-    [SerializeField] float hearingLevelMin = 20f;
-    [SerializeField] bool debugMode = true, explicitDebug = true;
-    [SerializeField] EnemyState debugState = EnemyState.Patrol;
+    [SerializeField] float beforeAttackTime = 1, attackReloadTime = 2.5f;
+    [Range(0,100)]
+    [SerializeField] float hearingLevelMin = 0.5f;
+    [SerializeField] Transform _attackCenter;
     [SerializeField] PatrolPath patrolPath = null;
+    [SerializeField] EnemyState debugState = EnemyState.Patrol;
+    [SerializeField] bool debugLogs = true, debugDraws = true;
     EnemyState _state = EnemyState.Idle;
     Vector3 _lastDestination, _lastSoundVector, _searchVectorLeft, _searchVectorRight;
     bool _soundHeard = false;
@@ -78,6 +81,17 @@ public class Enemy : MonoBehaviour
     private void Start()
     {
         State = debugState;
+        // set initial position and orientation
+        if(patrolPath != null && patrolPath.wayPoints.Length > 0) {
+            if(GetSurfacePoint(patrolPath.wayPoints[0].point.position, out Vector3 startPos)) {
+                transform.position = startPos;
+                if(patrolPath.wayPoints.Length > 1) {
+                    if(GetSurfacePoint(patrolPath.wayPoints[1].point.position, out Vector3 lookPos)) {
+                        transform.LookAt(lookPos, Vector3.up);
+                    }
+                }
+            }
+        }
     }
 
     private void Update()
@@ -119,7 +133,7 @@ public class Enemy : MonoBehaviour
     }
     public void HearSound(Vector3 soundVector, float soundLevel)
     {
-        if (debugMode)
+        if (debugLogs)
         {
             Debug.Log($"The enemy \"{name}\" encountered a sound of {soundLevel.ChangePrecision(4)}dB coming from {soundVector.magnitude.ChangePrecision(2)}m away."
                 + $"\nIts minimum hearing level is {hearingLevelMin.ChangePrecision(4)}dB so "
@@ -151,11 +165,10 @@ public class Enemy : MonoBehaviour
             }
             // if pre-attack wait time is over, sprint toward target and instantly prepare to attack
             Speed = SprintSpeed;
-            if (!debugMode)
+            if (_attackReloadTimer >= attackReloadTime)
             {
                 //Debug.Log("Attack: set destination");
                 SetDestinationPoint(targetPos);
-                _attackReloadTimer = attackReloadTime;
             }
         }
         else
@@ -179,12 +192,16 @@ public class Enemy : MonoBehaviour
         }
         if (_attackReloadTimer >= attackReloadTime)
         {
-            if (_isCollidingWithTarget)
-            {
+            float attackRadius = 2, attackRange = 3;
+            if (Physics.SphereCast(new Ray(_attackCenter.position, transform.forward), attackRadius, attackRange, 1<<target.gameObject.layer)) {
                 // if attack prepared and target in collision, reset the attack and do the damage
+                // TODO: Stop moving for a while
+                CancelDestination();
+                //_beforeAttackTimer = 0;
                 _attackReloadTimer = 0;
-                Debug.LogWarning($"{name} punched your stupid face! Ya dead, bitch.");
+                if(debugLogs) Debug.LogWarning($"{name} punched your stupid face! Ya dead.");
             }
+            //if (_isCollidingWithTarget) {}
         }
         else
         {
@@ -267,20 +284,7 @@ public class Enemy : MonoBehaviour
                         }
                         _patrolWaitTimer = 0;
                     }
-                    if (patrolPath.mode == PatrolPath.Mode.BackAndForth)
-                    {
-                        if (_patPathIndex + 1 == patrolPath.wayPoints.Length)
-                        {
-                            _patrolAscending = false;
-                        }
-                        else if (_patPathIndex == 0)
-                        {
-                            _patrolAscending = true;
-                        }
-                    }
-                    _patPathIndex += (_patrolAscending ? 1 : -1); // next wayPoint index
-                    if (_patPathIndex < 0) _patPathIndex = patrolPath.wayPoints.Length - 1;
-                    else if (_patPathIndex >= patrolPath.wayPoints.Length) _patPathIndex = 0;
+                    _patPathIndex = patrolPath.GetNextIndex(_patPathIndex, ref _patrolAscending);
                 }
                 else
                 {
@@ -305,7 +309,7 @@ public class Enemy : MonoBehaviour
         Vector3 relativePos = playerPos - origin.position;
         Vector3 originFwd = origin.TransformDirection(Vector3.forward);
         // -------------- debug FOV ------------------- //
-        if (debugMode && explicitDebug)
+        if (debugDraws)
         {
             Vector3 fovLimitLeft = origin.TransformDirection(Quaternion.Euler(0, fieldOfView * -0.5f, 0) * Vector3.forward);
             Vector3 fovLimitRight = origin.TransformDirection(Quaternion.Euler(0, fieldOfView * 0.5f, 0) * Vector3.forward);
@@ -350,7 +354,7 @@ public class Enemy : MonoBehaviour
                 }
             }
         }
-        if (debugMode)
+        if (debugDraws)
         {
             Debug.DrawLine(origin.position, target.transform.position, detected ? Color.green : (invalidAngleSight ? Color.red : Color.yellow));
         }
@@ -436,7 +440,7 @@ public class Enemy : MonoBehaviour
         transform.localRotation = Quaternion.Slerp(transform.localRotation, newRotation, t);
         return t >= 1;
     }
-
+    /*
     private void OnTriggerEnter(Collider other)
     {
         //Debug.Log("Enemy STARTED collided with " + other.name);
@@ -453,7 +457,7 @@ public class Enemy : MonoBehaviour
         {
             _isCollidingWithTarget = false;
         }
-    }
+    }*/
 }
 
 [System.Serializable]
