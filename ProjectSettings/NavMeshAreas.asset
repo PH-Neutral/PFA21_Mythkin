@@ -91,8 +91,8 @@ NavMeshProjectSettings:
       m_Flags: 0
   - serializedVersion: 2
     agentTypeID: -1372625422
-    agentRadius: 3.5
-    agentHeight: 6
+    agentRadius: 3
+    agentHeight: 5
     agentSlope: 20
     agentClimb: 0.5
     ledgeDropHeight: 0
@@ -109,4 +109,4 @@ NavMeshProjectSettings:
       m_Flags: 0
   m_SettingNames:
   - Humanoid
-  - Enemy
+  - Boar

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text;
 
 public class PlayerCamera : MonoBehaviour
 {
@@ -19,8 +20,11 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] bool _invertVertical = true, _invertHorizontal = false;
     Transform _camRef, _headRef;
     float _currentRotation = 0, _fpsModeRatio = 1;
+    float _camSphereRadius;
     private void Awake() {
         cam = GetComponentInChildren<Camera>();
+        _camSphereRadius = CalculateCamSphereRadius();
+        //Debug.Log("camSphereRadius = " + _camSphereRadius);
         _currentRotation = _swivel.transform.localRotation.eulerAngles.x;
     }
     private void LateUpdate() {
@@ -49,8 +53,8 @@ public class PlayerCamera : MonoBehaviour
         float zoomRatio = maxZoomRatio;
         Vector3 rayOrigin = transform.position;
         Vector3 rayDir = -transform.forward * _preferedZoom * maxZoomRatio;
-        int layerMask = Utils.layer_Terrain.ToLayerMask() | Utils.layer_Environment.ToLayerMask() | Utils.layer_Enemies.ToLayerMask();
-        if (Physics.Raycast(rayOrigin, rayDir, out RaycastHit hit, rayDir.magnitude, layerMask)) {
+        int layerMask = Utils.layer_Terrain.ToLayerMask() | Utils.layer_Enemies.ToLayerMask();
+        if (Physics.SphereCast(rayOrigin, _camSphereRadius, rayDir, out RaycastHit hit, rayDir.magnitude, layerMask)) {
             zoomRatio = Vector3.Distance(rayOrigin, hit.point) / _preferedZoom;
         }
         LerpZoom(zoomRatio);
@@ -58,5 +62,14 @@ public class PlayerCamera : MonoBehaviour
     }
     void AdjustPosition() {
         transform.position = Vector3.Lerp(_headRef.position, _camRef.position, _fpsModeRatio);
+    }
+
+    float CalculateCamSphereRadius() {
+        /*float h = cam.nearClipPlane * Mathf.Tan(0.5f * cam.fieldOfView * Mathf.Deg2Rad);
+        float l = h * cam.aspect;
+        float d = Mathf.Sqrt(Mathf.Pow(h, 2) + Mathf.Pow(l, 2));
+        float r = Mathf.Sqrt(Mathf.Pow(d, 2) + Mathf.Pow(cam.nearClipPlane, 2));*/
+        return Mathf.Sqrt(Mathf.Pow(cam.nearClipPlane, 4) * Mathf.Pow(Mathf.Tan(0.5f * cam.fieldOfView * Mathf.Deg2Rad), 4) * Mathf.Pow(1 + cam.aspect, 2) 
+            + Mathf.Pow(cam.nearClipPlane, 2));
     }
 }
