@@ -88,6 +88,7 @@ public static class Utils {
             {
                 relativePos = soundPosition - enemy.transform.position;
                 soundLevel = Utils.CalculateSoundLevel(soundRadius, relativePos.magnitude);
+                if (Mathf.Abs(enemy.transform.position.y - soundPosition.y) < 6f /*layer thickness (put a real var later)*/)
                 enemy.HearSound(relativePos, soundLevel);
             }
         }

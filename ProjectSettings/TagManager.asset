@@ -8,6 +8,7 @@ TagManager:
   - grass
   - HitBox
   - Roots
+  - BombPlant
   layers:
   - Default
   - TransparentFX
