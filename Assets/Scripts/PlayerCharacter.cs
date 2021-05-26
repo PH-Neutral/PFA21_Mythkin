@@ -34,8 +34,9 @@ public class PlayerCharacter : MonoBehaviour {
     RaycastHit _declimbHit;
     bool _wasGrounded = false, _wasClimbing = true;
     bool _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
-    bool _isAiming = false, _isThrowing = false, _isInteracting = false, _isJumping = false, _isRunning = false;
+    bool _isAiming = false, _isThrowing = false, _hasBomb = false, _isInteracting = false, _isJumping = false, _isRunning = false;
     float deltaTime;
+    BombPlant lastPlant;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
@@ -56,7 +57,7 @@ public class PlayerCharacter : MonoBehaviour {
         Look();
         HandleMovement();
         HandleInteractions();
-        HandleThrowing();
+        if (_hasBomb) HandleThrowing();
         if (_inputs != Vector3.zero) EmitSound();
 
         _wasClimbing = _isOnClimbWall;
@@ -87,17 +88,26 @@ public class PlayerCharacter : MonoBehaviour {
         BombPlant bombPlant;
         if ((bombPlant = CheckPlantInteraction()) != null)
         {
-            if (_isInteracting) bombPlant.PickBomb();
+            if (_isInteracting) { 
+                bombPlant.PickBomb();
+                _hasBomb = true;
+                _fakebomb.enabled = true;
+                lastPlant = bombPlant;
+            }
         }
+        if (UIManager.Instance != null) UIManager.Instance.bombIndicator.SetActive(bombPlant != null);
     }
     void HandleThrowing() {
         if(_trajectoryHandler == null) return;
         _trajectoryHandler.IsDisplaying = _isAiming;
         if (_isAiming){
             _trajectoryHandler.SetBombTrajectory();
-            if (_isThrowing)
-            {
+            if (_isThrowing){
+                _fakebomb.enabled = false;
                 _trajectoryHandler.ThrowBomb();
+                lastPlant.GrowBomb();
+                _hasBomb = false;
+                _trajectoryHandler.IsDisplaying = false;
             }
         } 
         
@@ -412,7 +422,7 @@ public class PlayerCharacter : MonoBehaviour {
                 return null;
             }
 
-            if (hit.collider.CompareTag("Roots"))
+            if (hit.collider.CompareTag("Roots")) // use trygetcomponent
             {
                 return hit.collider.GetComponent<Root>();
             }
@@ -429,9 +439,10 @@ public class PlayerCharacter : MonoBehaviour {
                 return null;
             }
 
-            if (hit.collider.CompareTag("BombPlant"))
-            {
-                return hit.collider.GetComponent<BombPlant>();
+            if (hit.collider.TryGetComponent(out BombPlant bp)){
+                if (bp._gotABomb){
+                    return bp;
+                }
             }
         }
         return null;
@@ -439,6 +450,7 @@ public class PlayerCharacter : MonoBehaviour {
     void GetBomb()
     {
         _fakebomb.enabled = true;
+        _hasBomb = true;
     }
     #endregion
     #region SOUNDMANAGEMENT

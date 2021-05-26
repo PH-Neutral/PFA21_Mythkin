@@ -5,16 +5,22 @@ using UnityEngine;
 public class BombPlant : MonoBehaviour
 {
     [SerializeField] float _timeToGrow = 5f;
-    bool _gotABomb = false, _canGrow = false;
+    [SerializeField] MeshRenderer _fakeBomb;
+    public bool _gotABomb = true;
 
-    void GrowBomb()
+    public void GrowBomb()
     {
         //play anim growBomb
+        Invoke(nameof(FinishGrow), _timeToGrow);
+    }
+    void FinishGrow()
+    {
         _gotABomb = true;
-        _canGrow = false;
+        _fakeBomb.enabled = true;
     }
     public void PickBomb()
     {
         //play anim PickBomb
+        _fakeBomb.enabled = false;
     }
 }
