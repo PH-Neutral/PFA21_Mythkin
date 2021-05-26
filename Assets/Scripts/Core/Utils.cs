@@ -70,9 +70,27 @@ public static class Utils {
     /// <param name="baseLevel">The level of the sound at the source of the emission.</param>
     /// <param name="distance">The distance from the source of the sound.</param>
     /// <returns>The percieved level of the sound.</returns>
-    public static float CalculateSoundLevel(float baseLevel, float distance) {
+    public static float CalculateSoundLevel(float distanceMax, float distance) {
+        /*
         float level = baseLevel - levelStep * Mathf.Log(Mathf.Pow(distance / distanceUnit, 2), 2);
         return level < levelCutoff ? 0 : level;
+        */
+        return (1 - distance / distanceMax) * 100;
+    }
+    public static void EmitSound(float soundRadius, Vector3 soundPosition)
+    {
+        Vector3 relativePos;
+        float soundLevel;
+        RaycastHit[] hits = Physics.SphereCastAll(soundPosition, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider.TryGetComponent(out Enemy enemy))
+            {
+                relativePos = soundPosition - enemy.transform.position;
+                soundLevel = Utils.CalculateSoundLevel(soundRadius, relativePos.magnitude);
+                enemy.HearSound(relativePos, soundLevel);
+            }
+        }
     }
     /// <summary>
     /// Calculate the distance from the source of the sound based on its base and percieved level.
