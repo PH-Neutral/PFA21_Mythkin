@@ -55,6 +55,9 @@ public static class Utils {
         }
         return result;
     }
+    public static float Sign(this float f) {
+        return f == 0 ? 0 : (f > 0 ? 1 : -1);
+    }
     #endregion
 
     #region SPECIFICS
@@ -62,6 +65,24 @@ public static class Utils {
         Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back
     };
 
+    public static bool LerpPosition(this Transform obj, Vector3 targetPos, float lerpSpeed) {
+        float t = lerpSpeed * Time.deltaTime / Vector3.Distance(obj.position, targetPos);
+        obj.position = Vector3.Lerp(obj.position, targetPos, t);
+        return t >= 1;
+    }
+    public static bool SlerpRotation(this Transform obj, Vector3 newDirection, float rotateSpeed, Space space = Space.World) {
+        //float vectorAngle = Vector3.Angle(obj.TransformDirection(Vector3.forward), newDirection);
+        Quaternion newRotation = Quaternion.LookRotation(newDirection, obj.TransformDirection(Vector3.up));
+        return obj.SlerpRotation(newRotation, rotateSpeed, space);
+    }
+    public static bool SlerpRotation(this Transform obj, Quaternion newRotation, float rotateSpeed, Space space = Space.World) {
+        float angle = Quaternion.Angle(space == Space.World ? obj.rotation : obj.localRotation, newRotation);
+        if(angle == 0) return true;
+        float t = rotateSpeed * Time.deltaTime / angle;
+        if(space == Space.World) obj.rotation = Quaternion.Slerp(obj.rotation, newRotation, t);
+        else obj.localRotation = Quaternion.Slerp(obj.localRotation, newRotation, t);
+        return t >= 1;
+    }
     public static Vector3 GetVector(this TunnelEntrance.Direction dir) {
         return directions[(int)dir];
     }

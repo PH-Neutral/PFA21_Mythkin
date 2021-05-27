@@ -123,6 +123,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &7309477 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2871104559849670995, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+  m_PrefabInstance: {fileID: 1618135203}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &58142141
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1137,6 +1142,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4452704586046106148, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
 --- !u!4 &259872586 stripped
@@ -1893,6 +1902,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4452704586046106148, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
 --- !u!1 &483076052
@@ -2583,7 +2596,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1769037192}
-  m_RootOrder: 4
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &645031704
 GameObject:
@@ -3481,8 +3494,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60efa3d3d2a234c47806a7cb9e93c954, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 5712730318692748881}
-  image: {fileID: 1015443419}
+  terrain: {fileID: 0}
   matEnemyPatrol: {fileID: 2100000, guid: 47be03d783d93c64f9ccdb582aba898f, type: 2}
   matEnemySearch: {fileID: 2100000, guid: 76682d98277a6834695e030c58262182, type: 2}
   matEnemyAttack: {fileID: 2100000, guid: 1fa6943df4f9ffb41a0aeef95a222341, type: 2}
@@ -5770,7 +5782,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 259872586}
-  m_RootOrder: 4
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1438966780 stripped
 Transform:
@@ -6080,6 +6092,14 @@ PrefabInstance:
       propertyPath: playerHead
       value: 
       objectReference: {fileID: 1618135204}
+    - target: {fileID: 7809531656284494468, guid: c6661067695bfd14e8e40d727edc0fba, type: 3}
+      propertyPath: _rotationSpeedHori
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7809531656284494468, guid: c6661067695bfd14e8e40d727edc0fba, type: 3}
+      propertyPath: _rotationSpeedVert
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 7809531656284494469, guid: c6661067695bfd14e8e40d727edc0fba, type: 3}
       propertyPath: m_RootOrder
       value: 3
@@ -6162,6 +6182,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: _model
+      value: 
+      objectReference: {fileID: 7309477}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
       propertyPath: _fakebomb
       value: 
       objectReference: {fileID: 1618135206}
@@ -6170,12 +6194,44 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1582710733}
     - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: _moveSpeed
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: _climbSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: _sprintRatio
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: acceleration
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: deceleration
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: _rotationSpeed
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
       propertyPath: _soundRadiusRun
       value: 18
       objectReference: {fileID: 0}
     - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
       propertyPath: _soundRadiusWalk
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: _accelerationTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871104559423992033, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
+      propertyPath: _decelerationTime
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 2871104559423992034, guid: f7931587d5f27794b8fde790eefeb14f, type: 3}
       propertyPath: m_Name
@@ -8910,6 +8966,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 262476794}
+    - target: {fileID: 2730331199056215224, guid: afcd54b3bd8d6cc4692e1c9dae8ccde4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2793036441744184942, guid: afcd54b3bd8d6cc4692e1c9dae8ccde4, type: 3}
       propertyPath: target
       value: 
@@ -9116,7 +9176,8 @@ MonoBehaviour:
   _stick: {fileID: 5712730320072582519}
   _rotationLowest: -45
   _rotationHighest: 45
-  _rotationSpeed: 100
+  _rotationSpeedVert: 100
+  _rotationSpeedHori: 100
   _preferedZoom: 2
   _fpsModeThreshold: 1
   _invertVertical: 1

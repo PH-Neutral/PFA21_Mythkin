@@ -8,9 +8,24 @@ public class PlayerCharacter : MonoBehaviour {
             return _moveSpeed * (_isRunning ? _sprintRatio : 1);
         }
     }
+    public float Acceleration {
+        get {
+            return _moveSpeed / _accelerationTime;
+        }
+    }
+    public float Deceleration {
+        get {
+            return _moveSpeed * _sprintRatio / _decelerationTime;
+        }
+    }
     public float ClimbSpeed {
         get {
             return _climbSpeed * (_isRunning ? _sprintRatio : 1);
+        }
+    }
+    public float RotationSpeed {
+        get {
+            return _rotationSpeed * 360;
         }
     }
     public bool IsClimbing {
@@ -28,6 +43,8 @@ public class PlayerCharacter : MonoBehaviour {
     public PlayerCamera playerCam;
 
     [SerializeField] Transform _bodyCenter, _camCenter, _throwPoint, _head, _model;
+    [SerializeField] bool advancedMovement = false;
+    [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5, _slideAcceleration = 2;
     [SerializeField] float _climbCheckDistanceOffset = 0.2f, _wallDistanceOffset = 0.1f;
@@ -44,6 +61,7 @@ public class PlayerCharacter : MonoBehaviour {
     bool _isAiming = false, _isThrowing = false, _hasBomb = false, _isInteracting = false, _isJumping = false, _isRunning = false;
     float deltaTime;
     BombPlant lastPlant;
+    Vector3 move = Vector3.zero;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
@@ -149,41 +167,75 @@ public class PlayerCharacter : MonoBehaviour {
         return new Vector3(inputs.x, _isJumping ? _jumpHeight : 0, inputs.y);
     }
     Vector3 Move() {
-        Vector3 flatInputs = new Vector3(_inputs.x, 0, _inputs.z);
-
-        if(_wasClimbing) _movement = Vector3.zero;
-        if(_isAiming) SlerpRotation(transform, new Vector3(playerCam.transform.forward.x, 0, playerCam.transform.forward.z), _rotationSpeed);
-        else if(flatInputs.magnitude > 0) SlerpRotation(transform, playerCam.transform.TransformDirection(flatInputs), _rotationSpeed);
-
-        Vector3 motion;
-        //Vector3 slopeVector = GetSlopeVector();
-        //bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeVector) - 90 < _charaCtrl.slopeLimit;
-        Vector3 slopeNormal = GetSlopeNormal();
-        //float slopeAngle = Vector3.Angle(Vector3.up, slopeNormal);
-        bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeNormal) < _charaCtrl.slopeLimit;
-        //Debug.Log($"slope angle: {slopeAngle} deg");
-        if(_charaCtrl.isGrounded) {
-            motion = new Vector3(_inputs.x * Speed, _movement.y, _inputs.z * Speed);
-            if(inSlopeLimit && _inputs.y > 0) motion.y = _inputs.y;
-            _movement = playerCam.transform.TransformDirection(motion);
-
-            if(!inSlopeLimit) {
-                //Debug.Log($"Slope too steep! ({Vector3.Angle(Vector3.up, slopeNormal)}deg)");
-                //_movement += slopeVector * Vector3.Dot(slopeVector, Physics.gravity) * deltaTime;
-
-                //Vector3 slideVector = new Vector3(slopeNormal.x, 0, slopeNormal.z);
-                //_movement += slideVector * _slideAcceleration * deltaTime;
-            }
-        } else {
-            //if(_wasGrounded && _movement.y < -0.5f) _movement.y = -0.5f;
-            motion = flatInputs * Speed * _inAirMoveRatio * Time.deltaTime;
-            _movement.x *= (1 - 0.8f * deltaTime); // damping in x
-            _movement.z *= (1 - 0.8f * deltaTime); // damping in z
-            _movement += playerCam.transform.TransformDirection(motion);
-            if(_wasGrounded && _movement.y < 0) _movement.y = 0;
-            else _movement += Physics.gravity * deltaTime;
+        Vector3 flatInputs = new Vector3(_inputs.x.Sign(), 0, _inputs.z.Sign());
+        Debug.Log(flatInputs);
+        if(_wasClimbing) {
+            _movement = Vector3.zero;
+            move = Vector3.zero;
+            transform.localRotation = Quaternion.Euler(0, transform.localRotation.eulerAngles.y, 0);
         }
-        return _movement;
+        if(_isAiming) transform.SlerpRotation(new Vector3(playerCam.transform.forward.x, 0, playerCam.transform.forward.z), RotationSpeed);
+        else if(flatInputs.magnitude > 0) transform.SlerpRotation(playerCam.transform.TransformDirection(flatInputs), RotationSpeed);
+
+        if (advancedMovement) {
+            // jump
+            if(_charaCtrl.isGrounded && _inputs.y > 0) move.y = _inputs.y;
+            else if(_charaCtrl.isGrounded) move.y = -_groundPullMagnitude;
+            else move.y += Physics.gravity.y * deltaTime;
+            // move
+            if(flatInputs.x > 0) {
+                move.x += Mathf.Sign(flatInputs.x) * (move.x < 0 ? Deceleration : Acceleration) * deltaTime;
+            } else if(flatInputs.x < 0) {
+                move.x += Mathf.Sign(flatInputs.x) * (move.x > 0 ? Deceleration : Acceleration) * deltaTime;
+            } else {
+                move.x += -Mathf.Sign(move.x) * Mathf.Clamp((_charaCtrl.isGrounded ? 1 : 0.1f) * Deceleration * deltaTime, 0, Mathf.Abs(move.x));
+            }
+            if(flatInputs.z > 0) {
+                move.z += Mathf.Sign(flatInputs.z) * (move.z < 0 ? Deceleration : Acceleration) * deltaTime;
+            } else if(flatInputs.z < 0) {
+                move.z += Mathf.Sign(flatInputs.z) * (move.z > 0 ? Deceleration : Acceleration) * deltaTime;
+            } else if(_charaCtrl.isGrounded) {
+                move.z += -Mathf.Sign(move.z) * Mathf.Clamp((_charaCtrl.isGrounded ? 1 : 0.1f) * Deceleration * deltaTime, 0, Mathf.Abs(move.z));
+            }
+            Vector3 moveTemp = move;
+            moveTemp.y = 0;
+            moveTemp = Vector3.ClampMagnitude(moveTemp, Speed);
+            move.x = moveTemp.x;
+            move.z = moveTemp.z;
+            // full motion
+            return playerCam.transform.TransformDirection(move);
+        } else {
+            Vector3 motion;
+            //Vector3 slopeVector = GetSlopeVector();
+            //bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeVector) - 90 < _charaCtrl.slopeLimit;
+            Vector3 slopeNormal = GetSlopeNormal();
+            //float slopeAngle = Vector3.Angle(Vector3.up, slopeNormal);
+            bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeNormal) < _charaCtrl.slopeLimit;
+            //Debug.Log($"slope angle: {slopeAngle} deg");
+            if(_charaCtrl.isGrounded) {
+                motion = new Vector3(_inputs.x * Speed, _movement.y, _inputs.z * Speed);
+                if(inSlopeLimit && _inputs.y > 0) motion.y = _inputs.y;
+                _movement = playerCam.transform.TransformDirection(motion);
+
+                if(!inSlopeLimit) {
+                    //Debug.Log($"Slope too steep! ({Vector3.Angle(Vector3.up, slopeNormal)}deg)");
+                    //_movement += slopeVector * Vector3.Dot(slopeVector, Physics.gravity) * deltaTime;
+
+                    //Vector3 slideVector = new Vector3(slopeNormal.x, 0, slopeNormal.z);
+                    //_movement += slideVector * _slideAcceleration * deltaTime;
+                }
+            } else {
+                //if(_wasGrounded && _movement.y < -0.5f) _movement.y = -0.5f;
+                motion = flatInputs * Speed * _inAirMoveRatio * Time.deltaTime;
+                _movement.x *= (1 - 0.8f * deltaTime); // damping in x
+                _movement.z *= (1 - 0.8f * deltaTime); // damping in z
+                _movement += playerCam.transform.TransformDirection(motion);
+                if(_wasGrounded && _movement.y < 0) _movement.y = 0;
+                else _movement += Physics.gravity * deltaTime;
+            }
+            return _movement;
+
+        }
     }
     Vector3 GetSlopeVector() {
         RaycastHit hit;
@@ -209,25 +261,12 @@ public class PlayerCharacter : MonoBehaviour {
         //Debug.DrawRay(rayOrigin, rayDir, Color.red);
         return Vector3.up;
     }
-    bool LerpPosition(Vector3 targetPos, float lerpSpeed) {
-        float t = lerpSpeed * Time.deltaTime / Vector3.Distance(transform.position, targetPos);
-        transform.position = Vector3.Lerp(transform.position, targetPos, t);
-        return t >= 1;
-    }
-    bool SlerpRotation(Transform obj, Vector3 newDirection, float rotateSpeed) {
-        float vectorAngle = Vector3.Angle(obj.TransformDirection(Vector3.forward), newDirection);
-        Quaternion newRotation = Quaternion.LookRotation(newDirection, obj.TransformDirection(Vector3.up));
-        float t = rotateSpeed * Time.deltaTime / vectorAngle;
-        obj.rotation = Quaternion.Slerp(obj.rotation, newRotation, t);
-        return t >= 1;
-    }
     #endregion
     #region CLIMBING
     Vector3 Climb() {
-        Vector3 inputs = GetInputs();
         // check for terrain under character
         bool isGrounded = CheckIfGrounded();
-        if(CheckForClimbDown() && !CheckForClimbMiddle() && inputs.z > 0 && FindDeclimbHitPoint(out _declimbHit)) {
+        if(CheckForClimbDown() && !CheckForClimbMiddle() && _inputs.z > 0 && FindDeclimbHitPoint(out _declimbHit)) {
             _isDeclimbingUp = true;
             _declimbPart1 = true;
             return Vector3.zero;
@@ -241,24 +280,24 @@ public class PlayerCharacter : MonoBehaviour {
         }
         Vector3 wallDir = _wallPoint - _bodyCenter.position;
         Vector3 dirToOffsettedPoint = wallDir - wallDir.normalized * (Radius + _wallDistanceOffset);
-        if(!(isGrounded && inputs.z < 0) && dirToOffsettedPoint.magnitude > 0.01f) {
+        if(!(isGrounded && _inputs.z < 0) && dirToOffsettedPoint.magnitude > 0.01f) {
             _isLerpingToWall = true;
         }
         // lerping to adapt to the wall
         if(_isLerpingToWall) {
-            if(!SlerpRotation(transform, wallDir, _rotationSpeed) && !LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
+            if(!transform.SlerpRotation(wallDir, RotationSpeed) && !transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
                 return Vector3.zero;
             }
             _isLerpingToWall = false;
         }
 
         // movement
-        _movement = new Vector3(inputs.x, inputs.z, 0) * ClimbSpeed;
-        if(isGrounded && inputs.z < 0) {
-            _movement = new Vector3(inputs.x, -_groundPullMagnitude, inputs.z) * Speed;
+        _movement = new Vector3(_inputs.x, _inputs.z, 0) * ClimbSpeed;
+        if(isGrounded && _inputs.z < 0) {
+            _movement = new Vector3(_inputs.x, -_groundPullMagnitude, _inputs.z) * Speed;
         }
-        bool canMoveHori = CanClimbHorizontal(inputs.x);
-        bool canMoveVert = CanClimbVertical(inputs.z);
+        bool canMoveHori = CanClimbHorizontal(_inputs.x);
+        bool canMoveVert = CanClimbVertical(_inputs.z);
         if(!canMoveHori) _movement.x = 0;
         if(!canMoveVert) _movement.y = 0;
         return transform.TransformDirection(_movement);
@@ -269,12 +308,12 @@ public class PlayerCharacter : MonoBehaviour {
             Vector3 vHit = _declimbHit.point - transform.position;
             float upMagn = vHit.magnitude * Mathf.Sin(Vector3.Angle(vHit, transform.forward) * Mathf.Deg2Rad);
             Vector3 lerpPoint1 = transform.position + transform.up * upMagn;
-            if(LerpPosition(lerpPoint1, _climbSpeed)) {
+            if(transform.LerpPosition(lerpPoint1, _climbSpeed)) {
                 _declimbPart1 = false;
             }
         }
         if(!_declimbPart1) {
-            if(LerpPosition(_declimbHit.point, _moveSpeed)) {
+            if(transform.LerpPosition(_declimbHit.point, _moveSpeed)) {
                 _isDeclimbingUp = false;
             }
         }
