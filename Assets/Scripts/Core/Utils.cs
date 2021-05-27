@@ -46,6 +46,15 @@ public static class Utils {
     public static int ToLayerMask(this string layerName) {
         return 1<<LayerMask.NameToLayer(layerName);
     }
+    public static float Sum(this float[] array)
+    {
+        float result = 0f;
+        for (int i = 0; i < array.Length; i++)
+        {
+            result += array[i];
+        }
+        return result;
+    }
     #endregion
 
     #region SPECIFICS
