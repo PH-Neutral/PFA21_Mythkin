@@ -57,7 +57,7 @@ public class PlayerCharacter : MonoBehaviour {
         deltaTime = Time.deltaTime;
         _isJumping = Input.GetKey(KeyCode.Space);
         _isInteracting = Input.GetKeyDown(KeyCode.E);
-        if(Input.GetKeyDown(KeyCode.Alpha1)) _isAiming = _hasBomb ? !_isAiming : false;
+        if(Input.GetKeyDown(KeyCode.Alpha1)) _isAiming = _hasBomb ? !_isAiming : false; // lalala
         _isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
         _isRunning = Input.GetKey(KeyCode.LeftShift);
         _inputs = GetInputs();
