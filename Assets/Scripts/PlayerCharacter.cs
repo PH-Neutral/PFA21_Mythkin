@@ -168,7 +168,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     Vector3 Move() {
         Vector3 flatInputs = new Vector3(_inputs.x.Sign(), 0, _inputs.z.Sign());
-        Debug.Log(flatInputs);
+        //Debug.Log(flatInputs);
         if(_wasClimbing) {
             _movement = Vector3.zero;
             move = Vector3.zero;
@@ -470,7 +470,7 @@ public class PlayerCharacter : MonoBehaviour {
     Root CheckRootsInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerCam.transform.position, playerCam.cam.transform.forward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
+        if (Physics.Raycast(playerCam.transform.position, playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
         {
             if (hit.collider.TryGetComponent(out Root root))
             {
@@ -482,7 +482,7 @@ public class PlayerCharacter : MonoBehaviour {
     BombPlant CheckPlantInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerCam.transform.position, playerCam.cam.transform.forward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
+        if (Physics.Raycast(playerCam.transform.position, playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
         {
             if (hit.collider.TryGetComponent(out BombPlant bp)){
                 if (bp._gotABomb){

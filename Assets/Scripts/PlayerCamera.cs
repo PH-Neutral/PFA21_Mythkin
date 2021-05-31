@@ -10,22 +10,17 @@ public class PlayerCamera : MonoBehaviour
             return _swivel.localRotation;
         }
     }
-    [HideInInspector] public Camera cam;
+    public Vector3 CamForward {
+        get {
+            return _swivel.forward;
+        }
+    }
+    [SerializeField] public Camera cam;
     public Transform playerHead;
     public float maxZoomRatio = 1;
 
-    float RotationSpeedVert {
-        get {
-            return _rotationSpeedVert * 360;
-        }
-    }
-    float RotationSpeedHori {
-        get {
-            return _rotationSpeedHori * 360;
-        }
-    }
     [SerializeField] Transform _swivel, _stick;
-    [SerializeField] float _rotationLowest, _rotationHighest, _rotationSpeedVert = 1, _rotationSpeedHori = 1;
+    [SerializeField] float _rotationLowest, _rotationHighest, rotationPower = 1;
     [SerializeField] float _preferedZoom = 2, _fpsModeThreshold = 1;
     [SerializeField] bool _invertVertical = true, _invertHorizontal = false;
     PlayerCharacter _player;
@@ -35,7 +30,7 @@ public class PlayerCamera : MonoBehaviour
     float _camSphereRadius;
     private void Awake() {
         cam = GetComponentInChildren<Camera>();
-        _camSphereRadius = CalculateCamSphereRadius();
+        _camSphereRadius = 0.1f;//CalculateCamSphereRadius();
         //Debug.Log("camSphereRadius = " + _camSphereRadius);
         _currentRotVertX = _swivel.transform.localRotation.eulerAngles.x;
     }
@@ -51,15 +46,16 @@ public class PlayerCamera : MonoBehaviour
     public void RotateVertical(float speedRatio)
     {
         if(speedRatio == 0) return;
-        _currentRotVertX = Mathf.Clamp(_currentRotVertX + (_invertVertical ? -1 : 1) * speedRatio * RotationSpeedVert * Time.deltaTime, _rotationLowest, _rotationHighest);
-        _swivel.localRotation = Quaternion.Euler(_currentRotVertX, 0, 0);
+        //_currentRotVertX = Mathf.Clamp(_currentRotVertX + (_invertVertical ? -1 : 1) * speedRatio * RotationSpeedVert * Time.deltaTime, _rotationLowest, _rotationHighest);
+        //_swivel.localRotation = Quaternion.Euler(_currentRotVertX, 0, 0);
         //_swivel.SlerpRotation(_rotVert, RotationSpeedVert * speedRatio, Space.Self);
-
+        _swivel.localRotation *= Quaternion.AngleAxis((_invertVertical ? -1 : 1) * speedRatio * rotationPower, Vector3.right);
     }
     public void RotateHorizontal(float speedRatio) {
         if(speedRatio == 0) return;
-        transform.localRotation = Quaternion.Euler(0, (_invertHorizontal ? -1 : 1) * speedRatio * RotationSpeedHori * Time.deltaTime, 0) * transform.localRotation;
+        //transform.localRotation = Quaternion.Euler(0, (_invertHorizontal ? -1 : 1) * speedRatio * RotationSpeedHori * Time.deltaTime, 0) * transform.localRotation;
         //transform.SlerpRotation(_rotHori, RotationSpeedHori * speedRatio, Space.Self);
+        transform.localRotation *= Quaternion.AngleAxis((_invertHorizontal ? -1 : 1) * speedRatio * rotationPower, Vector3.up);
     }
     public void LerpZoom(float t) {
         _stick.localPosition = Vector3.Lerp(Vector3.zero, Vector3.back * _preferedZoom, t);
