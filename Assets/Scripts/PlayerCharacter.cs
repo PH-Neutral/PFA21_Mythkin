@@ -40,10 +40,9 @@ public class PlayerCharacter : MonoBehaviour {
         get { return _charaCtrl.height + _charaCtrl.skinWidth * 2; }
     }
     public float interactionRange = 3f;
-    public PlayerCamera playerCam;
 
     [SerializeField] Transform _bodyCenter, _camCenter, _throwPoint, _head, _model;
-    [SerializeField] bool advancedMovement = false;
+    [SerializeField] bool advancedMovement = false, debugDraws = false;
     [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5, _slideAcceleration = 2;
@@ -51,6 +50,7 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] float _soundRadiusRun = 10f, _soundRadiusWalk = 5f;
     [SerializeField] MeshRenderer _fakebomb; //temporary. Will need to do it by animation
     CharacterController _charaCtrl;
+    PlayerCamera _playerCam;
     TrajectoryHandler _trajectoryHandler;
     Renderer[] _renderers;
     bool _isModelHidden = false;
@@ -64,12 +64,13 @@ public class PlayerCharacter : MonoBehaviour {
     Vector3 move = Vector3.zero;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
+        _playerCam = GetComponentInChildren<PlayerCamera>();
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
-        if(_trajectoryHandler != null) _trajectoryHandler.playerCamera = playerCam;
+        if(_trajectoryHandler != null) _trajectoryHandler.playerCamera = _playerCam;
         _renderers = _model.GetComponentsInChildren<Renderer>();
     }
     private void Start() {
-        playerCam.SetReferences(this, _head,_camCenter);
+        _playerCam.SetReferences(this, _head,_camCenter);
     }
     private void Update() {
         deltaTime = Time.deltaTime;
@@ -147,14 +148,8 @@ public class PlayerCharacter : MonoBehaviour {
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        playerCam.RotateHorizontal(inputs.x);
-        playerCam.RotateVertical(inputs.y);
-        //transform.localRotation = _playerCam.transform.localRotation;
-        /*/ apply camera rotation to character
-        if (!_isOnClimbWall) {
-            transform.localRotation = _playerCam.transform.localRotation;
-            _playerCam.transform.localRotation = Quaternion.identity;
-        }*/
+        _playerCam.RotateHorizontal(inputs.x);
+        _playerCam.RotateVertical(inputs.y);
     }
     #region MOVEMENT
     /// <summary>
@@ -163,8 +158,8 @@ public class PlayerCharacter : MonoBehaviour {
     /// <returns></returns>
     Vector3 GetInputs() {
         Vector2 inputs = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        inputs = Utils.CartToPolar(inputs);
-        return new Vector3(inputs.x, _isJumping ? _jumpHeight : 0, inputs.y);
+        //inputs = Utils.CartToPolar(inputs);
+        return new Vector3(inputs.x, 0, inputs.y).normalized;
     }
     Vector3 Move() {
         Vector3 flatInputs = new Vector3(_inputs.x.Sign(), 0, _inputs.z.Sign());
@@ -174,12 +169,12 @@ public class PlayerCharacter : MonoBehaviour {
             move = Vector3.zero;
             transform.localRotation = Quaternion.Euler(0, transform.localRotation.eulerAngles.y, 0);
         }
-        if(_isAiming) transform.SlerpRotation(new Vector3(playerCam.transform.forward.x, 0, playerCam.transform.forward.z), RotationSpeed);
-        else if(flatInputs.magnitude > 0) transform.SlerpRotation(playerCam.transform.TransformDirection(flatInputs), RotationSpeed);
+        if(_isAiming) transform.SlerpRotation(new Vector3(_playerCam.transform.forward.x, 0, _playerCam.transform.forward.z), RotationSpeed);
+        else if(flatInputs.magnitude > 0) transform.SlerpRotation(_playerCam.transform.TransformDirection(flatInputs), RotationSpeed);
 
         if (advancedMovement) {
             // jump
-            if(_charaCtrl.isGrounded && _inputs.y > 0) move.y = _inputs.y;
+            if(_charaCtrl.isGrounded && _isJumping) move.y = _jumpHeight;
             else if(_charaCtrl.isGrounded) move.y = -_groundPullMagnitude;
             else move.y += Physics.gravity.y * deltaTime;
             // move
@@ -203,7 +198,7 @@ public class PlayerCharacter : MonoBehaviour {
             move.x = moveTemp.x;
             move.z = moveTemp.z;
             // full motion
-            return playerCam.transform.TransformDirection(move);
+            return _playerCam.transform.TransformDirection(move);
         } else {
             Vector3 motion;
             //Vector3 slopeVector = GetSlopeVector();
@@ -214,8 +209,8 @@ public class PlayerCharacter : MonoBehaviour {
             //Debug.Log($"slope angle: {slopeAngle} deg");
             if(_charaCtrl.isGrounded) {
                 motion = new Vector3(_inputs.x * Speed, _movement.y, _inputs.z * Speed);
-                if(inSlopeLimit && _inputs.y > 0) motion.y = _inputs.y;
-                _movement = playerCam.transform.TransformDirection(motion);
+                if(inSlopeLimit && _isJumping) motion.y = _jumpHeight;
+                _movement = _playerCam.transform.TransformDirection(motion);
 
                 if(!inSlopeLimit) {
                     //Debug.Log($"Slope too steep! ({Vector3.Angle(Vector3.up, slopeNormal)}deg)");
@@ -229,7 +224,7 @@ public class PlayerCharacter : MonoBehaviour {
                 motion = flatInputs * Speed * _inAirMoveRatio * Time.deltaTime;
                 _movement.x *= (1 - 0.8f * deltaTime); // damping in x
                 _movement.z *= (1 - 0.8f * deltaTime); // damping in z
-                _movement += playerCam.transform.TransformDirection(motion);
+                _movement += _playerCam.transform.TransformDirection(motion);
                 if(_wasGrounded && _movement.y < 0) _movement.y = 0;
                 else _movement += Physics.gravity * deltaTime;
             }
@@ -285,12 +280,12 @@ public class PlayerCharacter : MonoBehaviour {
         }
         // lerping to adapt to the wall
         if(_isLerpingToWall) {
-            if(!transform.SlerpRotation(wallDir, RotationSpeed) && !transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
+            if(transform.SlerpRotation(wallDir, RotationSpeed) && transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
+                _isLerpingToWall = false;
+            } else {
                 return Vector3.zero;
             }
-            _isLerpingToWall = false;
         }
-
         // movement
         _movement = new Vector3(_inputs.x, _inputs.z, 0) * ClimbSpeed;
         if(isGrounded && _inputs.z < 0) {
@@ -300,6 +295,13 @@ public class PlayerCharacter : MonoBehaviour {
         bool canMoveVert = CanClimbVertical(_inputs.z);
         if(!canMoveHori) _movement.x = 0;
         if(!canMoveVert) _movement.y = 0;
+        // jumping
+        if(_isJumping) {
+            if(_inputs.z < 0) {
+                _movement = new Vector3(_inputs.x * Speed, _jumpHeight * 0.5f, _inputs.z * Speed * 0.5f);
+            }
+        }
+        // result
         return transform.TransformDirection(_movement);
     }
     void Declimb() {
@@ -470,7 +472,7 @@ public class PlayerCharacter : MonoBehaviour {
     Root CheckRootsInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerCam.transform.position, playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
+        if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
         {
             if (hit.collider.TryGetComponent(out Root root))
             {
@@ -482,7 +484,7 @@ public class PlayerCharacter : MonoBehaviour {
     BombPlant CheckPlantInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerCam.transform.position, playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
+        if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
         {
             if (hit.collider.TryGetComponent(out BombPlant bp)){
                 if (bp._gotABomb){
@@ -542,16 +544,17 @@ public class PlayerCharacter : MonoBehaviour {
 
     private void OnTriggerStay(Collider other) {
         if (other.TryGetComponent(out TunnelEntrance tEntrance)) {
-            playerCam.maxZoomRatio = tEntrance.GetCamLerpRatio(transform.position, true);
+            _playerCam.maxZoomRatio = tEntrance.GetCamLerpRatio(transform.position, true);
         }
     }
     private void OnTriggerExit(Collider other) {
         if(other.TryGetComponent(out TunnelEntrance tEntrance)) {
-            playerCam.maxZoomRatio = tEntrance.GetCamLerpRatio(transform.position, true);
+            _playerCam.maxZoomRatio = tEntrance.GetCamLerpRatio(transform.position, true);
         }
     }
 
     private void OnDrawGizmosSelected() {
+        if(!debugDraws) return;
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, _soundRadiusWalk);
         Gizmos.color = Color.red;

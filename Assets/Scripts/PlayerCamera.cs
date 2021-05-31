@@ -32,7 +32,9 @@ public class PlayerCamera : MonoBehaviour
         cam = GetComponentInChildren<Camera>();
         _camSphereRadius = 0.1f;//CalculateCamSphereRadius();
         //Debug.Log("camSphereRadius = " + _camSphereRadius);
-        _currentRotVertX = _swivel.transform.localRotation.eulerAngles.x;
+        _currentRotVertX = _swivel.localEulerAngles.x;
+        Cinemachine.CinemachineVirtualCamera CMVC = GetComponentInChildren<Cinemachine.CinemachineVirtualCamera>();
+        CMVC.transform.SetParent(null);
     }
     private void LateUpdate() {
         AdjustCamera();
@@ -50,18 +52,27 @@ public class PlayerCamera : MonoBehaviour
         //_swivel.localRotation = Quaternion.Euler(_currentRotVertX, 0, 0);
         //_swivel.SlerpRotation(_rotVert, RotationSpeedVert * speedRatio, Space.Self);
         _swivel.localRotation *= Quaternion.AngleAxis((_invertVertical ? -1 : 1) * speedRatio * rotationPower, Vector3.right);
+        Vector3 angles = _swivel.localEulerAngles;
+        angles.y = angles.z = 0;
+        if(angles.x >= 180 && angles.x < 360 + _rotationLowest) {
+            angles.x = 360 + _rotationLowest;
+        } else if(angles.x <= 180 && angles.x > _rotationHighest) {
+            angles.x = _rotationHighest;
+        }
+        _swivel.localEulerAngles = angles;
     }
     public void RotateHorizontal(float speedRatio) {
         if(speedRatio == 0) return;
         //transform.localRotation = Quaternion.Euler(0, (_invertHorizontal ? -1 : 1) * speedRatio * RotationSpeedHori * Time.deltaTime, 0) * transform.localRotation;
         //transform.SlerpRotation(_rotHori, RotationSpeedHori * speedRatio, Space.Self);
-        transform.localRotation *= Quaternion.AngleAxis((_invertHorizontal ? -1 : 1) * speedRatio * rotationPower, Vector3.up);
+        transform.rotation *= Quaternion.AngleAxis((_invertHorizontal ? -1 : 1) * speedRatio * rotationPower, Vector3.up);
     }
     public void LerpZoom(float t) {
         _stick.localPosition = Vector3.Lerp(Vector3.zero, Vector3.back * _preferedZoom, t);
         _fpsModeRatio = Mathf.Clamp01(t * _preferedZoom / _fpsModeThreshold);
     }
     void AdjustCamera() {
+        if(transform.parent != null) transform.SetParent(null);
         float zoomRatio = maxZoomRatio;
         Vector3 rayOrigin = transform.position;
         Vector3 rayDir = -transform.forward * _preferedZoom * maxZoomRatio;
