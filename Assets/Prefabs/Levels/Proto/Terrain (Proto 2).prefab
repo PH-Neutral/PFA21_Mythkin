@@ -449,7 +449,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1445474747}
-  m_Layer: 10
+  m_Layer: 7
   m_Name: BombFruit 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -575,7 +575,7 @@ GameObject:
   - component: {fileID: 1912022754}
   - component: {fileID: 1912022753}
   - component: {fileID: 1912022752}
-  m_Layer: 10
+  m_Layer: 7
   m_Name: BombPlant
   m_TagString: BombPlant
   m_Icon: {fileID: 0}
@@ -806,7 +806,7 @@ GameObject:
   - component: {fileID: 288137792587138098}
   - component: {fileID: 1015383867325926312}
   - component: {fileID: 2035791698562197101}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Root 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -949,7 +949,7 @@ GameObject:
   - component: {fileID: 99979463650327559}
   - component: {fileID: 8554815694002594311}
   - component: {fileID: 5159927056030758049}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Snake 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1027,7 +1027,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1058788707976361332}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -4927,7 +4927,7 @@ GameObject:
   - component: {fileID: 1751947345946615494}
   - component: {fileID: 1751947345946615495}
   m_Layer: 7
-  m_Name: Terrain
+  m_Name: Terrain (Proto 2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4978,7 +4978,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 1
   m_BuildHeightMesh: 0
-  m_NavMeshData: {fileID: 23800000, guid: 228fbb2052ac5214d849ec7fd13ff9cb, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: f38f1306d4f8c224ab8ce9ff9c7e50cf, type: 2}
 --- !u!114 &1751947345946615488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41770,7 +41770,7 @@ GameObject:
   - component: {fileID: 1401307708462532877}
   - component: {fileID: 4078083038779998462}
   - component: {fileID: 5474949397018062955}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Root 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42042,7 +42042,7 @@ GameObject:
   - component: {fileID: 6814639768747652962}
   - component: {fileID: 3376479182922913356}
   - component: {fileID: 4392789549470235913}
-  m_Layer: 10
+  m_Layer: 7
   m_Name: BombPlant
   m_TagString: BombPlant
   m_Icon: {fileID: 0}
@@ -42181,7 +42181,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7960864504312422899}
-  m_Layer: 10
+  m_Layer: 7
   m_Name: BombFruit 0 (test)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42277,7 +42277,7 @@ GameObject:
   - component: {fileID: 5302152505876884306}
   - component: {fileID: 49364877070128331}
   - component: {fileID: 8893793377637784176}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42421,7 +42421,7 @@ GameObject:
   - component: {fileID: 1655617638685577891}
   - component: {fileID: 5517655548583983836}
   - component: {fileID: 1086507990284085897}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Snake 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42499,7 +42499,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6705404352862985304}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -43550,7 +43550,7 @@ GameObject:
   - component: {fileID: 900045762681289864}
   - component: {fileID: 1986027974863828544}
   - component: {fileID: 8071934023225248060}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43705,7 +43705,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugLogs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: debugMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugDraws
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
@@ -43716,6 +43724,10 @@ PrefabInstance:
       propertyPath: fieldOfView
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: sightCenter
+      value: 
+      objectReference: {fileID: 961936283}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: _sightCenter
       value: 
@@ -43865,7 +43877,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugLogs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: debugMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugDraws
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
@@ -43876,6 +43896,10 @@ PrefabInstance:
       propertyPath: fieldOfView
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: sightCenter
+      value: 
+      objectReference: {fileID: 1819229666}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: _sightCenter
       value: 
@@ -44025,7 +44049,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugLogs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: debugMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugDraws
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
@@ -44036,6 +44068,10 @@ PrefabInstance:
       propertyPath: fieldOfView
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: sightCenter
+      value: 
+      objectReference: {fileID: 1710915568}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: _sightCenter
       value: 
@@ -44185,7 +44221,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugLogs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: debugMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: debugDraws
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
@@ -44196,6 +44240,10 @@ PrefabInstance:
       propertyPath: fieldOfView
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
+      propertyPath: sightCenter
+      value: 
+      objectReference: {fileID: 947379638}
     - target: {fileID: 3275417167527541161, guid: 137d50297aa80764d820d854cdc599a5, type: 3}
       propertyPath: _sightCenter
       value: 
