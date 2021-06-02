@@ -31,7 +31,7 @@ public class AudioManager : MonoBehaviour {
         //source.clip = asset.clip;
         source.volume = volumeSound * asset.volume;
         source.spatialBlend = target != null ? 1 : 0; // [0: 2D] [1: 3D]
-        source.PlayOneShot(asset.clip, volumeScale);
+        source.PlayOneShot(asset.GetClip(), volumeScale);
         SetSource(tag, target, source);
     }
 
@@ -41,7 +41,7 @@ public class AudioManager : MonoBehaviour {
         if(asset == null) return;
         AudioSource source = GetSource(tag, target);
         if(source == null) source = (target != null ? target : new GameObject()).AddComponent<AudioSource>();
-        source.clip = asset.clip;
+        source.clip = asset.GetClip();
         source.loop = loop;
         source.volume = volumeMusic * asset.volume;
         source.spatialBlend = target != null ? 1 : 0; // [0: 2D] [1: 3D]

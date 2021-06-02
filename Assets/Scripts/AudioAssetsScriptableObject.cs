@@ -5,19 +5,18 @@ using UnityEngine;
 namespace MythkinCore.Audio {
     [System.Serializable]
     public enum AudioTag {
-        debugVillager, debugStillAlive
+        debugVillager, debugStillAlive, debugWalk2
     }
     [System.Serializable]
     public class AudioAsset {
         public AudioTag tag;
-        public AudioClip clip;
+        public AudioClip[] clips;
         [Range(0f, 2f)]
         public float volume = 1f;
 
-        public AudioAsset(AudioTag tag, AudioClip clip, float volume) {
-            this.tag = tag;
-            this.clip = clip;
-            this.volume = volume;
+        public AudioClip GetClip() {
+            if(clips == null || clips.Length == 0) return null;
+            return clips[Random.Range(0, clips.Length)];
         }
     }
     [System.Serializable]
@@ -51,7 +50,7 @@ namespace MythkinCore.Audio {
         void AddToDictionary(ref Dictionary<AudioTag, AudioAsset> dictionary, AudioAsset[] assetArray) {
             if(assetArray == null) return;
             for(int i = 0; i < assetArray.Length; i++) {
-                if(assetArray[i].clip == null) continue;
+                if(assetArray[i].clips == null || assetArray[i].clips.Length == 0) continue;
                 if(dictionary.ContainsKey(assetArray[i].tag)) Debug.LogWarning($"The sound tag \"{assetArray[i].tag}\" has already been used! \nPlease check the AudioManager to make sure no sound tags are used more than once.");
                 dictionary[assetArray[i].tag] = assetArray[i];
             }
