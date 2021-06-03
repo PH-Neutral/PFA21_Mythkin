@@ -143,7 +143,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     void HandleSound() {
         if(_inputs != Vector3.zero) {
-            Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f);
+            Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f, true);
         }
     }
     void Look() {

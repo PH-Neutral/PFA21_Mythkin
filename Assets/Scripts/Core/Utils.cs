@@ -107,7 +107,7 @@ public static class Utils {
         */
         return (1 - distance / distanceMax) * 100;
     }
-    public static void EmitSound(float soundRadius, Vector3 soundPosition)
+    public static void EmitSound(float soundRadius, Vector3 soundPosition, bool isPlayer)
     {
         Vector3 relativePos;
         float soundLevel;
@@ -124,7 +124,7 @@ public static class Utils {
                 relativePos = soundPosition - enemy.transform.position;
                 soundLevel = CalculateSoundLevel(soundRadius, relativePos.magnitude);
                 if (Mathf.Abs(enemy.transform.position.y - soundPosition.y) < 3f /*layer thickness (put a real var later)*/)
-                enemy.HearSound(relativePos, soundLevel);
+                enemy.HearSound(relativePos, soundLevel, isPlayer);
             }
         }
     }

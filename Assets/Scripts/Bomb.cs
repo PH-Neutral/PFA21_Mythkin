@@ -22,7 +22,7 @@ public class Bomb : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer(Utils.layer_Terrain) || other.gameObject.layer == LayerMask.NameToLayer(Utils.layer_Interactibles))
         {
             Explode();
-            Utils.EmitSound(_soundRadius, transform.position);
+            Utils.EmitSound(_soundRadius, transform.position, false);
         }
     }
 }

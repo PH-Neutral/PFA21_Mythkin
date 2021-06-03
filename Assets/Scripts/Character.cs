@@ -343,7 +343,7 @@ public class Character : MonoBehaviour
             {
                 relativePos = transform.position - enemy.transform.position;
                 soundLevel = Utils.CalculateSoundLevel(levelAtSource, relativePos.magnitude);
-                enemy.HearSound(relativePos, soundLevel);
+                enemy.HearSound(relativePos, soundLevel, true);
             }
         }
     }
