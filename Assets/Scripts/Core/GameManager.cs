@@ -9,6 +9,14 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public bool GamePaused {
+        get {
+            return Time.timeScale == 0;
+        }
+        set {
+            Time.timeScale = value ? 0 : 1;
+        }
+    }
     public NavMeshSurface terrain;
 
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
@@ -26,11 +34,12 @@ public class GameManager : MonoBehaviour
     }
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            Application.Quit();
-        } else if(Input.GetKeyDown(KeyCode.Backspace)) {
-            SceneManager.LoadScene(0);
-
+            TogglePause();
         }
+    }
+    public void TogglePause() {
+        GamePaused = !GamePaused;
+        UIManager.Instance.DisplayPauseMenu(GamePaused);
     }
     public void UpdateNavMesh() {
         terrain.BuildNavMesh();

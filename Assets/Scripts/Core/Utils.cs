@@ -107,7 +107,7 @@ public static class Utils {
         */
         return (1 - distance / distanceMax) * 100;
     }
-    public static void EmitSound(float soundRadius, Vector3 soundPosition, bool isPlayer)
+    public static void EmitSound(float soundRadius, Vector3 soundPosition, bool isPlayer = false)
     {
         Vector3 relativePos;
         float soundLevel;

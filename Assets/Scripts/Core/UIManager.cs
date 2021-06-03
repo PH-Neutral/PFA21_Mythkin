@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using MythkinCore.UI;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
     public GameObject rootIndicator, bombIndicator;
+    public MenuPause menuPause;
 
     private void Awake()
     {
@@ -18,6 +21,11 @@ public class UIManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    public void DisplayPauseMenu(bool display) {
+        if(display) menuPause.Show();
+        else menuPause.Hide();
     }
 }
  

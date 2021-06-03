@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MythkinCore.Audio;
 
 public class PlayerCharacter : MonoBehaviour {
     public float Speed {
@@ -73,6 +74,8 @@ public class PlayerCharacter : MonoBehaviour {
         _playerCam.SetReferences(this, _head,_camCenter);
     }
     private void Update() {
+        if(GameManager.Instance.GamePaused) return;
+
         deltaTime = Time.deltaTime;
         _isJumping = Input.GetKey(KeyCode.Space);
         _isInteracting = Input.GetKeyDown(KeyCode.E);
@@ -141,9 +144,16 @@ public class PlayerCharacter : MonoBehaviour {
         } 
         
     }
+    float walkTimer, stepPerSec = 2;
     void HandleSound() {
         if(_inputs != Vector3.zero) {
-            Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f, true);
+            Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f);
+            float stepDelay = 1 / (stepPerSec * Speed / _moveSpeed);
+            if(walkTimer >= stepDelay) {
+                walkTimer -= stepDelay;
+                AudioManager.instance.PlaySound(AudioTag.debugWalk2, gameObject);
+            }
+            walkTimer += deltaTime;
         }
     }
     void Look() {
