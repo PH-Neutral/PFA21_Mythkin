@@ -148,10 +148,11 @@ public class PlayerCharacter : MonoBehaviour {
     void HandleSound() {
         if(_inputs != Vector3.zero) {
             Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f);
-            float stepDelay = 1 / (stepPerSec * Speed / _moveSpeed);
+            float speedRatio = Speed / _moveSpeed;
+            float stepDelay = 1 / (stepPerSec * speedRatio);
             if(walkTimer >= stepDelay) {
                 walkTimer -= stepDelay;
-                AudioManager.instance.PlaySound(AudioTag.debugWalk2, gameObject);
+                AudioManager.instance.PlaySound(AudioTag.playerWalk, gameObject, speedRatio);
             }
             walkTimer += deltaTime;
         }

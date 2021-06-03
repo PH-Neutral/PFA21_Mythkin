@@ -24,6 +24,16 @@ MonoBehaviour:
     volume: 1
   - tag: 2
     clips:
-    - {fileID: 8300000, guid: f22c524fedd3be146baacc5eab39e152, type: 3}
+    - {fileID: 8300000, guid: ef62c2f9efc1fb84b8368b2fccc3d177, type: 3}
+    - {fileID: 8300000, guid: 113976a298de24648ae0cbee9b270471, type: 3}
+    - {fileID: 8300000, guid: fee69c397dd67784e8168ac90f3ba83e, type: 3}
+    - {fileID: 8300000, guid: c0b218768d152134bb49a1feb8113d63, type: 3}
+    volume: 0.15
+  - tag: 3
+    clips:
+    - {fileID: 8300000, guid: 1eda5fbb8f015fe489d8817d5da5be29, type: 3}
+    - {fileID: 8300000, guid: cd599b6f125594d4dac07ffdbb4606c8, type: 3}
+    - {fileID: 8300000, guid: 5662d489fe1055b4e857a2c9a4294f5a, type: 3}
+    - {fileID: 8300000, guid: 41eee03168771fb4f882091465820403, type: 3}
     volume: 0.3
   sfx: []

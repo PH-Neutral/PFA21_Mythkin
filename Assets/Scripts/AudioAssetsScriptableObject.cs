@@ -5,7 +5,7 @@ using UnityEngine;
 namespace MythkinCore.Audio {
     [System.Serializable]
     public enum AudioTag {
-        debugVillager, debugStillAlive, debugWalk2
+        debugVillager, debugStillAlive, playerWalk, boarWalk
     }
     [System.Serializable]
     public class AudioAsset {
