@@ -34,6 +34,11 @@ public class PlayerCharacter : MonoBehaviour {
             return !_charaCtrl.isGrounded && _isOnClimbWall;
         }
     }
+    public bool IsJumping {
+        get {
+            return (_isOnClimbWall && _isJumping) || (!_isOnClimbWall && _isJumping && _charaCtrl.isGrounded);
+        }
+    }
     float Radius {
         get { return _charaCtrl.radius + _charaCtrl.skinWidth; }
     }
@@ -53,6 +58,7 @@ public class PlayerCharacter : MonoBehaviour {
     CharacterController _charaCtrl;
     PlayerCamera _playerCam;
     TrajectoryHandler _trajectoryHandler;
+    Animator _anim;
     Renderer[] _renderers;
     bool _isModelHidden = false;
     Vector3 _movement = Vector3.zero, _wallPoint, _inputs = Vector3.zero;
@@ -68,6 +74,7 @@ public class PlayerCharacter : MonoBehaviour {
         _playerCam = GetComponentInChildren<PlayerCamera>();
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
         if(_trajectoryHandler != null) _trajectoryHandler.playerCamera = _playerCam;
+        _anim = GetComponentInChildren<Animator>();
         _renderers = _model.GetComponentsInChildren<Renderer>();
     }
     private void Start() {
@@ -89,6 +96,7 @@ public class PlayerCharacter : MonoBehaviour {
         HandleInteractions();
         HandleThrowing();
         HandleSound();
+        HandleAnimations();
 
         _wasClimbing = _isOnClimbWall;
         _wasGrounded = _charaCtrl.isGrounded;
@@ -156,6 +164,16 @@ public class PlayerCharacter : MonoBehaviour {
             }
             walkTimer += deltaTime;
         }
+    }
+    void HandleAnimations() {
+        _anim.SetBool("Alive", true);
+        _anim.SetBool("Sprinting", _isRunning);
+        float speed = _movement.Multiply(new Vector3(1, 0, 1)).magnitude / Speed;
+        _anim.SetFloat("Speed", speed);
+        _anim.SetFloat("ClimbSpeed", _movement.magnitude / ClimbSpeed);
+        _anim.SetBool("Jumping", IsJumping);
+        _anim.SetBool("Falling", !_charaCtrl.isGrounded);
+        _anim.SetBool("Climbing", _isOnClimbWall);
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
