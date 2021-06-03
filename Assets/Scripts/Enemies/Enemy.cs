@@ -43,7 +43,7 @@ public abstract class Enemy : MonoBehaviour
     public Transform sightCenter;
     [SerializeField] protected Transform target;
     [SerializeField] protected bool debugLogs, debugDraws;
-    protected MeshRenderer[] _renderers;
+    [SerializeField] protected MeshRenderer[] _renderers;
 
     protected Vector3 lastSoundVector;
     protected bool soundHeard, lastSoundIsPlayer;
@@ -53,7 +53,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Awake()
     {
-        _renderers = GetComponentsInChildren<MeshRenderer>();
+        //_renderers = GetComponentsInChildren<MeshRenderer>();
     }
     protected virtual void Start()
     {

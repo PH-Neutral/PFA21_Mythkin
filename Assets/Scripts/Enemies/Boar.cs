@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using MythkinCore.Audio;
 
 public class Boar : Enemy
 {
@@ -73,6 +74,22 @@ public class Boar : Enemy
         }
         // --------------- //
         base.Update();
+        HandleSound();
+    }
+    float walkTimer, stepPerSec = 2;
+    void HandleSound()
+    {
+        if (_agent.velocity != Vector3.zero)
+        {
+            float speedRatio = Speed / moveSpeed;
+            float stepDelay = 1 / (stepPerSec * speedRatio);
+            if (walkTimer >= stepDelay)
+            {
+                walkTimer -= stepDelay;
+                AudioManager.instance.PlaySound(AudioTag.boarWalk, gameObject, speedRatio);
+            }
+            walkTimer += Time.deltaTime;
+        }
     }
     protected override void OnStateChange()
     {

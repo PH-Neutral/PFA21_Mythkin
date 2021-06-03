@@ -302,6 +302,7 @@ GameObject:
   - component: {fileID: 174648132}
   - component: {fileID: 174648131}
   - component: {fileID: 174648133}
+  - component: {fileID: 174648134}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -353,6 +354,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rootIndicator: {fileID: 1886278408}
   bombIndicator: {fileID: 1886278407}
+  menuPause: {fileID: 0}
+--- !u!114 &174648134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174648130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b78d0d95500dcc4f8e7c6494b7fde62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  volumeMusic: 0.5
+  volumeSound: 0.5
+  audioAssets: {fileID: 11400000, guid: 68830cca68732294e926540c5e441d27, type: 2}
 --- !u!114 &262470983 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2907452573514102818, guid: afcd54b3bd8d6cc4692e1c9dae8ccde4, type: 3}
@@ -755,7 +772,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 318459133}
   m_LocalRotation: {x: 0.0807242, y: -0.37558317, z: 0.032859284, w: 0.92268145}
-  m_LocalPosition: {x: -19.736652, y: 14.580945, z: -44.714523}
+  m_LocalPosition: {x: -19.736652, y: 14.830945, z: -44.714523}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
