@@ -1,0 +1,253 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &916684277278600485
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4939820868405501052}
+  m_Layer: 0
+  m_Name: FruitBombe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4939820868405501052
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 916684277278600485}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.31500077, y: 1.125, z: 0.3240013}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_Children:
+  - {fileID: 9019454820868537612}
+  m_Father: {fileID: 7354410011958056247}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2619528232005941533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7015894939115296016}
+  m_Layer: 0
+  m_Name: FruitBombeArbre
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7015894939115296016
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2619528232005941533}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.060001373}
+  m_LocalScale: {x: 0.34426, y: 0.34426, z: 0.34426}
+  m_Children:
+  - {fileID: 2553768190611558630}
+  m_Father: {fileID: 7354410011958056247}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5801513009135945050
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7354410011958056247}
+  - component: {fileID: 1150592020684413993}
+  m_Layer: 0
+  m_Name: BombFruit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7354410011958056247
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5801513009135945050}
+  m_LocalRotation: {x: -0, y: -0.82941705, z: -0, w: -0.55863}
+  m_LocalPosition: {x: -2.934, y: 1, z: 0.245}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_Children:
+  - {fileID: 7015894939115296016}
+  - {fileID: 4939820868405501052}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: -247.922, z: 0}
+--- !u!114 &1150592020684413993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5801513009135945050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6307beb4448b5094989454a8eeb7127e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _timeToGrow: 5
+  _fakeBomb: {fileID: 7881482433589298787}
+  _gotABomb: 1
+--- !u!1001 &2664573928913336077
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 7015894939115296016}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.14127901
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5320142
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.84612495
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.0109815085
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.03021627
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 8141d9c48a165784e9ac4e425c06d865, type: 2}
+    - target: {fileID: 919132149155446097, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+      propertyPath: m_Name
+      value: Fruits_bombe_Arbre_V2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+--- !u!4 &2553768190611558630 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 89bdc6a4d4ed77c42b0defcb21254bdf, type: 3}
+  m_PrefabInstance: {fileID: 2664573928913336077}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8836400165657041639
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 4939820868405501052}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.70710677
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.000000005268356
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.0000000052683564
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4eb927e97083cf74e9c34e8209242ad8, type: 2}
+    - target: {fileID: 919132149155446097, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+      propertyPath: m_Name
+      value: Fruits-bombe
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+--- !u!4 &9019454820868537612 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+  m_PrefabInstance: {fileID: 8836400165657041639}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7881482433589298787 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
+  m_PrefabInstance: {fileID: 8836400165657041639}
+  m_PrefabAsset: {fileID: 0}

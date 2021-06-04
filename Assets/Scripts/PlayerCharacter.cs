@@ -104,7 +104,7 @@ public class PlayerCharacter : MonoBehaviour {
     void HandleMovement() {
         if(!_isDeclimbingUp) {
             if(!_wasClimbing) _isOnClimbWall = CheckForClimbMiddle() && CanClimbHorizontal(-1) && CanClimbHorizontal(1);
-            _isOnClimbWall = CheckForClimbMiddle() || CheckForClimbDown(); // && !CanDeclimbUp();
+            else _isOnClimbWall = CheckForClimbMiddle() || CheckForClimbDown(); // && !CanDeclimbUp();
 
             _movement = _isOnClimbWall ? Climb() : Move();
 
@@ -155,14 +155,16 @@ public class PlayerCharacter : MonoBehaviour {
     float walkTimer, stepPerSec = 2;
     void HandleSound() {
         if(_inputs != Vector3.zero) {
-            Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f);
-            float speedRatio = Speed / _moveSpeed;
-            float stepDelay = 1 / (stepPerSec * speedRatio);
-            if(walkTimer >= stepDelay) {
-                walkTimer -= stepDelay;
-                AudioManager.instance.PlaySound(AudioTag.playerWalk, gameObject, speedRatio);
+            if(_charaCtrl.isGrounded || _isOnClimbWall) {
+                Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f, true);
+                float speedRatio = Speed / _moveSpeed;
+                float stepDelay = 1 / (stepPerSec * speedRatio);
+                if(walkTimer >= stepDelay) {
+                    walkTimer -= stepDelay;
+                    AudioManager.instance.PlaySound(AudioTag.playerWalk, gameObject, speedRatio);
+                }
+                walkTimer += deltaTime;
             }
-            walkTimer += deltaTime;
         }
     }
     void HandleAnimations() {
