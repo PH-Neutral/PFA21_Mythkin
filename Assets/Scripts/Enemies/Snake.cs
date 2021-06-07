@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Snakes : Enemy
+public class Snake : Enemy
 {
-    [SerializeField] float inGroundTime = 5f, searchDuration = 3f;
-    [SerializeField] Transform _model;
+    [SerializeField] float inGroundTime = 5f;
     bool isInGround;
 
     protected override void Awake()
@@ -19,6 +18,9 @@ public class Snakes : Enemy
         {
             base.Update();
         }
+    }
+    protected override void OnUpdate() {
+        // decide the state you in
     }
     protected override void Passive()
     {
@@ -34,16 +36,12 @@ public class Snakes : Enemy
             Debug.DrawLine(transform.position, transform.TransformPoint(lastSoundVector), Color.green);
 
             Vector3 lookPos = new Vector3(lastSoundVector.x, 0, lastSoundVector.z);
-            _model.LookAt(transform.TransformPoint(lookPos));
+            head.LookAt(transform.TransformPoint(lookPos));
         }
         else
         {
             Invoke(nameof(StopSearching), searchDuration);
         }
-    }
-    void StopSearching()
-    {
-        State = EnemyState.Passive;
     }
     protected override void Aggro()
     {
@@ -60,9 +58,12 @@ public class Snakes : Enemy
             GoInHole();
         }
     }
+    void StopSearching() {
+        State = EnemyState.Passive;
+    }
     void GoInHole()
     {
-        _model.gameObject.SetActive(false);
+        head.gameObject.SetActive(false);
 
 
         //play anim goInHole
@@ -71,7 +72,7 @@ public class Snakes : Enemy
     }
     void LeaveHole()
     {
-        _model.gameObject.SetActive(true);
+        head.gameObject.SetActive(true);
 
 
         //play anime leaveHole
@@ -85,9 +86,11 @@ public class Snakes : Enemy
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("HitBox") && !isInGround)
+        if(isInGround) return;
+        if (LayerMask.LayerToName(other.gameObject.layer) == Utils.layer_Player)
         {
-            Debug.Log("you died");
+            if(TryGetComponent(out PlayerCharacter player)) Debug.Log("Player component found! Player is dead.");
+            else Debug.Log("Player died, but where is component ?");
             // play anim bite
             // other.GetComponent<PlayerCharacter>().Die();
         }

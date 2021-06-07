@@ -8,7 +8,7 @@ public class AudioManager : MonoBehaviour {
 
     [Range(0f,1f)]
     [SerializeField] float volumeMusic = 0.5f, volumeSound = 0.5f;
-    [SerializeField] AudioAssetsScriptableObject audioAssets;
+    [SerializeField] AudioAssetStorage audioAssets;
     Dictionary<AudioTag, AudioAsset> _assetDic;
     Dictionary<AudioKey, AudioSource> _sourceDic;
 

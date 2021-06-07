@@ -6,19 +6,6 @@ using MythkinCore.Audio;
 
 public class Boar : Enemy
 {
-    public float Speed
-    {
-        get { return _agent.speed; }
-        set
-        {
-            _agent.speed = value;
-        }
-    }
-
-    float SprintSpeed
-    {
-        get { return moveSpeed * sprintRatio; }
-    }
     bool IsCharging
     {
         get { return _isCharging; }
@@ -29,40 +16,29 @@ public class Boar : Enemy
             Speed = value ? SprintSpeed : moveSpeed;
         }
     }
-    [SerializeField] float moveSpeed = 3, sprintRatio = 2, rotationSpeed = 50;
-    [SerializeField] float searchLookDuration = 1f;
     [SerializeField] float beforeAttackTime = 1, attackReloadTime = 2.5f, chargeDuration = 2f;
     [SerializeField] Transform _attackCenter;
-    [SerializeField] PatrolPath patrolPath = null;
     Vector3 _lastDestination, _searchVectorLeft, _searchVectorRight;
-    int _patPathIndex = 0;
-    bool _patrolJustStarted = true, _targetPointReached = true, _patrolAscending = true, _searchStart = true, _searchRight = false, _searchLeft = false;
-    float _patrolWaitTimer = 0, _beforeAttackTimer = 0, _attackReloadTimer = 0, _searchLookTimer = 0;
+    bool _searchStart = true, _searchRight = false, _searchLeft = false;
+    float _beforeAttackTimer = 0, _attackReloadTimer = 0, _searchLookTimer = 0;
     float _agentPathCheckRate = 1 / 30f; // in seconds
     bool _isAlerted = false, _isCollidingWithTarget = false;
     NavMeshAgent _agent;
     bool _isCharging = false;
 
+    Vector3 _suspiciousPos, _attackPos;
+    bool _stateStart = false;
+
     protected override void Awake()
     {
         base.Awake();
         _agent = GetComponentInChildren<NavMeshAgent>();
+        _agent.enabled = false;
     }
     protected override void Start()
     {
         base.Start();
-        if(target == null) target = FindObjectOfType<PlayerCharacter>().transform;
-        // set initial position and orientation
-        if(patrolPath != null && patrolPath.wayPoints.Length > 0) {
-            if(GetSurfacePoint(patrolPath.wayPoints[0].point.position, out Vector3 startPos)) {
-                transform.position = startPos;
-                if(patrolPath.wayPoints.Length > 1) {
-                    if(GetSurfacePoint(patrolPath.wayPoints[1].point.position, out Vector3 lookPos)) {
-                        transform.LookAt(lookPos, Vector3.up);
-                    }
-                }
-            }
-        }
+        _agent.enabled = true;
     }
 
     protected override void Update()
@@ -74,21 +50,170 @@ public class Boar : Enemy
         }
         // --------------- //
         base.Update();
+
         HandleSound();
     }
-    float walkTimer, stepPerSec = 2;
-    void HandleSound()
+    protected override void OnUpdate() {
+        if(Look(out Vector3 targetPos)) {
+            State = EnemyState.Aggro;
+        } else if(State == EnemyState.Passive && soundHeard) {
+            State = EnemyState.Search;
+        }
+    }
+    protected override void OnStateChange()
     {
-        if (_agent.velocity != Vector3.zero)
-        {
+        base.OnStateChange();
+        CancelDestination();
+        _stateStart = true;
+    }
+    protected override void OnAggro()
+    {
+        base.OnAggro();
+        AudioManager.instance.PlaySound(AudioTag.boarScream, 1);
+    }
+    protected override void OnSearch()
+    {
+        base.OnSearch();
+        AudioManager.instance.PlaySound(AudioTag.boarTalk, 1);
+    }
+    protected override void Aggro()
+    {
+        bool targetSeen;
+        if(targetSeen = Look(out Vector3 targetPos)) {
+            _attackPos = targetPos;
+        }
+        if(!_targetPointReached || _stateStart) {
+            if(_stateStart) {
+                _stateStart = false;
+                Speed = moveSpeed;
+            }
+            SetDestinationPoint(_attackPos);
+        }
+        if(_targetPointReached && !targetSeen) {
+            _suspiciousPos = _attackPos;
+            State = EnemyState.Search;
+            return;
+        }
+    }
+    protected override void Search()
+    {
+        if(_stateStart || soundHeard) {
+            _stateStart = false;
+            _searchLeft = true;
+            _searchRight = true;
+            if(soundHeard) {
+                soundHeard = false;
+                _suspiciousPos = transform.position + lastSoundVector;
+            }
+            Speed = moveSpeed;
+            SetDestinationPoint(_suspiciousPos);
+        }
+        if(_targetPointReached) {
+            if(_searchLeft && _searchRight) {
+                _searchLeft = false;
+                _searchRight = false;
+                _searchVectorLeft = transform.TransformDirection(Quaternion.Euler(0, -60, 0) * Vector3.forward);
+                _searchVectorRight = transform.TransformDirection(Quaternion.Euler(0, 60, 0) * Vector3.forward);
+            }
+            if(!_searchLeft) {
+                if(transform.SlerpRotation(_searchVectorLeft, Vector3.up, rotationSpeed)) {
+                    _searchLeft = true;
+                }
+            } else if(!_searchRight) {
+                if(transform.SlerpRotation(_searchVectorRight, Vector3.up, rotationSpeed)) {
+                    _searchRight = true;
+                }
+            } else {
+                State = EnemyState.Passive;
+            }
+        }
+    }
+    protected override void Passive()
+    {
+        FollowPatrol();
+    }
+
+    float walkTimer;
+    void HandleSound() {
+        if(_agent.velocity != Vector3.zero) {
             float speedRatio = Speed / moveSpeed;
-            float stepDelay = 1 / (stepPerSec * speedRatio);
-            if (walkTimer >= stepDelay)
-            {
+            float stepDelay = 6;
+            if(walkTimer >= stepDelay) {
                 walkTimer -= stepDelay;
                 AudioManager.instance.PlaySound(AudioTag.boarWalk, gameObject, speedRatio);
             }
             walkTimer += Time.deltaTime;
+        }
+    }
+    void CancelDestination()
+    {
+        CancelInvoke(nameof(CheckIfPointReached));
+        if(_agent.enabled) _agent.ResetPath();
+        _targetPointReached = true;
+    }
+    protected override bool SetDestinationPoint(Vector3 destination, bool raycastGround = true)
+    {
+        if(!raycastGround) base.SetDestinationPoint(destination, raycastGround);
+
+        if(Utils.GetSurfacePoint(destination, out Vector3 surfacePoint))
+        {
+            if ((surfacePoint - transform.position).magnitude < 0.05f)
+            {
+                _targetPointReached = true;
+                _lastDestination = destination;
+                return true;
+            }
+            bool destinationCorrect = _agent.SetDestination(surfacePoint);
+            if (destinationCorrect)
+            {
+                _targetPointReached = false;
+                _lastDestination = destination;
+                CheckIfPointReached();
+            }
+            else
+            {
+                Debug.LogWarning("The destination provided is incorrect. " + surfacePoint);
+            }
+            return destinationCorrect;
+        }
+        return false;
+    }
+    void CheckIfPointReached()
+    {
+        CancelInvoke(nameof(CheckIfPointReached));
+        // check if arrived at destination
+        if (Vector3.Distance(_agent.destination, _agent.transform.position) <= _agent.stoppingDistance)
+        {
+            if (!_agent.hasPath || _agent.velocity.sqrMagnitude == 0f)
+            {
+                CancelInvoke(nameof(CheckIfPointReached));
+                OnDestinationReached();
+                return;
+            }
+        }
+        Invoke(nameof(CheckIfPointReached), _agentPathCheckRate);
+    }
+    protected override void OnSoundHeard()
+    {
+    }
+    protected override float GetSpeed() {
+        return _agent.speed;
+    }
+    protected override void SetSpeed(float speed) {
+        _agent.speed = speed;
+    }
+}
+
+#region OLD
+/*
+ * 
+    protected override void OnUpdate() {
+        if(Look(out Vector3 targetPos)) {
+            State = EnemyState.Aggro;
+        } else if(soundHeard) {
+            if(State == EnemyState.Passive) {
+                State = EnemyState.Search;
+            }
         }
     }
     protected override void OnStateChange()
@@ -106,11 +231,6 @@ public class Boar : Enemy
     {
         base.OnSearch();
         _searchStart = true;
-    }
-    protected override void OnPassive()
-    {
-        base.OnPassive();
-        _patrolJustStarted = true;
     }
     protected override void Aggro()
     {
@@ -135,7 +255,7 @@ public class Boar : Enemy
                     // if during the pre-attack wait time
                     //Debug.Log("Attack: pre-attack");
                     _beforeAttackTimer += Time.deltaTime;
-                    SlerpRotation(targetPos - transform.position, rotationSpeed); // turn toward target at defined speed
+                    transform.SlerpRotation(targetPos - transform.position, transform.up, rotationSpeed, Space.Self); // turn toward target at defined speed
                     return;
                 }
             }
@@ -210,10 +330,10 @@ public class Boar : Enemy
         // turn around to try and see the little bugger
         if (!_searchLeft)
         {
-            if (SlerpRotation(_searchVectorLeft, rotationSpeed * 2))
+            if (transform.SlerpRotation(_searchVectorLeft, transform.up, rotationSpeed * 2, Space.Self))
             {
                 // if finished turning, wait a bit before turning the other way
-                if (_searchLookTimer < searchLookDuration)
+                if (_searchLookTimer < searchDuration)
                 {
                     _searchLookTimer += Time.deltaTime;
                     return;
@@ -224,10 +344,10 @@ public class Boar : Enemy
         }
         else if (!_searchRight)
         {
-            if (SlerpRotation(_searchVectorRight, rotationSpeed * 2))
+            if (transform.SlerpRotation(_searchVectorRight, transform.up, rotationSpeed * 2, Space.Self))
             {
                 // if finished turning, wait a bit before going back to patrolling
-                if (_searchLookTimer < searchLookDuration)
+                if (_searchLookTimer < searchDuration)
                 {
                     _searchLookTimer += Time.deltaTime;
                     return;
@@ -243,129 +363,8 @@ public class Boar : Enemy
     }
     protected override void Passive()
     {
-        if (patrolPath != null && patrolPath.wayPoints.Length > 0)
-        {
-            if (_targetPointReached || _patrolJustStarted)
-            {
-                // when the target point has been reached or before starting the patrol
-                if (!_patrolJustStarted)
-                {
-                    // if not at the begining of the patrol
-                    if (patrolPath.wayPoints[_patPathIndex].waitingDuration > 0)
-                    {
-                        _patrolWaitTimer += Time.deltaTime;
-                        if (_patrolWaitTimer < patrolPath.wayPoints[_patPathIndex].waitingDuration)
-                        {
-                            return;
-                        }
-                        _patrolWaitTimer = 0;
-                    }
-                    _patPathIndex = patrolPath.GetNextIndex(_patPathIndex, ref _patrolAscending);
-                }
-                else
-                {
-                    _patrolJustStarted = false;
-                }
-
-                _agent.speed = patrolPath.wayPoints[_patPathIndex].speedToPoint;
-                SetDestinationPoint(patrolPath.wayPoints[_patPathIndex].point.position);
-            }
-        }
+        FollowPatrol();
     }
-
-    void CancelDestination()
-    {
-        CancelInvoke(nameof(CheckIfPointReached));
-        _agent.ResetPath();
-        _targetPointReached = true;
-    }
-    bool SetDestinationPoint(Vector3 destination)
-    {
-        if (GetSurfacePoint(destination, out Vector3 surfacePoint))
-        {
-            if ((surfacePoint - transform.position).magnitude < 0.05f)
-            {
-                _targetPointReached = true;
-                _lastDestination = destination;
-                return true;
-            }
-            bool destinationCorrect = _agent.SetDestination(surfacePoint);
-            if (destinationCorrect)
-            {
-                _targetPointReached = false;
-                _lastDestination = destination;
-                CheckIfPointReached();
-            }
-            else
-            {
-                Debug.LogWarning("The destination provided is incorrect. " + surfacePoint);
-            }
-            return destinationCorrect;
-        }
-        return false;
-    }
-    void CheckIfPointReached()
-    {
-        CancelInvoke(nameof(CheckIfPointReached));
-        // check if arrived at destination
-        if (Vector3.Distance(_agent.destination, _agent.transform.position) <= _agent.stoppingDistance)
-        {
-            if (!_agent.hasPath || _agent.velocity.sqrMagnitude == 0f)
-            {
-                CancelInvoke(nameof(CheckIfPointReached));
-                OnPointReached();
-                return;
-            }
-        }
-        Invoke(nameof(CheckIfPointReached), _agentPathCheckRate);
-    }
-    void OnPointReached()
-    {
-        _targetPointReached = true;
-    }
-    bool GetSurfacePoint(Vector3 worldPos, out Vector3 surfacePoint)
-    {
-        surfacePoint = worldPos;
-        if (Physics.Raycast(worldPos + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, 10, 1 << LayerMask.NameToLayer("Terrain")))
-        {
-            surfacePoint = hit.point;
-            Vector3 raycast = hit.point - worldPos;
-            if (raycast.magnitude > Utils.floorHeight)
-            {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
-    bool SlerpRotation(Vector3 newDirection, float rotateSpeed)
-    {
-        float vectorAngle = Vector3.Angle(transform.TransformDirection(Vector3.forward), newDirection);
-        float t = rotateSpeed * Time.deltaTime / vectorAngle;
-        Quaternion newRotation = Quaternion.LookRotation(newDirection, transform.TransformDirection(Vector3.up));
-        transform.localRotation = Quaternion.Slerp(transform.localRotation, newRotation, t);
-        return t >= 1;
-    }
-    /*
-    private void OnTriggerEnter(Collider other)
-    {
-        //Debug.Log("Enemy STARTED collided with " + other.name);
-        if (other.gameObject.layer == target.gameObject.layer && other.CompareTag("HitBox"))
-        {
-            _isCollidingWithTarget = true;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        //Debug.Log("Enemy STOPPED collided with " + other.name);
-        if (other.gameObject.layer == target.gameObject.layer && other.CompareTag("HitBox"))
-        {
-            _isCollidingWithTarget = false;
-        }
-    }*/
-    protected override void OnSoundHeard()
-    {
-    }
-}
+*/
+#endregion
 

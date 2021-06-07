@@ -45,15 +45,16 @@ public class PlayerCharacter : MonoBehaviour {
     float Height {
         get { return _charaCtrl.height + _charaCtrl.skinWidth * 2; }
     }
-    public float interactionRange = 3f;
+    public Transform head;
 
-    [SerializeField] Transform _bodyCenter, _camCenter, _throwPoint, _head, _model;
+    [SerializeField] Transform _bodyCenter, _camCenter, _throwPoint, _model;
     [SerializeField] bool advancedMovement = false, debugDraws = false;
     [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5, _slideAcceleration = 2;
     [SerializeField] float _climbCheckDistanceOffset = 0.2f, _wallDistanceOffset = 0.1f;
     [SerializeField] float _soundRadiusRun = 10f, _soundRadiusWalk = 5f;
+    [SerializeField] float interactionRange = 3f;
     [SerializeField] MeshRenderer _fakebomb; //temporary. Will need to do it by animation
     CharacterController _charaCtrl;
     PlayerCamera _playerCam;
@@ -63,7 +64,7 @@ public class PlayerCharacter : MonoBehaviour {
     bool _isModelHidden = false;
     Vector3 _movement = Vector3.zero, _wallPoint, _inputs = Vector3.zero;
     RaycastHit _declimbHit;
-    bool _wasGrounded = false, _wasClimbing = true;
+    bool _wasGrounded = false, _wasClimbing = true, _wasPushed = false;
     bool _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
     bool _isAiming = false, _isThrowing = false, _hasBomb = false, _isInteracting = false, _isJumping = false, _isRunning = false;
     float deltaTime;
@@ -78,7 +79,7 @@ public class PlayerCharacter : MonoBehaviour {
         _renderers = _model.GetComponentsInChildren<Renderer>();
     }
     private void Start() {
-        _playerCam.SetReferences(this, _head,_camCenter);
+        _playerCam.SetReferences(this, head,_camCenter);
     }
     private void Update() {
         if(GameManager.Instance.GamePaused) return;
@@ -101,12 +102,17 @@ public class PlayerCharacter : MonoBehaviour {
         _wasClimbing = _isOnClimbWall;
         _wasGrounded = _charaCtrl.isGrounded;
     }
+    private void LateUpdate() {
+        _wasPushed = false;
+    }
     void HandleMovement() {
         if(!_isDeclimbingUp) {
             if(!_wasClimbing) _isOnClimbWall = CheckForClimbMiddle() && CanClimbHorizontal(-1) && CanClimbHorizontal(1);
             else _isOnClimbWall = CheckForClimbMiddle() || CheckForClimbDown(); // && !CanDeclimbUp();
 
-            _movement = _isOnClimbWall ? Climb() : Move();
+            if(!_wasPushed) {
+                _movement = _isOnClimbWall ? Climb() : Move();
+            }
 
             _charaCtrl.Move(_movement * deltaTime);
         }
@@ -131,6 +137,7 @@ public class PlayerCharacter : MonoBehaviour {
                 _hasBomb = true;
                 _fakebomb.enabled = true;
                 lastPlant = bombPlant;
+                AudioManager.instance.PlaySound(AudioTag.fruitBombTaken, 1);
             }
         }
         if (UIManager.Instance != null) UIManager.Instance.bombIndicator.SetActive(bombPlant != null);
@@ -156,12 +163,16 @@ public class PlayerCharacter : MonoBehaviour {
     void HandleSound() {
         if(_inputs != Vector3.zero) {
             if(_charaCtrl.isGrounded || _isOnClimbWall) {
+                if(!_wasGrounded) {
+                    Utils.EmitSound(_soundRadiusRun, transform.position + Vector3.up * 0.1f, true);
+                    AudioManager.instance.PlaySound(AudioTag.playerFall, gameObject, 1);
+                }
                 Utils.EmitSound(_isRunning ? _soundRadiusRun : _soundRadiusWalk, transform.position + Vector3.up * 0.1f, true);
                 float speedRatio = Speed / _moveSpeed;
                 float stepDelay = 1 / (stepPerSec * speedRatio);
                 if(walkTimer >= stepDelay) {
                     walkTimer -= stepDelay;
-                    AudioManager.instance.PlaySound(AudioTag.playerWalk, gameObject, speedRatio);
+                    AudioManager.instance.PlaySound(AudioTag.playerWalkGrass, gameObject, speedRatio);
                 }
                 walkTimer += deltaTime;
             }
@@ -200,8 +211,8 @@ public class PlayerCharacter : MonoBehaviour {
             move = Vector3.zero;
             transform.localRotation = Quaternion.Euler(0, transform.localRotation.eulerAngles.y, 0);
         }
-        if(_isAiming) transform.SlerpRotation(new Vector3(_playerCam.transform.forward.x, 0, _playerCam.transform.forward.z), RotationSpeed);
-        else if(flatInputs.magnitude > 0) transform.SlerpRotation(_playerCam.transform.TransformDirection(flatInputs), RotationSpeed);
+        if(_isAiming) transform.SlerpRotation(new Vector3(_playerCam.transform.forward.x, 0, _playerCam.transform.forward.z), transform.up, RotationSpeed);
+        else if(flatInputs.magnitude > 0) transform.SlerpRotation(_playerCam.transform.TransformDirection(flatInputs), transform.up, RotationSpeed);
 
         if (advancedMovement) {
             // jump
@@ -311,7 +322,7 @@ public class PlayerCharacter : MonoBehaviour {
         }
         // lerping to adapt to the wall
         if(_isLerpingToWall) {
-            if(transform.SlerpRotation(wallDir, RotationSpeed) && transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
+            if(transform.SlerpRotation(wallDir, transform.up, RotationSpeed) && transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
                 _isLerpingToWall = false;
             } else {
                 return Vector3.zero;
@@ -532,6 +543,10 @@ public class PlayerCharacter : MonoBehaviour {
     }
     #endregion
 
+    public void PushOut(Vector3 direction, float strength) {
+        _movement = direction.normalized * strength;
+        _wasPushed = true;
+    }
     public void HideMeshes(bool hide) {
         if(_isModelHidden == hide) return;
         _isModelHidden = hide;

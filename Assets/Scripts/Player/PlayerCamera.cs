@@ -15,7 +15,7 @@ public class PlayerCamera : MonoBehaviour
             return _swivel.forward;
         }
     }
-    [SerializeField] public Camera cam;
+    [HideInInspector] public Camera cam;
     public Transform playerHead;
     public float maxZoomRatio = 1;
 
@@ -23,6 +23,7 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] float _rotationLowest, _rotationHighest, rotationPower = 1;
     [SerializeField] float _preferedZoom = 2, _fpsModeThreshold = 1;
     [SerializeField] bool _invertVertical = true, _invertHorizontal = false;
+    Cinemachine.CinemachineVirtualCamera cmCam;
     PlayerCharacter _player;
     Transform _camRef, _headRef;
     Quaternion _rotVert, _rotHori;
@@ -33,8 +34,8 @@ public class PlayerCamera : MonoBehaviour
         _camSphereRadius = 0.1f;//CalculateCamSphereRadius();
         //Debug.Log("camSphereRadius = " + _camSphereRadius);
         _currentRotVertX = _swivel.localEulerAngles.x;
-        Cinemachine.CinemachineVirtualCamera CMVC = GetComponentInChildren<Cinemachine.CinemachineVirtualCamera>();
-        CMVC.transform.SetParent(null);
+        cmCam = GetComponentInChildren<Cinemachine.CinemachineVirtualCamera>();
+        cmCam.transform.SetParent(null);
     }
     private void LateUpdate() {
         AdjustCamera();

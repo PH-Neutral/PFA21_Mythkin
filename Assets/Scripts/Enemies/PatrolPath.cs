@@ -6,7 +6,7 @@ public class PatrolPath : MonoBehaviour {
     [System.Serializable]
     public struct Waypoint {
         public Transform point;
-        public float speedToPoint;
+        public bool sprintSpeed;
         public float waitingDuration;
         /*
         public WayPoint(Transform point, float speedToPoint, float waitingDuration) {
@@ -50,11 +50,13 @@ public class PatrolPath : MonoBehaviour {
     private void OnDrawGizmos() {
         Vector3 origin, target;
         for(int i = 0; i < wayPoints.Length; i++) {
+            if(wayPoints[i].point == null) continue;
             target = wayPoints[i].point.position;
             if(i == 0) Gizmos.color = Color.red;
             else Gizmos.color = Color.yellow;
             Gizmos.DrawSphere(target, _gizmoSphereRadius);
             if(i > 0) {
+                if(wayPoints[i - 1].point == null) continue;
                 origin = wayPoints[i - 1].point.position;
                 if(i == 1) Gizmos.color = Color.red;
                 else Gizmos.color = Color.white;

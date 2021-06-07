@@ -5,7 +5,7 @@ using UnityEngine;
 public static class Utils {
     public const string layer_Interactibles = "Interactibles", layer_Terrain = "Terrain", layer_Environment = "Environment", 
         layer_Enemies = "Enemies", layer_Player = "Player";
-    public static float floorHeight = 2;
+    public static float floorHeight = 6;
 
     #region MISC
 
@@ -40,6 +40,9 @@ public static class Utils {
     public static Vector3 Multiply(this Vector3 vector, Vector3 other) {
         return new Vector3(vector.x * other.x, vector.y * other.y, vector.z * other.z);
     }
+    public static Vector3 Flatten(this Vector3 vector) {
+        return new Vector3(vector.x, 0, vector.z);
+    }
     public static float ChangePrecision(this float f, int nbDecimals) {
         return ((int)(f * Mathf.Pow(10, nbDecimals))) / Mathf.Pow(10, nbDecimals);
     }
@@ -58,6 +61,9 @@ public static class Utils {
     public static float Sign(this float f) {
         return f == 0 ? 0 : (f > 0 ? 1 : -1);
     }
+    public static bool IsBetween(this float f, float min, bool minInclu, float max, bool maxInclu) {
+        return (minInclu ? f >= min : f > min) && (maxInclu ? f <= max : f < max);
+    }
     #endregion
 
     #region SPECIFICS
@@ -65,14 +71,26 @@ public static class Utils {
         Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back
     };
 
+    public static bool GetSurfacePoint(Vector3 worldPos, out Vector3 surfacePoint, float maxDistance = 10) {
+        surfacePoint = worldPos;
+        if(Physics.Raycast(worldPos + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, maxDistance + 0.5f, Utils.layer_Terrain.ToLayerMask())) {
+            surfacePoint = hit.point;
+            Vector3 raycast = hit.point - worldPos;
+            if(raycast.magnitude > Utils.floorHeight) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
     public static bool LerpPosition(this Transform obj, Vector3 targetPos, float lerpSpeed) {
         float t = lerpSpeed * Time.deltaTime / Vector3.Distance(obj.position, targetPos);
         obj.position = Vector3.Lerp(obj.position, targetPos, t);
         return t >= 1;
     }
-    public static bool SlerpRotation(this Transform obj, Vector3 newDirection, float rotateSpeed, Space space = Space.World) {
-        //float vectorAngle = Vector3.Angle(obj.TransformDirection(Vector3.forward), newDirection);
-        Quaternion newRotation = Quaternion.LookRotation(newDirection, obj.TransformDirection(Vector3.up));
+    public static bool SlerpRotation(this Transform obj, Vector3 newDirection, Vector3 upAxis, float rotateSpeed, Space space = Space.World) {
+        if(Vector3.Angle(obj.forward, newDirection) == 0) return true;
+        Quaternion newRotation = Quaternion.LookRotation(newDirection, upAxis);
         return obj.SlerpRotation(newRotation, rotateSpeed, space);
     }
     public static bool SlerpRotation(this Transform obj, Quaternion newRotation, float rotateSpeed, Space space = Space.World) {

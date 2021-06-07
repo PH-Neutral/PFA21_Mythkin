@@ -5,7 +5,10 @@ using UnityEngine;
 namespace MythkinCore.Audio {
     [System.Serializable]
     public enum AudioTag {
-        debugVillager, debugStillAlive, playerWalk, boarWalk
+        debugSound, debugMusic, 
+        playerWalkGrass, playerWalkWood, playerFall,
+        boarWalk, boarTalk, boarScream,
+        fruitBombTaken, fruitBombImpact
     }
     [System.Serializable]
     public class AudioAsset {
@@ -31,7 +34,7 @@ namespace MythkinCore.Audio {
     }
     // +++ +++ +++ +++ +++ SCRIPTABLE OBJECT +++ +++ +++ +++ +++ //
     [CreateAssetMenu(fileName = "New AudioAssetFile", menuName = "ScriptableObjects/AudioAssets", order = 1)]
-    public class AudioAssetsScriptableObject : ScriptableObject {
+    public class AudioAssetStorage : ScriptableObject {
         public AudioAsset[] musics;
         public AudioAsset[] sounds;
         public AudioAsset[] sfx;
