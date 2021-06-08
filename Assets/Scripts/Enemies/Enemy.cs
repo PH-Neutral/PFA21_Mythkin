@@ -55,18 +55,18 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] protected int floorLevel = 0;
     [SerializeField] protected PatrolPath patrolPath = null;
     [SerializeField] protected Transform head;
-    [SerializeField] protected MeshRenderer[] _renderers;
     protected Transform target;
     protected Vector3 destinationPoint, lastDestinationPoint;
     protected Vector3 lastSoundVector;
     protected bool soundHeard, lastSoundIsPlayer;
     protected float lastSoundLevel;
-    protected bool _patrolJustStarted = true, _targetPointReached = true, _patrolAscending = true;
-    protected float _patrolWaitTimer = 0;
-    protected int _patPathIndex = 0;
-    protected float _speed;
+    protected bool destinationReached = true;
 
-    protected EnemyState _state = EnemyState.Idle;
+    [SerializeField] MeshRenderer[] _renderers;
+    EnemyState _state = EnemyState.Idle;
+    bool _patrolJustStarted = true, _patrolAscending = true;
+    float _speed, _patrolWaitTimer = 0;
+    int _patPathIndex = 0;
 
     protected virtual void Awake()
     {
@@ -74,7 +74,6 @@ public abstract class Enemy : MonoBehaviour
     }
     protected virtual void Start() {
         target = GameManager.Instance.player.head;
-        //ChangeMaterial(GameManager.Instance.matEnemyPatrol); //if starts in passive state
         State = debugState;
 
         // set initial position and orientation forced by patrolPath
@@ -179,7 +178,7 @@ public abstract class Enemy : MonoBehaviour
             invalidAngleSight = true;
         } else {
             // Check if target is in sight or not
-            int layers = Utils.layer_Terrain.ToLayerMask() | Utils.layer_Environment.ToLayerMask() | Utils.layer_Interactibles.ToLayerMask();
+            int layers = Utils.l_Terrain.ToLayerMask() | Utils.l_Environment.ToLayerMask() | Utils.l_Interactibles.ToLayerMask() | Utils.l_Enemies.ToLayerMask();
             if(Physics.Raycast(origin.position, relativePos.normalized, out RaycastHit hit, relativePos.magnitude, layers)) {
                 if(hit.collider.CompareTag("grass")) {
                     // vision is blocked by grass
@@ -201,7 +200,7 @@ public abstract class Enemy : MonoBehaviour
     }
     protected void FollowPatrol() {
         if(patrolPath != null && patrolPath.wayPoints.Length > 0) {
-            if(_targetPointReached || _patrolJustStarted) {
+            if(destinationReached || _patrolJustStarted) {
                 // when the target point has been reached or before starting the patrol
                 if(!_patrolJustStarted) {
                     // if not at the begining of the patrol
@@ -223,15 +222,15 @@ public abstract class Enemy : MonoBehaviour
         }
     }
     protected void OnDestinationReached() {
-        _targetPointReached = true;
+        destinationReached = true;
     }
     protected virtual bool SetDestinationPoint(Vector3 destination, bool raycastGround = true) {
         lastDestinationPoint = destinationPoint;
         destinationPoint = destination;
         if(raycastGround) Utils.GetSurfacePoint(destination, out destinationPoint, 1.5f);
 
-        if(Vector3.Distance(transform.position, destinationPoint) == 0) _targetPointReached = true;
-        else _targetPointReached = false;
+        if(Vector3.Distance(transform.position, destinationPoint) == 0) destinationReached = true;
+        else destinationReached = false;
         return true;
     }
     protected void ChangeMaterial(Material mat)

@@ -39,7 +39,7 @@ public class Corvid : Enemy {
     protected override void Passive() {
         FollowPatrol();
         // move to destination
-        if(!_targetPointReached) {
+        if(!destinationReached) {
             if(Move(destinationPoint, Speed)) {
                 OnDestinationReached();
             } else {
@@ -87,7 +87,7 @@ public class Corvid : Enemy {
                         PushPlayer(transform.position - lastPos);
                     }
                     _attackDone = true;
-                    _afterAttackPos = transform.position + GetDirectionUpped(transform.position - lastPos, _afterAttackUpAngle) * 10;
+                    _afterAttackPos = transform.position + Utils.GetDirectionUpped(transform.position - lastPos, _afterAttackUpAngle) * 10;
                 }
             } else {
                 _afterAttackTimer -= Time.deltaTime;
@@ -101,17 +101,12 @@ public class Corvid : Enemy {
     void PushPlayer(Vector3 direction) {
         Debug.LogWarning("Player was pushed by a big bird!");
         // push player away
-        Vector3 pushDir = GetDirectionUpped(direction, 10);
+        Vector3 pushDir = Utils.GetDirectionUpped(direction, 10);
         GameManager.Instance.player.PushOut(pushDir, _knockbackStrength);
-    }
-    Vector3 GetDirectionUpped(Vector3 direction, float upAngle) {
-        Vector3 newDir = direction.Flatten();
-        newDir.y = newDir.magnitude * Mathf.Tan(upAngle * Mathf.Deg2Rad);
-        return newDir.normalized;
     }
     bool CheckForTouch(Vector3 start, Vector3 end) {
         Ray ray = new Ray(start, end - start);
-        return Physics.SphereCast(ray, 0.5f, Vector3.Distance(start, end), Utils.layer_Player.ToLayerMask());
+        return Physics.SphereCast(ray, 0.5f, Vector3.Distance(start, end), Utils.l_Player.ToLayerMask());
     }
     bool Move(Vector3 targetPos, float speed) {
         if(transform.LerpPosition(targetPos, speed)) return true;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using MythkinCore.Audio;
+using AshkynCore.Audio;
 
 public class Boar : Enemy
 {
@@ -13,10 +13,12 @@ public class Boar : Enemy
         {
             _isCharging = value;
             _agent.autoBraking = !value;
-            Speed = value ? SprintSpeed : moveSpeed;
+            _chargeTimer = 0;
+            _preChargeTimer = 0;
+            Speed = SprintSpeed * (value ? 2 : 1);
         }
     }
-    [SerializeField] float beforeAttackTime = 1, attackReloadTime = 2.5f, chargeDuration = 2f;
+    [SerializeField] float afterAttackDelay = 1, attackReloadTime = 2.5f, preChargeDelay = 2f, chargeDelay = 5f, stunDuration = 5;
     [SerializeField] Transform _attackCenter;
     Vector3 _lastDestination, _searchVectorLeft, _searchVectorRight;
     bool _searchStart = true, _searchRight = false, _searchLeft = false;
@@ -24,16 +26,18 @@ public class Boar : Enemy
     float _agentPathCheckRate = 1 / 30f; // in seconds
     bool _isAlerted = false, _isCollidingWithTarget = false;
     NavMeshAgent _agent;
-    bool _isCharging = false;
 
+    SphereCollider _coll;
     Vector3 _suspiciousPos, _attackPos;
-    bool _stateStart = false;
+    bool _stateStart = false, _searchTurn = false, _isCharging = false, _isStunned = false;
+    float _preChargeTimer, _chargeTimer, _afterAttackTimer, _stunTimer;
 
     protected override void Awake()
     {
         base.Awake();
         _agent = GetComponentInChildren<NavMeshAgent>();
         _agent.enabled = false;
+        _coll = _attackCenter.GetComponent<SphereCollider>();
     }
     protected override void Start()
     {
@@ -60,6 +64,9 @@ public class Boar : Enemy
             State = EnemyState.Search;
         }
     }
+    protected override void OnSoundHeard() {
+        
+    }
     protected override void OnStateChange()
     {
         base.OnStateChange();
@@ -69,38 +76,90 @@ public class Boar : Enemy
     protected override void OnAggro()
     {
         base.OnAggro();
+        Speed = SprintSpeed;
+        _afterAttackTimer = 0;
+        _stunTimer = 0;
         AudioManager.instance.PlaySound(AudioTag.boarScream, 1);
     }
     protected override void OnSearch()
     {
         base.OnSearch();
+        Speed = moveSpeed;
         AudioManager.instance.PlaySound(AudioTag.boarTalk, 1);
+    }
+    protected override void OnPassive() {
+        base.OnPassive();
+        Speed = moveSpeed;
     }
     protected override void Aggro()
     {
+        if(_isStunned) {
+            if(_stunTimer < stunDuration) {
+                _stunTimer += Time.deltaTime;
+                return;
+            }
+            _stunTimer = 0;
+            _isStunned = false;
+        }
         bool targetSeen;
         if(targetSeen = Look(out Vector3 targetPos)) {
             _attackPos = targetPos;
         }
-        if(!_targetPointReached || _stateStart) {
-            if(_stateStart) {
-                _stateStart = false;
-                Speed = moveSpeed;
-            }
-            SetDestinationPoint(_attackPos);
-        }
-        if(_targetPointReached && !targetSeen) {
-            _suspiciousPos = _attackPos;
-            State = EnemyState.Search;
+        if(_afterAttackTimer > 0) {
+            _afterAttackTimer -= Time.deltaTime;
             return;
+        }
+        if(CheckFrontAttack()) {
+            Debug.LogWarning($"Player was attacked by {name}!");
+            GameManager.Instance.player.PushOut(Utils.GetDirectionUpped(transform.forward, 10), 20);
+            IsCharging = false;
+            _afterAttackTimer = afterAttackDelay;
+            return;
+        }
+        if(!IsCharging) {
+            if(!destinationReached || _stateStart) {
+                if(_stateStart) {
+                    _stateStart = false;
+                }
+                Speed = SprintSpeed;
+                SetDestinationPoint(_attackPos);
+                if(targetSeen) {
+                    _preChargeTimer += Time.deltaTime;
+                    if(_preChargeTimer >= preChargeDelay) {
+                        IsCharging = true;
+                        //Debug.Log($"{name} IS CHAAAARGING !");
+                        _chargeTimer = 0;
+                    }
+                } else {
+                    _preChargeTimer = 0;
+                }
+            }
+            if(destinationReached && !targetSeen) {
+                _suspiciousPos = _attackPos;
+                State = EnemyState.Search;
+                return;
+            }
+        } else {
+            SetDestinationPoint(transform.position + transform.forward);
+            if(CheckFrontCharge()) {
+                // become stunned
+                Debug.Log($"{name} is stunned!");
+                IsCharging = false;
+                _isStunned = true;
+                return;
+            }
+            _chargeTimer += Time.deltaTime;
+            if(_chargeTimer >= chargeDelay) {
+                //Debug.Log($"{name} isn't charging anymore ! (he's full)");
+                IsCharging = false;
+            }
         }
     }
     protected override void Search()
     {
         if(_stateStart || soundHeard) {
             _stateStart = false;
-            _searchLeft = true;
-            _searchRight = true;
+            _searchTurn = false;
             if(soundHeard) {
                 soundHeard = false;
                 _suspiciousPos = transform.position + lastSoundVector;
@@ -108,8 +167,9 @@ public class Boar : Enemy
             Speed = moveSpeed;
             SetDestinationPoint(_suspiciousPos);
         }
-        if(_targetPointReached) {
-            if(_searchLeft && _searchRight) {
+        if(destinationReached) {
+            if(!_searchTurn) {
+                _searchTurn = true;
                 _searchLeft = false;
                 _searchRight = false;
                 _searchVectorLeft = transform.TransformDirection(Quaternion.Euler(0, -60, 0) * Vector3.forward);
@@ -145,11 +205,37 @@ public class Boar : Enemy
             walkTimer += Time.deltaTime;
         }
     }
+    bool CheckFrontAttack() {
+        int layer = Utils.l_Player.ToLayerMask();
+        RaycastHit[] hits = Utils.SphereCastAll(_coll, -transform.forward * 2, transform.forward, 2, layer);
+        Vector3 origin = transform.TransformPoint(_coll.center);
+        Vector3 direction;
+        for(int i = 0; i < hits.Length; i++) {
+            direction = hits[i].point - origin;
+            if(!Physics.Raycast(new Ray(origin, direction.normalized), direction.magnitude, Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    bool CheckFrontCharge() {
+        int layer = Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask();
+        RaycastHit[] hits = Utils.SphereCastAll(_coll, -transform.forward * 2, transform.forward, 2, layer);
+        float angle;
+        for(int i = 0; i < hits.Length; i++) {
+            angle = Vector3.Angle(transform.forward, -hits[i].normal);
+            //Debug.Log("Front hit with angle: " + angle);
+            if(angle < 90) {
+                return true;
+            }
+        }
+        return false;
+    }
     void CancelDestination()
     {
         CancelInvoke(nameof(CheckIfPointReached));
         if(_agent.enabled) _agent.ResetPath();
-        _targetPointReached = true;
+        destinationReached = true;
     }
     protected override bool SetDestinationPoint(Vector3 destination, bool raycastGround = true)
     {
@@ -159,14 +245,14 @@ public class Boar : Enemy
         {
             if ((surfacePoint - transform.position).magnitude < 0.05f)
             {
-                _targetPointReached = true;
+                destinationReached = true;
                 _lastDestination = destination;
                 return true;
             }
             bool destinationCorrect = _agent.SetDestination(surfacePoint);
             if (destinationCorrect)
             {
-                _targetPointReached = false;
+                destinationReached = false;
                 _lastDestination = destination;
                 CheckIfPointReached();
             }
@@ -192,9 +278,6 @@ public class Boar : Enemy
             }
         }
         Invoke(nameof(CheckIfPointReached), _agentPathCheckRate);
-    }
-    protected override void OnSoundHeard()
-    {
     }
     protected override float GetSpeed() {
         return _agent.speed;

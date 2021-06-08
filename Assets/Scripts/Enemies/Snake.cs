@@ -87,7 +87,7 @@ public class Snake : Enemy
     private void OnTriggerEnter(Collider other)
     {
         if(isInGround) return;
-        if (LayerMask.LayerToName(other.gameObject.layer) == Utils.layer_Player)
+        if (LayerMask.LayerToName(other.gameObject.layer) == Utils.l_Player)
         {
             if(TryGetComponent(out PlayerCharacter player)) Debug.Log("Player component found! Player is dead.");
             else Debug.Log("Player died, but where is component ?");

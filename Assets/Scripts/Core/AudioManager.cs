@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MythkinCore.Audio;
+using AshkynCore.Audio;
 
 public class AudioManager : MonoBehaviour {
     public static AudioManager instance = null;

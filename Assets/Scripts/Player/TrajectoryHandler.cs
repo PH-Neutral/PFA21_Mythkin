@@ -42,7 +42,7 @@ public class TrajectoryHandler : MonoBehaviour {
             {
                 rayOrigin = transform.TransformPoint(trajectoryPoints[(int)i - 1]);
                 rayDir = transform.TransformDirection(projectilePosition - trajectoryPoints[(int)i - 1]);
-                if(Physics.SphereCast(rayOrigin, _bombRadius, rayDir, out hit, rayDir.magnitude, Utils.layer_Terrain.ToLayerMask() | Utils.layer_Interactibles.ToLayerMask()))
+                if(Physics.SphereCast(rayOrigin, _bombRadius, rayDir, out hit, rayDir.magnitude, Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask()))
                 {
                     trajectoryPoints.Add(transform.InverseTransformPoint(hit.point + hit.normal * _bombRadius));
                     break;

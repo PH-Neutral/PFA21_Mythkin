@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utils {
-    public const string layer_Interactibles = "Interactibles", layer_Terrain = "Terrain", layer_Environment = "Environment", 
-        layer_Enemies = "Enemies", layer_Player = "Player";
+    public const string l_Interactibles = "Interactibles", l_Terrain = "Terrain", l_Environment = "Environment", 
+        l_Enemies = "Enemies", l_Player = "Player";
     public static float floorHeight = 6;
 
     #region MISC
 
+    public static RaycastHit[] SphereCastAll(SphereCollider coll, Vector3 relativeOrigin, Vector3 direction, float maxDistance, int layerMask, bool showDebug = false) {
+        float radius = coll.radius * coll.transform.lossyScale.x;
+        Vector3 center = coll.transform.TransformPoint(coll.center);
+        if(showDebug) {
+            Debug.DrawRay(center + relativeOrigin, direction.normalized * maxDistance, Color.red, 3);
+            Debug.DrawRay(center + relativeOrigin + direction.normalized * maxDistance, direction.normalized * radius, Color.blue, 3);
+        }
+        return Physics.SphereCastAll(center + relativeOrigin, radius, direction.normalized, maxDistance, layerMask);
+    }
     public static bool LinePlaneIntersection(out Vector3 intersection, Vector3 pointOnPlane, Vector3 planeNormal, Vector3 pointOnLine, Vector3 lineDirection) {
         intersection = pointOnPlane;
         float a, b, x;
@@ -71,9 +80,14 @@ public static class Utils {
         Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back
     };
 
+    public static Vector3 GetDirectionUpped(Vector3 direction, float upAngle) {
+        Vector3 newDir = direction.Flatten();
+        newDir.y = newDir.magnitude * Mathf.Tan(upAngle * Mathf.Deg2Rad);
+        return newDir.normalized;
+    }
     public static bool GetSurfacePoint(Vector3 worldPos, out Vector3 surfacePoint, float maxDistance = 10) {
         surfacePoint = worldPos;
-        if(Physics.Raycast(worldPos + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, maxDistance + 0.5f, Utils.layer_Terrain.ToLayerMask())) {
+        if(Physics.Raycast(worldPos + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, maxDistance + 0.5f, Utils.l_Terrain.ToLayerMask())) {
             surfacePoint = hit.point;
             Vector3 raycast = hit.point - worldPos;
             if(raycast.magnitude > Utils.floorHeight) {
@@ -130,7 +144,7 @@ public static class Utils {
         Vector3 relativePos;
         float soundLevel;
         Ray ray;
-        RaycastHit[] hits = Physics.SphereCastAll(soundPosition, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f, layer_Enemies.ToLayerMask());
+        RaycastHit[] hits = Physics.SphereCastAll(soundPosition, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f, l_Enemies.ToLayerMask());
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider.TryGetComponent(out Enemy enemy))
@@ -138,7 +152,7 @@ public static class Utils {
                 ray = new Ray(soundPosition, enemy.sightCenter.position - soundPosition);
                 float dist = Vector3.Distance(enemy.sightCenter.position, soundPosition);
                 //Debug.Log("yDiff: " + yDiff);
-                if(Physics.Raycast(ray, dist, layer_Terrain.ToLayerMask())) continue;
+                if(Physics.Raycast(ray, dist, l_Terrain.ToLayerMask())) continue;
                 relativePos = soundPosition - enemy.transform.position;
                 soundLevel = CalculateSoundLevel(soundRadius, relativePos.magnitude);
                 if (Mathf.Abs(enemy.transform.position.y - soundPosition.y) < 3f /*layer thickness (put a real var later)*/)

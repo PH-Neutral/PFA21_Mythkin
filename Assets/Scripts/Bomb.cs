@@ -16,7 +16,7 @@ public class Bomb : MonoBehaviour
         // play explosion sound
         GameObject audioGO = new GameObject();
         audioGO.transform.position = transform.position;
-        AudioManager.instance.PlaySound(MythkinCore.Audio.AudioTag.fruitBombImpact, audioGO, 1);
+        AudioManager.instance.PlaySound(AshkynCore.Audio.AudioTag.fruitBombImpact, audioGO, 1);
         // can be heard by ennemies
         Utils.EmitSound(_soundRadius, transform.position, false);
         // destroy
@@ -24,7 +24,7 @@ public class Bomb : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer(Utils.layer_Terrain) || other.gameObject.layer == LayerMask.NameToLayer(Utils.layer_Interactibles))
+        if (other.gameObject.layer == LayerMask.NameToLayer(Utils.l_Terrain) || other.gameObject.layer == LayerMask.NameToLayer(Utils.l_Interactibles))
         {
             Explode();
         }

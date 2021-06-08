@@ -77,7 +77,7 @@ public class PlayerCamera : MonoBehaviour
         float zoomRatio = maxZoomRatio;
         Vector3 rayOrigin = transform.position;
         Vector3 rayDir = -transform.forward * _preferedZoom * maxZoomRatio;
-        int layerMask = Utils.layer_Terrain.ToLayerMask() | Utils.layer_Enemies.ToLayerMask();
+        int layerMask = Utils.l_Terrain.ToLayerMask() | Utils.l_Enemies.ToLayerMask();
         if (Physics.SphereCast(rayOrigin, _camSphereRadius, rayDir, out RaycastHit hit, rayDir.magnitude, layerMask)) {
             zoomRatio = Vector3.Distance(rayOrigin, hit.point) / _preferedZoom;
         }

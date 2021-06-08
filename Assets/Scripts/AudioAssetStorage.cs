@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MythkinCore.Audio {
+namespace AshkynCore.Audio {
     [System.Serializable]
     public enum AudioTag {
         debugSound, debugMusic, 

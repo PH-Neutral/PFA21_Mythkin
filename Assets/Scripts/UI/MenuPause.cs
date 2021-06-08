@@ -1,28 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-namespace MythkinCore.UI {
-    public class MenuPause : MonoBehaviour {
+namespace AshkynCore.UI {
+    public class MenuPause : CustomMenu {
         [SerializeField] GameObject panelMainMenu, panelMenuOptions;
-        [SerializeField] GameObject firstMenuItem;
 
         private void Start() {
             Hide();
         }
-
-        public void SelectUIObject(GameObject objToSelect) {
-            EventSystem.current.SetSelectedGameObject(objToSelect);
-        }
-        public void Show() {
+        protected override void OnShow() {
             // + display the cursor
             gameObject.SetActive(true);
             ShowMainMenu();
-            SelectUIObject(firstMenuItem);
         }
-        public void Hide() {
+        protected override void OnHide() {
             // + hide the cursor
             gameObject.SetActive(false);
             GameManager.Instance.GamePaused = false;
@@ -41,11 +34,8 @@ namespace MythkinCore.UI {
         public void HideMainMenu() {
             panelMainMenu.SetActive(false);
         }
-        public void ReloadScene() {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
-        public void QuitGame() {
-            Application.Quit(0);
+        public void LoadMainMenu() {
+            LoadScene(0);
         }
     }
 }

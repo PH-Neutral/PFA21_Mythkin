@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using MythkinCore.UI;
+using AshkynCore.UI;
 
 public class UIManager : MonoBehaviour
 {

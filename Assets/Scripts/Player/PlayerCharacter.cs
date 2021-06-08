@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MythkinCore.Audio;
+using AshkynCore.Audio;
 
 public class PlayerCharacter : MonoBehaviour {
     public float Speed {
@@ -278,7 +278,7 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = transform.position;
         Vector3 rayDir = -transform.up * _charaCtrl.skinWidth * 2;
-        int layerMaskTerrain = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMaskTerrain = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
             // calculate downward slope vector
             return Vector3.Cross(Vector3.Cross(hit.normal, Vector3.down), hit.normal).normalized;
@@ -289,7 +289,7 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = transform.position + transform.up * _charaCtrl.radius;
         Vector3 rayDir = -transform.up * Radius / Mathf.Sin(Mathf.Deg2Rad);
-        int layerMaskTerrain = Utils.layer_Terrain.ToLayerMask();
+        int layerMaskTerrain = Utils.l_Terrain.ToLayerMask();
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
             // calculate downward slope vector
             //Debug.DrawLine(rayOrigin, hit.point, Color.green);
@@ -366,7 +366,7 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = transform.position;
         Vector3 rayDir = -transform.up * _charaCtrl.skinWidth * 2;
-        int layerMaskTerrain = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMaskTerrain = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
             // there is terrain under our feet
             return true;
@@ -377,7 +377,7 @@ public class PlayerCharacter : MonoBehaviour {
         Vector3 rayOrigin = origin + transform.TransformDirection(offset);
         Vector3 centerDir = transform.forward * (Radius + _wallDistanceOffset);
         Vector3 hitPoint = rayOrigin + centerDir * 1.5f;
-        int layerMask = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMask = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         for(float i = -maxAngle; i <= maxAngle; i += stepAngle) {
             Quaternion iRot = Quaternion.Euler(0, i, 0);
             if(Physics.Raycast(rayOrigin, iRot * centerDir.normalized, out RaycastHit hit, (hitPoint - rayOrigin).magnitude, layerMask)) {
@@ -390,7 +390,7 @@ public class PlayerCharacter : MonoBehaviour {
     bool FindDeclimbHitPoint(out RaycastHit hitPoint) {
         Vector3 rayOrigin = _bodyCenter.position;
         Vector3 rayDir = transform.forward * (Radius * 2 + _wallDistanceOffset);
-        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hitPoint, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "forward" direction
             return false;
@@ -407,8 +407,8 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = _bodyCenter.position;
         Vector3 rayDir = transform.forward * (Radius + _wallDistanceOffset);
-        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.layer_Environment);
-        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.l_Environment);
+        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "forward" direction
             if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
@@ -422,8 +422,8 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = transform.position;
         Vector3 rayDir = transform.forward * (Radius + _wallDistanceOffset);
-        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.layer_Environment);
-        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.l_Environment);
+        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "forward" direction
             if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
@@ -438,8 +438,8 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = _bodyCenter.position;
         Vector3 rayDir = Mathf.Sign(vInput) * transform.up * (Height * 0.5f + _climbCheckDistanceOffset);
-        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.layer_Environment);
-        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.l_Environment);
+        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.blue);
@@ -476,8 +476,8 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = _bodyCenter.position;
         Vector3 rayDir = Mathf.Sign(hInput) * transform.right * (Radius + _climbCheckDistanceOffset);
-        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.layer_Environment);
-        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.layer_Terrain);
+        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.l_Environment);
+        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "right/left" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.blue);
@@ -514,7 +514,8 @@ public class PlayerCharacter : MonoBehaviour {
     Root CheckRootsInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
+        int layer = Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask();
+        if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, layer))
         {
             if (hit.collider.TryGetComponent(out Root root))
             {
@@ -526,7 +527,8 @@ public class PlayerCharacter : MonoBehaviour {
     BombPlant CheckPlantInteraction()
     {
         RaycastHit hit;
-        if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, Utils.layer_Terrain.ToLayerMask()))
+        int layer = Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask();
+        if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, layer))
         {
             if (hit.collider.TryGetComponent(out BombPlant bp)){
                 if (bp._gotABomb){
@@ -558,7 +560,7 @@ public class PlayerCharacter : MonoBehaviour {
         RaycastHit hit;
         Vector3 rayOrigin = _bodyCenter.position;
         Vector3 rayDir = transform.up * (Height * 0.5f + _climbCheckDistanceOffset);
-        int layerMaskWall = Utils.layer_Terrain.ToLayerMask();
+        int layerMaskWall = Utils.l_Terrain.ToLayerMask();
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.blue);
