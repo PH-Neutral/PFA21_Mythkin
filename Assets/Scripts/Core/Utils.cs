@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class Utils {
-    public const string layer_Interactibles = "Interactibles", layer_Terrain = "Terrain", layer_Environment = "Environment", 
-        layer_Enemies = "Enemies", layer_Player = "Player";
-    public static float floorHeight = 2;
+    public const string l_Interactibles = "Interactibles", l_Terrain = "Terrain", l_Environment = "Environment", 
+        l_Enemies = "Enemies", l_Player = "Player";
+    public static float floorHeight = 6;
 
     #region MISC
 
+    public static RaycastHit[] SphereCastAll(SphereCollider coll, Vector3 relativeOrigin, Vector3 direction, float maxDistance, int layerMask, bool showDebug = false) {
+        float radius = coll.radius * coll.transform.lossyScale.x;
+        Vector3 center = coll.transform.TransformPoint(coll.center);
+        if(showDebug) {
+            Debug.DrawRay(center + relativeOrigin, direction.normalized * maxDistance, Color.red, 3);
+            Debug.DrawRay(center + relativeOrigin + direction.normalized * maxDistance, direction.normalized * radius, Color.blue, 3);
+        }
+        return Physics.SphereCastAll(center + relativeOrigin, radius, direction.normalized, maxDistance, layerMask);
+    }
     public static bool LinePlaneIntersection(out Vector3 intersection, Vector3 pointOnPlane, Vector3 planeNormal, Vector3 pointOnLine, Vector3 lineDirection) {
         intersection = pointOnPlane;
         float a, b, x;
@@ -40,6 +49,9 @@ public static class Utils {
     public static Vector3 Multiply(this Vector3 vector, Vector3 other) {
         return new Vector3(vector.x * other.x, vector.y * other.y, vector.z * other.z);
     }
+    public static Vector3 Flatten(this Vector3 vector) {
+        return new Vector3(vector.x, 0, vector.z);
+    }
     public static float ChangePrecision(this float f, int nbDecimals) {
         return ((int)(f * Mathf.Pow(10, nbDecimals))) / Mathf.Pow(10, nbDecimals);
     }
@@ -58,6 +70,9 @@ public static class Utils {
     public static float Sign(this float f) {
         return f == 0 ? 0 : (f > 0 ? 1 : -1);
     }
+    public static bool IsBetween(this float f, float min, bool minInclu, float max, bool maxInclu) {
+        return (minInclu ? f >= min : f > min) && (maxInclu ? f <= max : f < max);
+    }
     #endregion
 
     #region SPECIFICS
@@ -65,14 +80,31 @@ public static class Utils {
         Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back
     };
 
+    public static Vector3 GetDirectionUpped(Vector3 direction, float upAngle) {
+        Vector3 newDir = direction.Flatten();
+        newDir.y = newDir.magnitude * Mathf.Tan(upAngle * Mathf.Deg2Rad);
+        return newDir.normalized;
+    }
+    public static bool GetSurfacePoint(Vector3 worldPos, out Vector3 surfacePoint, float maxDistance = 10) {
+        surfacePoint = worldPos;
+        if(Physics.Raycast(worldPos + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, maxDistance + 0.5f, Utils.l_Terrain.ToLayerMask())) {
+            surfacePoint = hit.point;
+            Vector3 raycast = hit.point - worldPos;
+            if(raycast.magnitude > Utils.floorHeight) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
     public static bool LerpPosition(this Transform obj, Vector3 targetPos, float lerpSpeed) {
         float t = lerpSpeed * Time.deltaTime / Vector3.Distance(obj.position, targetPos);
         obj.position = Vector3.Lerp(obj.position, targetPos, t);
         return t >= 1;
     }
-    public static bool SlerpRotation(this Transform obj, Vector3 newDirection, float rotateSpeed, Space space = Space.World) {
-        //float vectorAngle = Vector3.Angle(obj.TransformDirection(Vector3.forward), newDirection);
-        Quaternion newRotation = Quaternion.LookRotation(newDirection, obj.TransformDirection(Vector3.up));
+    public static bool SlerpRotation(this Transform obj, Vector3 newDirection, Vector3 upAxis, float rotateSpeed, Space space = Space.World) {
+        if(Vector3.Angle(obj.forward, newDirection) == 0) return true;
+        Quaternion newRotation = Quaternion.LookRotation(newDirection, upAxis);
         return obj.SlerpRotation(newRotation, rotateSpeed, space);
     }
     public static bool SlerpRotation(this Transform obj, Quaternion newRotation, float rotateSpeed, Space space = Space.World) {
@@ -112,7 +144,7 @@ public static class Utils {
         Vector3 relativePos;
         float soundLevel;
         Ray ray;
-        RaycastHit[] hits = Physics.SphereCastAll(soundPosition, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f, layer_Enemies.ToLayerMask());
+        RaycastHit[] hits = Physics.SphereCastAll(soundPosition, soundRadius, Vector3.up, soundRadius * 2 + /*layerOffset = */ 5f, l_Enemies.ToLayerMask());
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider.TryGetComponent(out Enemy enemy))
@@ -120,7 +152,7 @@ public static class Utils {
                 ray = new Ray(soundPosition, enemy.sightCenter.position - soundPosition);
                 float dist = Vector3.Distance(enemy.sightCenter.position, soundPosition);
                 //Debug.Log("yDiff: " + yDiff);
-                if(Physics.Raycast(ray, dist, layer_Terrain.ToLayerMask())) continue;
+                if(Physics.Raycast(ray, dist, l_Terrain.ToLayerMask())) continue;
                 relativePos = soundPosition - enemy.transform.position;
                 soundLevel = CalculateSoundLevel(soundRadius, relativePos.magnitude);
                 if (Mathf.Abs(enemy.transform.position.y - soundPosition.y) < 3f /*layer thickness (put a real var later)*/)

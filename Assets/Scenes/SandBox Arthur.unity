@@ -572,6 +572,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 1751947346525048624}
+  player: {fileID: 0}
   matEnemyPatrol: {fileID: 2100000, guid: 47be03d783d93c64f9ccdb582aba898f, type: 2}
   matEnemySearch: {fileID: 2100000, guid: 76682d98277a6834695e030c58262182, type: 2}
   matEnemyAttack: {fileID: 2100000, guid: 1fa6943df4f9ffb41a0aeef95a222341, type: 2}
@@ -3136,22 +3137,22 @@ MonoBehaviour:
   mode: 0
   wayPoints:
   - point: {fileID: 432121076}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 347871774}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 91535285}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 435312060}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 1781445138}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 1208229949}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   _gizmoSphereRadius: 0.5
 --- !u!4 &734150901
@@ -4233,22 +4234,22 @@ MonoBehaviour:
   mode: 0
   wayPoints:
   - point: {fileID: 541332674}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 1994624193}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 773857283}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 1754588602}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 1963562951}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 1543323189}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   _gizmoSphereRadius: 0.5
 --- !u!1 &1193555667
@@ -6809,6 +6810,30 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1795746076 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 9af00c26892095147ba7dfea077e8fdb, type: 3}
+  m_PrefabInstance: {fileID: 889013546}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1795746077 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 9af00c26892095147ba7dfea077e8fdb, type: 3}
+  m_PrefabInstance: {fileID: 889013546}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1795746078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1795746076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cf5b69c79db7544fb6e5ce0db3a4149, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  distanceToGround: 0
+  anim: {fileID: 1795746077}
 --- !u!1 &1848614775
 GameObject:
   m_ObjectHideFlags: 0
@@ -7837,22 +7862,22 @@ MonoBehaviour:
   mode: 1
   wayPoints:
   - point: {fileID: 7579925321367390388}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 759905170268509117}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 8840057529676353510}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 4053071255114317954}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 9156938250106015723}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 6992138343166239762}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   _gizmoSphereRadius: 0.5
 --- !u!4 &1120407574523073193
@@ -21070,7 +21095,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 1
+  m_VoxelSize: 0.8333333
   m_BuildHeightMesh: 0
   m_NavMeshData: {fileID: 23800000, guid: 783988b1712be3448bdfd27c799fe6c5, type: 2}
 --- !u!23 &1751947346525048626
@@ -48924,11 +48949,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db59eacff9a5935489c10b5d2957938d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionRange: 3
+  head: {fileID: 1779984823}
   _bodyCenter: {fileID: 2871104559140760996}
   _camCenter: {fileID: 2871104559796256119}
   _throwPoint: {fileID: 1957144560}
-  _head: {fileID: 1779984823}
   _model: {fileID: 2871104560652769878}
   advancedMovement: 0
   debugDraws: 0
@@ -48946,6 +48970,7 @@ MonoBehaviour:
   _wallDistanceOffset: 0.05
   _soundRadiusRun: 18
   _soundRadiusWalk: 8
+  interactionRange: 3
   _fakebomb: {fileID: 1711813854840200317}
 --- !u!4 &2871104560759759846
 Transform:
@@ -49017,22 +49042,22 @@ MonoBehaviour:
   mode: 1
   wayPoints:
   - point: {fileID: 7996652010980163524}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 5566608616403540529}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 6127558279055761793}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 6973918967704068450}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 5302478383823044951}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   - point: {fileID: 3443502771181442456}
-    speedToPoint: 5
+    sprintSpeed: 0
     waitingDuration: 0
   _gizmoSphereRadius: 0.5
 --- !u!114 &2959517089392026342

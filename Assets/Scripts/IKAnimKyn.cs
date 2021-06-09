@@ -23,7 +23,7 @@ public class IKAnimKyn : MonoBehaviour
         RaycastHit hit;
         Ray ray = new Ray(anim.GetIKPosition(AvatarIKGoal.LeftFoot) + Vector3.up, Vector3.down);
         Debug.DrawRay(ray.origin, ray.direction * (distanceToGround + 1f), Color.green);
-        if (Physics.Raycast(ray, out hit, distanceToGround + 1f, Utils.layer_Terrain.ToLayerMask()))
+        if (Physics.Raycast(ray, out hit, distanceToGround + 1f, Utils.l_Terrain.ToLayerMask()))
         {
             Vector3 footPosition = hit.point;
             footPosition.y += distanceToGround;

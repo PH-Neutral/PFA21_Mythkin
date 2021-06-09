@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
         }
     }
     public NavMeshSurface terrain;
-
+    public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
 
     private void Awake()
@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        UpdateNavMesh();
     }
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
