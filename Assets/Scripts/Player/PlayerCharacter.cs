@@ -36,7 +36,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     public bool IsJumping {
         get {
-            return (_isOnClimbWall && _isJumping) || (!_isOnClimbWall && _isJumping && _charaCtrl.isGrounded);
+            return (_isOnClimbWall && _inputs.z < 0 && _isJumping) || (!_isOnClimbWall && _isJumping && _charaCtrl.isGrounded);
         }
     }
     float Radius {
@@ -107,8 +107,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     void HandleMovement() {
         if(!_isDeclimbingUp) {
-            if(!_wasClimbing) _isOnClimbWall = CheckForClimbMiddle() && CanClimbHorizontal(-1) && CanClimbHorizontal(1);
-            else _isOnClimbWall = CheckForClimbMiddle() || CheckForClimbDown(); // && !CanDeclimbUp();
+            _isOnClimbWall = CheckForClimb();
 
             if(!_wasPushed) {
                 _movement = _isOnClimbWall ? Climb() : Move();
@@ -182,6 +181,7 @@ public class PlayerCharacter : MonoBehaviour {
         _anim.SetBool("Alive", true);
         _anim.SetBool("Sprinting", _isRunning);
         float speed = _movement.Multiply(new Vector3(1, 0, 1)).magnitude / Speed;
+        Debug.Log($"{_movement.Multiply(new Vector3(1, 0, 1)).magnitude}/{Speed} = {speed}");
         _anim.SetFloat("Speed", speed);
         _anim.SetFloat("ClimbSpeed", _movement.magnitude / ClimbSpeed);
         _anim.SetBool("Jumping", IsJumping);
@@ -199,12 +199,12 @@ public class PlayerCharacter : MonoBehaviour {
     /// </summary>
     /// <returns></returns>
     Vector3 GetInputs() {
-        Vector2 inputs = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        Vector2 inputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         //inputs = Utils.CartToPolar(inputs);
         return new Vector3(inputs.x, 0, inputs.y).normalized;
     }
     Vector3 Move() {
-        Vector3 flatInputs = new Vector3(_inputs.x.Sign(), 0, _inputs.z.Sign());
+        Vector3 flatInputs = new Vector3(_inputs.x, 0, _inputs.z);
         //Debug.Log(flatInputs);
         if(_wasClimbing) {
             _movement = Vector3.zero;
@@ -303,7 +303,7 @@ public class PlayerCharacter : MonoBehaviour {
     Vector3 Climb() {
         // check for terrain under character
         bool isGrounded = CheckIfGrounded();
-        if(CheckForClimbDown() && !CheckForClimbMiddle() && _inputs.z > 0 && FindDeclimbHitPoint(out _declimbHit)) {
+        if(_inputs.z > 0 && FindDeclimbHitPoint(out _declimbHit)) {
             _isDeclimbingUp = true;
             _declimbPart1 = true;
             return Vector3.zero;
@@ -364,13 +364,15 @@ public class PlayerCharacter : MonoBehaviour {
     }
     bool CheckIfGrounded() {
         RaycastHit hit;
-        Vector3 rayOrigin = transform.position;
-        Vector3 rayDir = -transform.up * _charaCtrl.skinWidth * 2;
+        Vector3 rayOrigin = transform.position + transform.up * _charaCtrl.skinWidth * 2;
+        Vector3 rayDir = -transform.up * _charaCtrl.skinWidth * 4;
         int layerMaskTerrain = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
             // there is terrain under our feet
+            Debug.DrawLine(rayOrigin, hit.point, Color.red);
             return true;
         }
+        Debug.DrawRay(rayOrigin, rayDir, Color.green);
         return false;
     }
     Vector3 FindClosestWallPoint(Vector3 origin, Vector3 offset, float maxAngle = 90, float stepAngle = 1) {
@@ -396,38 +398,31 @@ public class PlayerCharacter : MonoBehaviour {
             return false;
         }
         rayOrigin += rayDir;
-        rayDir = -transform.up * Height * 0.5f;
+        rayDir = -transform.up * Height;
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hitPoint, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "forward -> down" direction
             return true;
         }
         return false;
     }
-    bool CheckForClimbMiddle() {
+    bool CheckForClimb() {
+        if(!_wasClimbing) {
+            return (CheckForClimbForward(_bodyCenter.position) || CheckForClimbForward(_bodyCenter.position, 45) || CheckForClimbForward(_bodyCenter.position, -45));
+                //&& CanClimbHorizontal(-1) && CanClimbHorizontal(1); 
+        } else { 
+            return CheckForClimbForward(_bodyCenter.position) || CheckForClimbForward(transform.position); // && !CanDeclimbUp();
+        }
+    }
+    bool CheckForClimbForward(Vector3 rayOrigin, float angleY = 0) {
         RaycastHit hit;
-        Vector3 rayOrigin = _bodyCenter.position;
-        Vector3 rayDir = transform.forward * (Radius + _wallDistanceOffset);
-        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.l_Environment);
-        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
+        //Vector3 rayOrigin = _bodyCenter.position;
+        Vector3 rayDir = Quaternion.Euler(0, angleY, 0) * transform.forward * (Radius + _wallDistanceOffset);
+        int layerMaskClimbZone = Utils.l_Environment.ToLayerMask();
+        int layerMaskWall = Utils.l_Terrain.ToLayerMask();
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "forward" direction
             if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
                 // this surface is NOT a climbable wall
-                return true;
-            }
-        }
-        return false;
-    }
-    bool CheckForClimbDown() {
-        RaycastHit hit;
-        Vector3 rayOrigin = transform.position;
-        Vector3 rayDir = transform.forward * (Radius + _wallDistanceOffset);
-        int layerMaskClimbZone = 1 << LayerMask.NameToLayer(Utils.l_Environment);
-        int layerMaskWall = 1 << LayerMask.NameToLayer(Utils.l_Terrain);
-        if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
-            // a surface blocks the "forward" direction
-            if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
-                // this surface is a climbable wall
                 return true;
             }
         }
