@@ -149,8 +149,8 @@ MonoBehaviour:
   debugState: 0
   debugLogs: 0
   debugDraws: 0
-  moveSpeed: 3
-  sprintRatio: 2
+  moveSpeed: 4
+  sprintRatio: 3
   rotationSpeed: 50
   searchDuration: 1
   hearingLevelMin: 0
