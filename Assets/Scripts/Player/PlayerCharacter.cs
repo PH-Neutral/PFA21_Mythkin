@@ -108,6 +108,7 @@ public class PlayerCharacter : MonoBehaviour {
     void HandleMovement() {
         if(!_isDeclimbingUp) {
             _isOnClimbWall = CheckForClimb();
+            Debug.Log("Climbing = " + _isOnClimbWall);
 
             if(!_wasPushed) {
                 _movement = _isOnClimbWall ? Climb() : Move();
@@ -181,7 +182,7 @@ public class PlayerCharacter : MonoBehaviour {
         _anim.SetBool("Alive", true);
         _anim.SetBool("Sprinting", _isRunning);
         float speed = _movement.Multiply(new Vector3(1, 0, 1)).magnitude / Speed;
-        Debug.Log($"{_movement.Multiply(new Vector3(1, 0, 1)).magnitude}/{Speed} = {speed}");
+        //Debug.Log($"{_movement.Multiply(new Vector3(1, 0, 1)).magnitude}/{Speed} = {speed}");
         _anim.SetFloat("Speed", speed);
         _anim.SetFloat("ClimbSpeed", _movement.magnitude / ClimbSpeed);
         _anim.SetBool("Jumping", IsJumping);
