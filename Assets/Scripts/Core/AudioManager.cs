@@ -6,8 +6,8 @@ using AshkynCore.Audio;
 public class AudioManager : MonoBehaviour {
     public static AudioManager instance = null;
 
-    [Range(0f,1f)]
-    [SerializeField] float volumeMusic = 0.5f, volumeSound = 0.5f;
+    [Range(0f,1f)] public float volumeMusic = 0.5f, volumeSound = 0.5f;
+
     [SerializeField] AudioAssetStorage audioAssets;
     Dictionary<AudioTag, AudioAsset> _assetDic;
     Dictionary<AudioKey, AudioSource> _sourceDic;
