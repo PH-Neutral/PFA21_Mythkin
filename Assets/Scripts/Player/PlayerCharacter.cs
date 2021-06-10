@@ -73,9 +73,10 @@ public class PlayerCharacter : MonoBehaviour {
     bool _wasGrounded = false, _wasClimbing = true, _wasPushed = false;
     bool _isOnClimbWall = false, _isLerpingToWall = false, _isDeclimbingUp = false, _declimbPart1 = true;
     bool _isAiming = false, _isThrowing = false, _hasBomb = false, _isInteracting = false, _isJumping = false, _isRunning = false;
+    bool _isInJump = false, _startJumping = false, _stopJumping = false, _isFalling = false;
     float deltaTime;
     BombPlant lastPlant;
-    Vector3 move = Vector3.zero;
+    Vector3 move = Vector3.zero, _jumpBasePos;
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
         _playerCam = GetComponentInChildren<PlayerCamera>();
@@ -97,6 +98,7 @@ public class PlayerCharacter : MonoBehaviour {
         _isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
         _isRunning = Input.GetKey(KeyCode.LeftShift);
         _inputs = GetInputs();
+
 
         Look();
         HandleMovement();
@@ -194,15 +196,36 @@ public class PlayerCharacter : MonoBehaviour {
         }
     }
     void HandleAnimations() {
-        _anim.SetBool("Alive", true);
-        _anim.SetBool("Sprinting", _isRunning);
-        float speed = _movement.Multiply(new Vector3(1, 0, 1)).magnitude / Speed;
+        if(_startJumping) {
+            _jumpBasePos = transform.position;
+        }
+        if(_isInJump) {
+            if(transform.position.y < _jumpBasePos.y - 1) {
+                _isInJump = false;
+                _isFalling = true;
+            }
+        }
+
+        _anim.SetBool("isAlive", true);
+        //float speed = _movement.Multiply(new Vector3(1, 0, 1)).magnitude / Speed;
         //Debug.Log($"{_movement.Multiply(new Vector3(1, 0, 1)).magnitude}/{Speed} = {speed}");
-        _anim.SetFloat("Speed", speed);
-        _anim.SetFloat("ClimbSpeed", _movement.magnitude / ClimbSpeed);
-        _anim.SetBool("Jumping", IsJumping);
-        _anim.SetBool("Falling", !_charaCtrl.isGrounded);
-        _anim.SetBool("Climbing", _isOnClimbWall);
+        _anim.SetFloat("SpeedX", motion.x);
+        _anim.SetFloat("SpeedY", motion.y);
+        _anim.SetFloat("SpeedXZ", motion.Flatten().magnitude);
+        _anim.SetBool("isSprinting", _isRunning);
+        //_anim.SetFloat("ClimbSpeed", _movement.magnitude / ClimbSpeed);
+        _anim.SetBool("startJumping", _startJumping);
+        _anim.SetBool("isJumping", _isInJump);
+        _anim.SetBool("stopJumping", _stopJumping);
+        _anim.SetBool("isFalling", _isFalling);
+        _anim.SetBool("isClimbing", _isOnClimbWall);
+
+        // debug
+        if(_startJumping) _startJumping = false;
+        if(_stopJumping) {
+            _stopJumping = false;
+            _isInJump = false;
+        } 
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
@@ -219,6 +242,7 @@ public class PlayerCharacter : MonoBehaviour {
         //inputs = Utils.CartToPolar(inputs);
         return new Vector3(inputs.x, 0, inputs.y).normalized;
     }
+    Vector3 motion;
     Vector3 Move() {
         Vector3 flatInputs = new Vector3(_inputs.x, 0, _inputs.z);
         //Debug.Log(flatInputs);
@@ -258,7 +282,7 @@ public class PlayerCharacter : MonoBehaviour {
             // full motion
             return _playerCam.transform.TransformDirection(move);
         } else {
-            Vector3 motion;
+            //Vector3 motion;
             //Vector3 slopeVector = GetSlopeVector();
             //bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeVector) - 90 < _charaCtrl.slopeLimit;
             Vector3 slopeNormal = GetSlopeNormal();
@@ -267,7 +291,15 @@ public class PlayerCharacter : MonoBehaviour {
             //Debug.Log($"slope angle: {slopeAngle} deg");
             if(_charaCtrl.isGrounded) {
                 motion = new Vector3(_inputs.x * Speed, _movement.y, _inputs.z * Speed);
-                if(inSlopeLimit && _isJumping) motion.y = _jumpHeight;
+                _isFalling = false;
+                if(_isInJump) {
+                    _stopJumping = true;
+                }
+                if(inSlopeLimit && _isJumping)  {
+                    motion.y = _jumpHeight;
+                    _isInJump = true;
+                    _startJumping = true;
+                }
                 _movement = _playerCam.transform.TransformDirection(motion);
 
                 if(!inSlopeLimit) {
@@ -317,12 +349,14 @@ public class PlayerCharacter : MonoBehaviour {
     #endregion
     #region CLIMBING
     Vector3 Climb() {
-
+        _isInJump = false;
+        _isFalling = false;
         // check for terrain under character
         bool isGrounded = CheckIfGrounded();
         // check if character can declimb on a ledge
         if(_inputs.z > 0 && FindDeclimbHitPoint(out _declimbHit)) {
             _declimbPoint1 = FindDeclimbPoint1();
+            _isOnClimbWall = false;
             _isDeclimbingUp = true;
             _declimbPart1 = true;
             return Vector3.zero;
@@ -356,6 +390,7 @@ public class PlayerCharacter : MonoBehaviour {
 
         // movement
         _movement = new Vector3(_inputs.x, _inputs.z, 0) * ClimbSpeed;
+        motion = new Vector3(_inputs.x, _inputs.z, 0);
         if(isGrounded && _inputs.z < 0) {
             _movement = new Vector3(_inputs.x, -_groundPullMagnitude, _inputs.z) * Speed;
         }
