@@ -169,7 +169,7 @@ public class PlayerCharacter : MonoBehaviour {
     float walkTimer, stepPerSec = 2;
     void HandleSound() {
         if(_inputs != Vector3.zero) {
-            if(_charaCtrl.isGrounded || _isOnClimbWall) {
+            if(_charaCtrl.isGrounded) {
                 if(!_wasGrounded) {
                     Utils.EmitSound(_soundRadiusRun, transform.position + Vector3.up * 0.1f, true);
                     AudioManager.instance.PlaySound(AudioTag.playerFall, gameObject, 1);
@@ -183,6 +183,14 @@ public class PlayerCharacter : MonoBehaviour {
                 }
                 walkTimer += deltaTime;
             }
+        }
+        else
+        {
+            AudioManager.instance.StopAudio(AudioTag.playerWalkGrass, gameObject);
+        }
+        if (!_charaCtrl.isGrounded && _wasGrounded)
+        {
+            AudioManager.instance.StopAudio(AudioTag.playerWalkGrass, gameObject);
         }
     }
     void HandleAnimations() {
