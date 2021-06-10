@@ -30,7 +30,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BackTex:
-        m_Texture: {fileID: 2800000, guid: f28d986b7f353b9459ed78e6a8f009c6, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1b1d76d6d45a6c0468015698a3505705, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseColorMap:
@@ -54,7 +54,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DownTex:
-        m_Texture: {fileID: 2800000, guid: 6a4fd5dcab928ad42ac2fbd9fec9fa1b, type: 3}
+        m_Texture: {fileID: 2800000, guid: dc0e2aac5d9b98e4eb287264d19bfa67, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissiveColorMap:
@@ -62,7 +62,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FrontTex:
-        m_Texture: {fileID: 2800000, guid: db9f9e060ddd20b4c9b9829863919144, type: 3}
+        m_Texture: {fileID: 2800000, guid: d5177c635ce72a84d8af442773c7d9d9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
@@ -78,7 +78,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LeftTex:
-        m_Texture: {fileID: 2800000, guid: 3850564290c7ec34e8abd43fa2631893, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5861009bc99ebc74fa3312e79078b922, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -98,7 +98,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RightTex:
-        m_Texture: {fileID: 2800000, guid: 8f107581505d2ac48934b19a849f6c90, type: 3}
+        m_Texture: {fileID: 2800000, guid: 769640e3bdd0ca34b85ac8e9d56b05d8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularColorMap:
@@ -130,7 +130,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _UpTex:
-        m_Texture: {fileID: 2800000, guid: 53cc1ee4af3c8144bacf26a9daee617b, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1a638c276b6492d449a116e4c950cce2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
