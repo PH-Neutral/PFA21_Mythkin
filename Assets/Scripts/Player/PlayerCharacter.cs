@@ -168,7 +168,7 @@ public class PlayerCharacter : MonoBehaviour {
         } 
         
     }
-    float walkTimer, stepPerSec = 2;
+    float walkTimer, stepPerSec = 2, climbingNoisePerSec = 0.75f;
     void HandleSound() {
         if(_inputs != Vector3.zero) {
             if(_charaCtrl.isGrounded) {
@@ -182,6 +182,17 @@ public class PlayerCharacter : MonoBehaviour {
                 if(walkTimer >= stepDelay) {
                     walkTimer -= stepDelay;
                     AudioManager.instance.PlaySound(AudioTag.playerWalkGrass, gameObject, speedRatio);
+                }
+                walkTimer += deltaTime;
+            }
+            else if (_isOnClimbWall)
+            {
+                float speedRatio = Speed / _moveSpeed;
+                float stepDelay = 1 / (climbingNoisePerSec * speedRatio);
+                if (walkTimer >= stepDelay)
+                {
+                    walkTimer -= stepDelay;
+                    AudioManager.instance.PlaySound(AudioTag.playerClimb, gameObject, speedRatio);
                 }
                 walkTimer += deltaTime;
             }
@@ -256,8 +267,12 @@ public class PlayerCharacter : MonoBehaviour {
 
         if (advancedMovement) {
             // jump
-            if(_charaCtrl.isGrounded && _isJumping) move.y = _jumpHeight;
-            else if(_charaCtrl.isGrounded) move.y = -_groundPullMagnitude;
+            if (_charaCtrl.isGrounded && _isJumping)
+            {
+                AudioManager.instance.PlaySound(AudioTag.playerJump, gameObject);
+                move.y = _jumpHeight;
+            }
+            else if (_charaCtrl.isGrounded) move.y = -_groundPullMagnitude;
             else move.y += Physics.gravity.y * deltaTime;
             // move
             if(flatInputs.x > 0) {
@@ -295,7 +310,9 @@ public class PlayerCharacter : MonoBehaviour {
                 if(_isInJump) {
                     _stopJumping = true;
                 }
-                if(inSlopeLimit && _isJumping)  {
+                if(inSlopeLimit && _isJumping)
+                {
+                    AudioManager.instance.PlaySound(AudioTag.playerJump, gameObject);
                     motion.y = _jumpHeight;
                     _isInJump = true;
                     _startJumping = true;
@@ -400,7 +417,7 @@ public class PlayerCharacter : MonoBehaviour {
         if(!canMoveVert) _movement.y = 0;
         // jumping
         if(_isJumping) {
-            if(_inputs.z < 0) {
+            if (_inputs.z < 0) {
                 _movement = new Vector3(_inputs.x * Speed, _jumpHeight * 0.5f, _inputs.z * Speed * 0.5f);
             }
         }
@@ -612,6 +629,7 @@ public class PlayerCharacter : MonoBehaviour {
     #endregion
 
     public void PushOut(Vector3 direction, float strength) {
+        AudioManager.instance.PlaySound(AudioTag.playerGetsPushed, gameObject);
         _movement = direction.normalized * strength;
         _wasPushed = true;
     }

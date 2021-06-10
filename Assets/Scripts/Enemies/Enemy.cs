@@ -221,7 +221,7 @@ public abstract class Enemy : MonoBehaviour
             }
         }
     }
-    protected void OnDestinationReached() {
+    protected virtual void OnDestinationReached() {
         destinationReached = true;
     }
     protected virtual bool SetDestinationPoint(Vector3 destination, bool raycastGround = true) {

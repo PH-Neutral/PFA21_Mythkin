@@ -6,9 +6,14 @@ namespace AshkynCore.Audio {
     [System.Serializable]
     public enum AudioTag {
         debugSound, debugMusic, 
-        playerWalkGrass, playerWalkWood, playerFall,
+        playerWalkGrass, playerWalkWood, playerFall, playerClimb, playerJump, playerScream, playerDeath, playerGetsPushed,
         boarWalk, boarTalk, boarScream,
-        fruitBombTaken, fruitBombImpact
+        corvidCharge, corvidFly, corvidTalk,
+        snakeTalk, snakeGoesInHole,
+        fruitBombTaken, fruitBombImpact, fruitBombThrow,
+        creepyTombAmbience, deepCinematicWindAmbience, scaryForestNightAmbience, 
+        musicMenu01, musicMenu02, musicLevel01,
+        Roots
     }
     [System.Serializable]
     public class AudioAsset {

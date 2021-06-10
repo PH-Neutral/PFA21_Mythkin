@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AshkynCore.Audio;
 
 public class Corvid : Enemy {
     [SerializeField] float _afterAttackDelay = 3, _afterAttackUpAngle = 30, _knockbackStrength = 25;
     Vector3 _suspiciousPos, _attackPos, _afterAttackPos;
     bool _trajectoryPrepared, _attackDone;
+    bool chargeSoundPlayed = false;
     float _searchTimer, _afterAttackTimer;
 
     protected override void Update() {
@@ -26,6 +28,7 @@ public class Corvid : Enemy {
     }
     protected override void OnSearch() {
         base.OnSearch();
+        chargeSoundPlayed = false;
         _searchTimer = 0;
     }
     protected override void OnAggro() {
@@ -77,6 +80,11 @@ public class Corvid : Enemy {
             }
         }
         if(_trajectoryPrepared) {
+            if (!chargeSoundPlayed)
+            {
+                AudioManager.instance.PlaySound(AudioTag.corvidCharge, gameObject);
+                chargeSoundPlayed = true;
+            }
             // after facing and having seen player for at least one frame, charge player then continue moving a bit
             if(!_attackDone) {
                 Vector3 lastPos = transform.position;
@@ -108,12 +116,26 @@ public class Corvid : Enemy {
         Ray ray = new Ray(start, end - start);
         return Physics.SphereCast(ray, 0.5f, Vector3.Distance(start, end), Utils.l_Player.ToLayerMask());
     }
+    float walkTimer, stepPerSec = 1.5f;
     bool Move(Vector3 targetPos, float speed) {
-        if(transform.LerpPosition(targetPos, speed)) return true;
+        float speedRatio = Speed / moveSpeed;
+        float stepDelay = 1 / (stepPerSec * speedRatio);
+        if (walkTimer >= stepDelay)
+        {
+            walkTimer -= stepDelay;
+            AudioManager.instance.PlaySound(AudioTag.corvidFly, gameObject, speedRatio);
+        }
+        walkTimer += Time.deltaTime;
+        if (transform.LerpPosition(targetPos, speed)) return true;
         return false;
     }
     bool Turn(Vector3 newDir, Vector3 upAxis, float rotationSpeed) {
         if(transform.SlerpRotation(newDir, upAxis, rotationSpeed)) return true;
         return false;
+    }
+    protected override void OnDestinationReached()
+    {
+        base.OnDestinationReached();
+        AudioManager.instance.PlaySound(AudioTag.corvidTalk, gameObject);
     }
 }

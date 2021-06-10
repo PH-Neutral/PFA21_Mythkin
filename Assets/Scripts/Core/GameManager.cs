@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.AI;
+using AshkynCore.Audio;
 
 public class GameManager : MonoBehaviour
 {
@@ -29,14 +30,27 @@ public class GameManager : MonoBehaviour
 
         UpdateNavMesh();
     }
+    private void Start()
+    {
+        AudioManager.instance.PlayMusic(AudioTag.musicLevel01, true);
+    }
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
             TogglePause();
         }
     }
     public void TogglePause() {
+        AudioManager.instance.PauseAudio(AudioTag.musicLevel01, null);
         GamePaused = !GamePaused;
         UIManager.Instance.DisplayPauseMenu(GamePaused);
+        if (GamePaused)
+        {
+            AudioManager.instance.PlayMusic(AudioTag.musicMenu02);
+        }
+        else
+        {
+            AudioManager.instance.StopAudio(AudioTag.musicMenu02, null);
+        }
     }
     public void UpdateNavMesh() {
         terrain.BuildNavMesh();
