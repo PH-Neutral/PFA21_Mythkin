@@ -63,7 +63,11 @@ namespace AshkynCore.UI {
         public void SelectUIObject(GameObject objToSelect) {
             EventSystem.current.SetSelectedGameObject(objToSelect);
         }
-        public void ReloadScene() => LoadScene(SceneManager.GetActiveScene().buildIndex);
+        public void ReloadScene() 
+        {
+            Destroy(GameManager.Instance.gameObject);
+            LoadScene(SceneManager.GetActiveScene().buildIndex);
+        } 
         public void LoadScene(int index) {
             SceneManager.LoadScene(index);
         }
