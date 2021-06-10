@@ -57,7 +57,7 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] bool advancedMovement = false, debugDraws = false;
     [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
-    [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5, _slideAcceleration = 2;
+    [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5;
     [SerializeField] float _climbCheckDistanceOffset = 0.2f, _wallDistanceOffset = 0.1f;
     [SerializeField] float _soundRadiusRun = 10f, _soundRadiusWalk = 5f;
     [SerializeField] float interactionRange = 3f;
@@ -328,14 +328,12 @@ public class PlayerCharacter : MonoBehaviour {
         }
         Vector3 wallDir = _wallPoint - BodyCenter;
         Vector3 dirToOffsettedPoint = wallDir - wallDir.normalized * (Radius + _wallDistanceOffset);
-        if(!(isGrounded && _inputs.z < 0) && dirToOffsettedPoint.magnitude > 0.01f) {
+        if(!(isGrounded && _inputs.z < 0) && dirToOffsettedPoint.magnitude > 0) {
             _isLerpingToWall = true;
-        }
-        // lerping to adapt to the wall
-        if(_isLerpingToWall) {
             if(transform.SlerpRotation(wallDir, transform.up, RotationSpeed) && transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed)) {
                 _isLerpingToWall = false;
             } else {
+                Debug.Log("Lerp in progress!");
                 return Vector3.zero;
             }
         }
