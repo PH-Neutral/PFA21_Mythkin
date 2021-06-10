@@ -83,7 +83,7 @@ public class PlayerCamera : MonoBehaviour
         }
         LerpZoom(zoomRatio);
         AdjustPosition();
-        _player.HideMeshes(_fpsModeRatio < 1);
+        //_player.HideMeshes(_fpsModeRatio < 1);
     }
     void AdjustPosition() {
         transform.position = Vector3.Lerp(_headRef.position, _camRef.position, _fpsModeRatio);

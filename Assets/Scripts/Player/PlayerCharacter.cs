@@ -53,7 +53,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     public Transform head;
 
-    [SerializeField] Transform _bodyCenter, _camCenter, _throwPoint, _model;
+    [SerializeField] Transform _camCenter, _throwPoint;
     [SerializeField] bool advancedMovement = false, debugDraws = false;
     [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
@@ -82,7 +82,7 @@ public class PlayerCharacter : MonoBehaviour {
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
         if(_trajectoryHandler != null) _trajectoryHandler.playerCamera = _playerCam;
         _anim = GetComponentInChildren<Animator>();
-        _renderers = _model.GetComponentsInChildren<Renderer>();
+        //_renderers = _model.GetComponentsInChildren<Renderer>();
     }
     private void Start() {
         _playerCam.SetReferences(this, head,_camCenter);
@@ -319,7 +319,7 @@ public class PlayerCharacter : MonoBehaviour {
             _declimbPart1 = true;
             return Vector3.zero;
         }
-        // find closest wall point with offset
+        /*/ find closest wall point with offset
         if(!_wasClimbing) {
             _wallPoint = FindClosestWallPoint(BodyCenter, Vector3.zero, 90, 1);
         }
@@ -336,7 +336,16 @@ public class PlayerCharacter : MonoBehaviour {
                 Debug.Log("Lerp in progress!");
                 return Vector3.zero;
             }
+        }*/
+        
+        _wallPoint = FindClosestWallPoint(BodyCenter, Vector3.zero, 90, 1);
+        Vector3 wallDir = _wallPoint - BodyCenter;
+        Vector3 dirToOffsettedPoint = wallDir - wallDir.normalized * (Radius + _wallDistanceOffset);
+        if(!(isGrounded && _inputs.z < 0)) {
+            if(Vector3.Angle(transform.forward, wallDir) != 0) transform.LookAt(transform.position + wallDir, Vector3.up);
+            if(dirToOffsettedPoint != Vector3.zero) transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed);
         }
+
         // movement
         _movement = new Vector3(_inputs.x, _inputs.z, 0) * ClimbSpeed;
         if(isGrounded && _inputs.z < 0) {
