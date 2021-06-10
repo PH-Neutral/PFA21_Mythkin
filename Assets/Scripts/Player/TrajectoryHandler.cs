@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AshkynCore.Audio;
 
 public class TrajectoryHandler : MonoBehaviour {
     public bool IsDisplaying {
@@ -65,6 +66,7 @@ public class TrajectoryHandler : MonoBehaviour {
     }
     public void ThrowBomb()
     {
+        AudioManager.instance.PlaySound(AudioTag.fruitBombThrow, gameObject);
         GameObject bombInstance = Instantiate(_bombPrefab, transform.position, transform.rotation);
         bombInstance.GetComponent<Rigidbody>().velocity = transform.TransformDirection(_throwVector);
     }

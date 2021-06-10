@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using AshkynCore.Audio;
 
 public class Snake : Enemy
 {
@@ -18,6 +19,11 @@ public class Snake : Enemy
         {
             base.Update();
         }
+    }
+    protected override void OnSearch()
+    {
+        base.OnSearch();
+        AudioManager.instance.PlaySound(AudioTag.snakeTalk);
     }
     protected override void OnUpdate() {
         // decide the state you in
@@ -65,7 +71,7 @@ public class Snake : Enemy
     {
         head.gameObject.SetActive(false);
 
-
+        AudioManager.instance.PlaySound(AudioTag.snakeGoesInHole, gameObject);
         //play anim goInHole
         isInGround = true;
         Invoke(nameof(LeaveHole), inGroundTime);
