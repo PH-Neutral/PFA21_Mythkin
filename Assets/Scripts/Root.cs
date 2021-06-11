@@ -7,23 +7,25 @@ public class Root : MonoBehaviour {
     public float openDuration = 5f;
 
     Collider _coll;
-    Renderer _rend;
+    GameObject _model;
     private void Awake()
     {
-        _coll = GetComponent<Collider>();
-        _rend = GetComponent<Renderer>();
+        _coll = GetComponentInChildren<Collider>();
+        _model = transform.GetChild(0).gameObject;
     }
     public void Open()
     {
         AudioManager.instance.PlaySound(AudioTag.Roots, gameObject);
-        _coll.enabled = _rend.enabled = false;
+        _coll.enabled = false;
+        _model.SetActive(false);
         Invoke(nameof(Close), openDuration);
         GameManager.Instance.UpdateNavMesh();
     }
     public void Close()
     {
         CancelInvoke(nameof(Close));
-        _coll.enabled = _rend.enabled = true;
+        _coll.enabled = true;
+        _model.SetActive(true);
         GameManager.Instance.UpdateNavMesh();
     }
 }
