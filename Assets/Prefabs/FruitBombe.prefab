@@ -132,7 +132,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 4eb927e97083cf74e9c34e8209242ad8, type: 2}
+      objectReference: {fileID: 2100000, guid: 4704f61954b2e694da6b64f73fb9cdad, type: 2}
     - target: {fileID: 919132149155446097, guid: 358c5057faa86a14196dbf3907e3720b, type: 3}
       propertyPath: m_Name
       value: Fruits-bombe

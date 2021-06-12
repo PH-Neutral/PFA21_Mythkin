@@ -511,7 +511,10 @@ public class PlayerCharacter : MonoBehaviour {
             // a surface blocks the "forward" direction
             if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
                 // this surface is NOT a climbable wall
-                return true;
+                if (hit.collider.CompareTag("tree"))
+                {
+                    return true;
+                }
             }
         }
         return false;
@@ -537,7 +540,10 @@ public class PlayerCharacter : MonoBehaviour {
             Debug.DrawLine(rayOrigin, hit.point, Color.red);
             if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
                 // this surface is climbable wall
-                return true;
+                if (hit.collider.CompareTag("tree"))
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -575,7 +581,10 @@ public class PlayerCharacter : MonoBehaviour {
             if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskClimbZone)) {
                 // this surface is climbable wall
                 Debug.DrawLine(rayOrigin, hit.point, Color.red);
-                return true;
+                if (hit.collider.CompareTag("tree"))
+                {
+                    return true;
+                }
             }
             return false;
         }
