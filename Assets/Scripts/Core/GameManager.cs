@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using AshkynCore.Audio;
+using AshkynCore.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class GameManager : MonoBehaviour
     public NavMeshSurface terrain;
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
+    public MenuOptions menuOptions;
 
     private void Awake()
     {
@@ -50,6 +52,7 @@ public class GameManager : MonoBehaviour
         else
         {
             AudioManager.instance.StopAudio(AudioTag.musicMenu02, null);
+            menuOptions.Hide();
         }
     }
     public void UpdateNavMesh() {

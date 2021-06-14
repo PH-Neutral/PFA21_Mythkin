@@ -15,6 +15,7 @@ public class AudioManager : MonoBehaviour {
     private void Awake() {
         if(instance == null) instance = this;
         else if(instance != this) Destroy(gameObject);
+        DontDestroyOnLoad(this);
 
         // setup the tracks dictionary
         _assetDic = audioAssets.ToDictionary();
