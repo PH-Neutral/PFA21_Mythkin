@@ -18,26 +18,22 @@ public class Boar : Enemy
             Speed = SprintSpeed * (value ? 2 : 1);
         }
     }
-    [SerializeField] float afterAttackDelay = 1, attackReloadTime = 2.5f, preChargeDelay = 2f, chargeDelay = 5f, stunDuration = 5;
+    [SerializeField] float afterAttackDelay = 1, preChargeDelay = 2f, chargeDelay = 5f, stunDuration = 5;
     [SerializeField] Transform _attackCenter;
-    Vector3 _lastDestination, _searchVectorLeft, _searchVectorRight;
-    bool _searchStart = true, _searchRight = false, _searchLeft = false;
-    float _beforeAttackTimer = 0, _attackReloadTimer = 0, _searchLookTimer = 0;
-    float _agentPathCheckRate = 1 / 30f; // in seconds
-    bool _isAlerted = false, _isCollidingWithTarget = false;
     NavMeshAgent _agent;
-
-    SphereCollider _coll;
-    Vector3 _suspiciousPos, _attackPos;
-    bool _stateStart = false, _searchTurn = false, _isCharging = false, _isStunned = false;
+    SphereCollider _collHit;
+    Vector3 _suspiciousPos, _attackPos, _searchVectorLeft, _searchVectorRight;
+    float _agentPathCheckRate = 1 / 30f; // in seconds
     float _preChargeTimer, _chargeTimer, _afterAttackTimer, _stunTimer;
+    bool _stateStart = false, _searchTurn = false, _isCharging = false, _isStunned = false;
+    bool _searchRight = false, _searchLeft = false;
 
     protected override void Awake()
     {
         base.Awake();
         _agent = GetComponentInChildren<NavMeshAgent>();
         _agent.enabled = false;
-        _coll = _attackCenter.GetComponent<SphereCollider>();
+        _collHit = _attackCenter.GetComponent<SphereCollider>();
     }
     protected override void Start()
     {
@@ -207,8 +203,8 @@ public class Boar : Enemy
     }
     bool CheckFrontAttack() {
         int layer = Utils.l_Player.ToLayerMask();
-        RaycastHit[] hits = Utils.SphereCastAll(_coll, -transform.forward * 2, transform.forward, 2, layer);
-        Vector3 origin = transform.TransformPoint(_coll.center);
+        RaycastHit[] hits = Utils.SphereCastAll(_collHit, -transform.forward * 2, transform.forward, 2, layer);
+        Vector3 origin = transform.TransformPoint(_collHit.center);
         Vector3 direction;
         for(int i = 0; i < hits.Length; i++) {
             direction = hits[i].point - origin;
@@ -220,7 +216,7 @@ public class Boar : Enemy
     }
     bool CheckFrontCharge() {
         int layer = Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask();
-        RaycastHit[] hits = Utils.SphereCastAll(_coll, -transform.forward * 2, transform.forward, 2, layer);
+        RaycastHit[] hits = Utils.SphereCastAll(_collHit, -transform.forward * 2, transform.forward, 2, layer);
         float angle;
         for(int i = 0; i < hits.Length; i++) {
             angle = Vector3.Angle(transform.forward, -hits[i].normal);
@@ -246,14 +242,12 @@ public class Boar : Enemy
             if ((surfacePoint - transform.position).magnitude < 0.05f)
             {
                 destinationReached = true;
-                _lastDestination = destination;
                 return true;
             }
             bool destinationCorrect = _agent.SetDestination(surfacePoint);
             if (destinationCorrect)
             {
                 destinationReached = false;
-                _lastDestination = destination;
                 CheckIfPointReached();
             }
             else

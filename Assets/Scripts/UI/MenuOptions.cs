@@ -11,11 +11,11 @@ namespace AshkynCore.UI {
         }
 
         public void SetMusicVolume(Slider slider) {
-            AudioManager.instance.ChangeVolumeMusic(slider.value);
+            AudioManager.instance.ChangeVolumeMusic(slider.GetValue01());
         }
 
         public void SetSoundVolume(Slider slider) {
-            AudioManager.instance.ChangeVolumeSound(slider.value);
+            AudioManager.instance.ChangeVolumeSound(slider.GetValue01());
         }
     }
 }

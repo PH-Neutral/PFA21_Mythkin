@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BombPlant : MonoBehaviour
+public class BombPlant : Interactable
 {
     [SerializeField] float _timeToGrow = 5f;
     [SerializeField] MeshRenderer _fakeBomb;

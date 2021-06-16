@@ -9,7 +9,7 @@ public class OutlineHelperEditor : Editor {
 
         OutlineHelper myScript = (OutlineHelper)target;
         if(GUILayout.Button("Create Outline Object")) {
-            myScript.CreateOutlineObject(true);
+            myScript.CreateOutlineObject(null, true);
         }
         if(GUILayout.Button("Delete Outline")) {
             myScript.ResetScript(true);

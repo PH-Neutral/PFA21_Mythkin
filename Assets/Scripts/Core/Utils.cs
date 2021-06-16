@@ -127,6 +127,9 @@ public static class Utils {
     public static Vector3 GetVector(this TunnelEntrance.Direction dir) {
         return directions[(int)dir];
     }
+    public static float GetValue01(this UnityEngine.UI.Slider slider) {
+        return (slider.value - slider.minValue) / (slider.maxValue - slider.minValue);
+    }
     #endregion
 
     #region SOUND

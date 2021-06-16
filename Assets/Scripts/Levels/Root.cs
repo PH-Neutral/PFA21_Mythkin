@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using AshkynCore.Audio;
 
-public class Root : MonoBehaviour {
+public class Root : Interactable {
     public float openDuration = 5f;
 
     Collider _coll;
     GameObject _model;
+
     private void Awake()
     {
         _coll = GetComponentInChildren<Collider>();

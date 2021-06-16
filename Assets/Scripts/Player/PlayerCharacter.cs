@@ -131,23 +131,24 @@ public class PlayerCharacter : MonoBehaviour {
         // Roots
         Root root;
         if ((root = CheckRootsInteraction()) != null) {
+            root.ShowOutline(true);
             if(_isInteracting) root.Open();
         }
-        if(UIManager.Instance != null) UIManager.Instance.rootIndicator.SetActive(root != null);
+        UIManager.Instance?.rootIndicator.SetActive(root != null);
 
         // Plants
         BombPlant bombPlant;
-        if ((bombPlant = CheckPlantInteraction()) != null)
-        {
-            if (_isInteracting) { 
+        if ((bombPlant = CheckPlantInteraction()) != null) {
+            bombPlant.ShowOutline(true);
+            if (_isInteracting && !_hasBomb) { 
                 bombPlant.PickBomb();
                 _hasBomb = true;
                 _fakebomb.enabled = true;
                 lastPlant = bombPlant;
-                AudioManager.instance.PlaySound(AudioTag.fruitBombTaken, 1);
+                AudioManager.instance?.PlaySound(AudioTag.fruitBombTaken, 1);
             }
         }
-        if (UIManager.Instance != null) UIManager.Instance.bombIndicator.SetActive(bombPlant != null);
+        UIManager.Instance?.bombIndicator.SetActive(bombPlant != null);
     }
     void HandleThrowing() {
         if(_trajectoryHandler == null) return;
