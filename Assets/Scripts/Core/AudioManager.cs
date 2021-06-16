@@ -11,16 +11,21 @@ public class AudioManager : MonoBehaviour {
     [SerializeField] AudioAssetStorage audioAssets;
     Dictionary<AudioTag, AudioAsset> _assetDic;
     Dictionary<AudioKey, AudioSource> _sourceDic;
+    Dictionary<AudioSource, AudioAsset> _sourceAssetDic;
+    List<AudioSource> _musicSources, _soundSources;
 
     private void Awake() {
         if(instance == null) instance = this;
         else if(instance != this) Destroy(gameObject);
         DontDestroyOnLoad(this);
 
-        // setup the tracks dictionary
-        _assetDic = audioAssets.ToDictionary();
-        // setup the source dictionary
-        _sourceDic = new Dictionary<AudioKey, AudioSource>();
+        
+        _assetDic = audioAssets.ToDictionary(); // setup the tracks dictionary
+        _sourceDic = new Dictionary<AudioKey, AudioSource>(); // setup the source dictionary
+        _sourceAssetDic = new Dictionary<AudioSource, AudioAsset>(); // setup the link between source and asset
+
+        _musicSources = new List<AudioSource>();
+        _soundSources = new List<AudioSource>();
     }
 
     public void PlaySound(AudioTag tag, float volumeScale = 1) => PlaySound(tag, null, volumeScale);
@@ -33,7 +38,8 @@ public class AudioManager : MonoBehaviour {
         source.volume = volumeSound * asset.volume;
         source.spatialBlend = target != null ? 1 : 0; // [0: 2D] [1: 3D]
         source.PlayOneShot(asset.GetClip(), volumeScale);
-        SetSource(tag, target, source);
+        SetSource(tag, target, source, asset);
+        _soundSources.AddUnique(source);
     }
 
     public void PlayMusic(AudioTag tag, bool loop = false) => PlayMusic(tag, null, loop);
@@ -47,7 +53,8 @@ public class AudioManager : MonoBehaviour {
         source.volume = volumeMusic * asset.volume;
         source.spatialBlend = target != null ? 1 : 0; // [0: 2D] [1: 3D]
         source.Play();
-        SetSource(tag, target, source);
+        SetSource(tag, target, source, asset);
+        _musicSources.AddUnique(source);
     }
 
     public void PauseAudio(AudioTag tag, GameObject target) => PauseAudio(new AudioKey(tag, target));
@@ -63,6 +70,25 @@ public class AudioManager : MonoBehaviour {
         AudioSource source = GetSource(key);
         if(source == null) return;
         source.Stop();
+    }
+
+    public void ChangeVolumeMusic(float volume) {
+        volumeMusic = volume;
+        AudioAsset asset;
+        for(int i=0; i<_musicSources.Count; i++) {
+            asset = GetAsset(_musicSources[i]);
+            if(asset == null) continue;
+            _musicSources[i].volume = volume * asset.volume;
+        }
+    }
+    public void ChangeVolumeSound(float volume) {
+        volumeSound = volume;
+        AudioAsset asset;
+        for(int i = 0; i < _soundSources.Count; i++) {
+            asset = GetAsset(_soundSources[i]);
+            if(asset == null) continue;
+            _soundSources[i].volume = volume * asset.volume;
+        }
     }
 
     bool IsPlaying(AudioKey key) {
@@ -87,8 +113,14 @@ public class AudioManager : MonoBehaviour {
         return null;
     }
 
-    void SetSource(AudioTag tag, GameObject target, AudioSource source) => SetSource(new AudioKey(tag, target), source);
-    void SetSource(AudioKey key, AudioSource source) {
+    void SetSource(AudioTag tag, GameObject target, AudioSource source, AudioAsset asset) => SetSource(new AudioKey(tag, target), source, asset);
+    void SetSource(AudioKey key, AudioSource source, AudioAsset asset) {
         _sourceDic[key] = source;
+        _sourceAssetDic[source] = asset;
+    }
+
+    AudioAsset GetAsset(AudioSource source) {
+        if(_sourceAssetDic.TryGetValue(source, out AudioAsset asset)) return asset;
+        return null;
     }
 }
