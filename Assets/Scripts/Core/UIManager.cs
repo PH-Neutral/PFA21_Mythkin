@@ -10,7 +10,7 @@ public class UIManager : MonoBehaviour
 
     public GameObject rootIndicator, bombIndicator;
     public MenuPause menuPause;
-    public Text timerTxt;
+    public Text invisibleTxt, timeTxt;
 
     private void Awake()
     {

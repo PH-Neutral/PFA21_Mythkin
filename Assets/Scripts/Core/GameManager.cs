@@ -23,8 +23,7 @@ public class GameManager : MonoBehaviour
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
     public MenuOptions menuOptions;
-    public CustomMenu gameOverMenu;
-    public float timeToWin = 45f;
+    public CustomMenu gameOverMenu, winMenu;
     float timer;
 
     private void Awake()
@@ -38,15 +37,13 @@ public class GameManager : MonoBehaviour
     {
         AudioManager.instance.PlayMusic(AudioTag.musicLevel01, true);
         GamePaused = false;
-        timer = timeToWin;
+        timer = 0;
     }
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
             TogglePause();
         }
-        timer -= Time.deltaTime;
-        UIManager.Instance.timerTxt.text = timer.ChangePrecision(0).ToString();
-        if (timer <= 0) GameOver();
+        timer += Time.deltaTime;
     }
     public void TogglePause() {
         AudioManager.instance.PauseAudio(AudioTag.musicLevel01, null);
@@ -69,5 +66,11 @@ public class GameManager : MonoBehaviour
     {
         GamePaused = true;
         gameOverMenu?.Show();
+    }
+    public void Win()
+    {
+        GamePaused = true;
+        UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
+        winMenu.Show();
     }
 }
