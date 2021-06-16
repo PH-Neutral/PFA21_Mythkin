@@ -73,6 +73,12 @@ public static class Utils {
     public static bool IsBetween(this float f, float min, bool minInclu, float max, bool maxInclu) {
         return (minInclu ? f >= min : f > min) && (maxInclu ? f <= max : f < max);
     }
+    public static bool Contains<T>(this T[] array, T element) where T : class {
+        for(int i=0;i<array.Length;i++) {
+            if(element == array[i]) return true;
+        }
+        return false;
+    }
     #endregion
 
     #region SPECIFICS

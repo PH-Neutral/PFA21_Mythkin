@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcf384b154398e341b6b29969c078198, type: 3}
   m_Name: MotionBlur
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   m_AdvancedMode: 0
   quality:
     m_OverrideState: 1
-    m_Value: 2
+    m_Value: 0
   intensity:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0.1
     min: 0
   maximumVelocity:
     m_OverrideState: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
     max: 20
   m_SampleCount:
     m_OverrideState: 1
-    m_Value: 12
+    m_Value: 4
     min: 2
 --- !u!114 &-2223948172287066284
 MonoBehaviour:
@@ -648,13 +648,13 @@ MonoBehaviour:
     m_Value: 12
   compensation:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 0.25
   limitMin:
     m_OverrideState: 1
-    m_Value: 5
+    m_Value: 13
   limitMax:
     m_OverrideState: 1
-    m_Value: 13
+    m_Value: 15
   curveMap:
     m_OverrideState: 0
     m_Value:

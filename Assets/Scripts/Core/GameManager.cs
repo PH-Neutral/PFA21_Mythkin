@@ -68,6 +68,6 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         GamePaused = true;
-        gameOverMenu.Show();
+        gameOverMenu?.Show();
     }
 }

@@ -8,11 +8,12 @@ public class GrassZoneGeneratorEditor : Editor {
         DrawDefaultInspector();
 
         GrassZoneGenerator myScript = (GrassZoneGenerator)target;
-        if(GUILayout.Button("Populate")) {
-            myScript.Populate();
+        if(GUILayout.Button("Populate All")) {
+            myScript.PopulateAll(true);
+
         }
-        if(GUILayout.Button("Clear")) {
-            myScript.Clear();
+        if(GUILayout.Button("Clear All")) {
+            myScript.ClearAll(true);
         }
     }
 }
