@@ -20,9 +20,9 @@ public class Snake : Enemy
             base.Update();
         }
     }
-    protected override void OnSearch()
+    protected override void OnAggro()
     {
-        base.OnSearch();
+        base.OnAggro();
         AudioManager.instance.PlaySound(AudioTag.snakeTalk);
     }
     protected override void OnUpdate() {
@@ -33,6 +33,10 @@ public class Snake : Enemy
 
     }
     protected override void Search()
+    {
+        
+    }
+    protected override void Aggro()
     {
         if (soundHeard)
         {
@@ -49,15 +53,11 @@ public class Snake : Enemy
             Invoke(nameof(StopSearching), searchDuration);
         }
     }
-    protected override void Aggro()
-    {
-        
-    }
     protected override void OnSoundHeard()
     {
         if (lastSoundIsPlayer)
         {
-            State = EnemyState.Search;
+            State = EnemyState.Aggro;
         }
         else
         {
