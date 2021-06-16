@@ -79,6 +79,9 @@ public static class Utils {
         }
         return false;
     }
+    public static void AddUnique<T>(this List<T> list, T element) where T : class {
+        if(!list.Contains(element)) list.Add(element);
+    }
     #endregion
 
     #region SPECIFICS
