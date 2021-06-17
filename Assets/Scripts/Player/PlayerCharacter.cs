@@ -381,10 +381,10 @@ public class PlayerCharacter : MonoBehaviour {
             _declimbPart1 = true;
             return Vector3.zero;
         }
-        
         _wallPoint = FindClosestWallPoint(BodyCenter, Vector3.zero, 90, 1);
         Vector3 wallDir = _wallPoint - BodyCenter;
         Vector3 dirToOffsettedPoint = wallDir - wallDir.normalized * (Radius + _wallDistanceOffset);
+        //Vector3 normalY = new Vector3(0, (transform.TransformDirection(-hit.normal) * wallDir.magnitude).y, 0);
         if(!(isGrounded && _inputs.z < 0)) {
             if(Vector3.Angle(transform.forward, wallDir) != 0) transform.LookAt(transform.position + wallDir, Vector3.up);
             if(dirToOffsettedPoint != Vector3.zero) transform.LerpPosition(transform.position + dirToOffsettedPoint, _moveSpeed);
@@ -396,7 +396,7 @@ public class PlayerCharacter : MonoBehaviour {
         if(isGrounded && _inputs.z < 0) {
             _movement = new Vector3(_inputs.x, -_groundPullMagnitude, _inputs.z) * Speed;
         }
-        bool canMoveHori = CanClimbHorizontal(_inputs.x);
+        bool canMoveHori = true;// CanClimbHorizontal(_inputs.x);
         bool canMoveVert = CanClimbVertical(_inputs.z);
         if(!canMoveHori) _movement.x = 0;
         if(!canMoveVert) _movement.y = 0;
@@ -453,13 +453,14 @@ public class PlayerCharacter : MonoBehaviour {
         return false;
     }
     Vector3 FindClosestWallPoint(Vector3 origin, Vector3 offset, float maxAngle = 90, float stepAngle = 1) {
+        RaycastHit hit;
         Vector3 rayOrigin = origin + transform.TransformDirection(offset);
         Vector3 centerDir = transform.forward * (Radius + _wallDistanceOffset);
         Vector3 hitPoint = rayOrigin + centerDir * 1.5f;
         int layerMask = Utils.l_Terrain.ToLayerMask();
         for(float i = -maxAngle; i <= maxAngle; i += stepAngle) {
             Quaternion iRot = Quaternion.Euler(0, i, 0);
-            if(Physics.Raycast(rayOrigin, iRot * centerDir.normalized, out RaycastHit hit, (hitPoint - rayOrigin).magnitude, layerMask)) {
+            if(Physics.Raycast(rayOrigin, iRot * centerDir.normalized, out hit, (hitPoint - rayOrigin).magnitude, layerMask)) {
                 Debug.DrawLine(origin, hit.point, Color.red, 1);
                 hitPoint = hit.point;
             }
@@ -528,7 +529,7 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.blue);
 
         rayOrigin += rayDir;
-        rayDir = transform.forward * (Radius + _wallDistanceOffset * 2);
+        rayDir = transform.forward * (Radius + _wallDistanceOffset * 4);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskWall)) {
             // a surface blocks the "up/down -> forward" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.red);
