@@ -98,7 +98,7 @@ Material:
     - BOOLEAN_8479FB671C2E4E6C889BEB5CCC5DDEAD: 1
     - ENUM_87713713805E47D98655CE3C298A9FDD: 2
     - Vector1_2258f74a282a42e991b6f6a976bee754: 1.48
-    - Vector1_4a6c2b29650b4602856f151f183772c9: 1
+    - Vector1_4a6c2b29650b4602856f151f183772c9: 0.2
     - Vector1_53b437a25a01461fa3b3ac85ddb4eb78: 100
     - Vector1_9fe3cfba56884552be83bc5ec427c9c7: 1
     - Vector1_a6b49cb50cf347079e819a1c192fad00: 100
@@ -115,8 +115,8 @@ Material:
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
-    - _CullMode: 1
-    - _CullModeForward: 1
+    - _CullMode: 2
+    - _CullModeForward: 2
     - _Cutoff: 0.5
     - _DepthOffsetEnable: 0
     - _DetailAlbedoMapScale: 1
@@ -132,7 +132,7 @@ Material:
     - _GlossyReflections: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
-    - _OpaqueCullMode: 1
+    - _OpaqueCullMode: 2
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 0

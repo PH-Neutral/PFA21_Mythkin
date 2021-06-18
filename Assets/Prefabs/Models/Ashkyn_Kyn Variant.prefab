@@ -223,6 +223,7 @@ MonoBehaviour:
   debugDraws: 0
   _accelerationTime: 0.5
   _decelerationTime: 0.2
+  _airDrag: 10
   _moveSpeed: 4
   _sprintRatio: 1.8
   _climbSpeed: 3
@@ -232,6 +233,7 @@ MonoBehaviour:
   _groundPullMagnitude: 5
   _climbCheckDistanceOffset: 0.2
   _wallDistanceOffset: 0.05
+  _climbSideAngle: 40
   _soundRadiusRun: 18
   _soundRadiusWalk: 8
   interactionRange: 3
@@ -975,7 +977,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 75fb5a1b52d43cc48a26f4d4515ddcfc, type: 3}
       propertyPath: m_Name
-      value: Ashkyn_Kyn
+      value: Ashkyn_Kyn Variant
       objectReference: {fileID: 0}
     - target: {fileID: 1729157626813452398, guid: 75fb5a1b52d43cc48a26f4d4515ddcfc, type: 3}
       propertyPath: m_Materials.Array.data[0]

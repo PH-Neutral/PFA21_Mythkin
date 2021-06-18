@@ -268,18 +268,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 922603c8632d38945a63d49ee73642f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sightCenter: {fileID: 1223666517432126468}
   debugState: 0
+  debugLogs: 0
+  debugDraws: 0
+  moveSpeed: 3
+  sprintRatio: 2
+  rotationSpeed: 50
+  searchDuration: 3
   hearingLevelMin: 0.5
   rangeOfSight: 50
   fieldOfView: 120
   grassVerticalViewAngleMax: 50
-  sightCenter: {fileID: 1223666517432126468}
-  target: {fileID: 0}
-  debugLogs: 0
-  debugDraws: 0
+  floorLevel: 0
+  patrolPath: {fileID: 0}
+  head: {fileID: 1223666516991144946}
+  _renderers: []
   inGroundTime: 5
-  searchDuration: 3
-  _model: {fileID: 1223666516991144946}
 --- !u!135 &1223666517432126469
 SphereCollider:
   m_ObjectHideFlags: 0
