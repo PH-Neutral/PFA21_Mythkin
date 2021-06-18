@@ -60,7 +60,8 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17, type: 2}
+  - {fileID: 2100000, guid: 37829480c3cf51a4db46af6b5e81df7c, type: 2}
+  - {fileID: 2100000, guid: 998d1c567390b94408f2e48a6377a228, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -120,7 +121,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1223666516991144957}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1223666516033215104}
@@ -188,7 +189,8 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17, type: 2}
+  - {fileID: 2100000, guid: 37829480c3cf51a4db46af6b5e81df7c, type: 2}
+  - {fileID: 2100000, guid: 998d1c567390b94408f2e48a6377a228, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -280,10 +282,13 @@ MonoBehaviour:
   rangeOfSight: 50
   fieldOfView: 120
   grassVerticalViewAngleMax: 50
-  floorLevel: 0
+  minHeightDetection: -1
+  maxHeightDetection: 5
   patrolPath: {fileID: 0}
   head: {fileID: 1223666516991144946}
-  _renderers: []
+  _renderers:
+  - {fileID: 1223666516033215110}
+  - {fileID: 1223666517384926997}
   inGroundTime: 5
 --- !u!135 &1223666517432126469
 SphereCollider:

@@ -168,16 +168,16 @@ MonoBehaviour:
   rotationSpeed: 50
   searchDuration: 1
   hearingLevelMin: 0
-  rangeOfSight: 50
+  rangeOfSight: 35
   fieldOfView: 120
   grassVerticalViewAngleMax: 50
-  floorLevel: 0
+  minHeightDetection: -1
+  maxHeightDetection: 5
   patrolPath: {fileID: 0}
   head: {fileID: 6658976861675272082}
   _renderers:
-  - {fileID: 6658976862171232214}
+  - {fileID: 1407308908468670392}
   afterAttackDelay: 1
-  attackReloadTime: 2.5
   preChargeDelay: 2
   chargeDelay: 5
   stunDuration: 5
@@ -230,7 +230,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6658976862171230248
 Transform:
   m_ObjectHideFlags: 0
@@ -359,9 +359,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8476281779148126211, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8476281779148126211, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 443c22b2537196349a6d6b9a260c47bb, type: 2}
+      objectReference: {fileID: 2100000, guid: dfb80978c5369724bb15b8aeae59dbec, type: 2}
+    - target: {fileID: -8476281779148126211, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 998d1c567390b94408f2e48a6377a228, type: 2}
     - target: {fileID: 919132149155446097, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
       propertyPath: m_Name
       value: Ashkyn_SpectralBoar
@@ -380,5 +388,10 @@ GameObject:
 --- !u!4 &2185169555439710126 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
+  m_PrefabInstance: {fileID: 1862785313018349637}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &1407308908468670392 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -8476281779148126211, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
   m_PrefabInstance: {fileID: 1862785313018349637}
   m_PrefabAsset: {fileID: 0}

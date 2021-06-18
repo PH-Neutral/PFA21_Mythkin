@@ -56,16 +56,17 @@ MonoBehaviour:
   rangeOfSight: 50
   fieldOfView: 120
   grassVerticalViewAngleMax: 50
-  floorLevel: 3
+  minHeightDetection: 0
+  maxHeightDetection: 6
   patrolPath: {fileID: 0}
   head: {fileID: 8958391739448553534}
   _renderers:
   - {fileID: 2567728030479777088}
   - {fileID: 7407088985678307553}
   - {fileID: 7123542760878137235}
-  _searchDelay: 2.5
   _afterAttackDelay: 3
   _afterAttackUpAngle: 35
+  _knockbackStrength: 25
 --- !u!1 &1552080608132600730
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,7 +127,8 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17, type: 2}
+  - {fileID: 2100000, guid: e62575d684c03e242a7fa4c66c93b8a8, type: 2}
+  - {fileID: 2100000, guid: 998d1c567390b94408f2e48a6377a228, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -223,7 +225,8 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17, type: 2}
+  - {fileID: 2100000, guid: e62575d684c03e242a7fa4c66c93b8a8, type: 2}
+  - {fileID: 2100000, guid: 998d1c567390b94408f2e48a6377a228, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -381,7 +384,8 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17, type: 2}
+  - {fileID: 2100000, guid: e62575d684c03e242a7fa4c66c93b8a8, type: 2}
+  - {fileID: 2100000, guid: 998d1c567390b94408f2e48a6377a228, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -8,7 +8,6 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
-    public GameObject rootIndicator, bombIndicator;
     public MenuPause menuPause;
     public Text invisibleTxt, timeTxt;
 

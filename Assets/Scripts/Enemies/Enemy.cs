@@ -31,7 +31,7 @@ public abstract class Enemy : MonoBehaviour
                     OnAggro();
                     break;
             }
-            ChangeMaterial(newMat);
+            ChangeMaterial(newMat, 1);
             OnStateChange();
             _state = value;
             debugState = value;
@@ -53,7 +53,7 @@ public abstract class Enemy : MonoBehaviour
     [Range(0, 100)]
     [SerializeField] protected float hearingLevelMin = 0f;
     [SerializeField] protected float rangeOfSight = 50, fieldOfView = 120, grassVerticalViewAngleMax = 50;
-    [SerializeField] protected int floorLevel = 0;
+    [SerializeField] protected float minHeightDetection = 0, maxHeightDetection = 6;
     [SerializeField] protected PatrolPath patrolPath = null;
     [SerializeField] protected Transform head;
     protected Transform target;
@@ -63,7 +63,7 @@ public abstract class Enemy : MonoBehaviour
     protected float lastSoundLevel;
     protected bool destinationReached = true;
 
-    [SerializeField] MeshRenderer[] _renderers;
+    [SerializeField] Renderer[] _renderers;
     EnemyState _state = EnemyState.Idle;
     bool _patrolJustStarted = true, _patrolAscending = true;
     float _speed, _patrolWaitTimer = 0;
@@ -166,9 +166,9 @@ public abstract class Enemy : MonoBehaviour
         }
         // -------------------------------------------- //
         // check if target is in range of sight and at correct height
-        float floorHeightMin = (floorLevel - 1 / 6f) * Utils.floorHeight;
-        float floorHeightmax = (floorLevel + 5 / 6f) * Utils.floorHeight;
-        if((target.transform.position - origin.position).magnitude > rangeOfSight || !target.transform.position.y.IsBetween(floorHeightMin, false, floorHeightmax, true)) {
+        //float floorHeightMin = (floorLevel - 1 / 6f) * Utils.floorHeight;
+        //float floorHeightmax = (floorLevel + 5 / 6f) * Utils.floorHeight;
+        if((target.transform.position - origin.position).magnitude > rangeOfSight || !target.transform.position.y.IsBetween(minHeightDetection, false, maxHeightDetection, true)) {
             return false;
         }
         bool invalidAngleSight = false;
@@ -234,11 +234,13 @@ public abstract class Enemy : MonoBehaviour
         else destinationReached = false;
         return true;
     }
-    protected void ChangeMaterial(Material mat)
+    protected void ChangeMaterial(Material mat, int index)
     {
-        for (int i = 0; i < _renderers.Length; i++)
-        {
-            _renderers[i].material = mat;
+        Material[] mats;
+        for (int i = 0; i < _renderers.Length; i++) {
+            mats = _renderers[i].sharedMaterials;
+            mats[index] = mat;
+            _renderers[i].sharedMaterials = mats;
         }
     }
 }

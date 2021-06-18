@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using AshkynCore.Audio;
 using AshkynCore.UI;
@@ -19,12 +17,15 @@ public class GameManager : MonoBehaviour
             Time.timeScale = value ? 0 : 1;
         }
     }
-    public NavMeshSurface terrain;
+    public UnityEngine.AI.NavMeshSurface terrain;
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
     public MenuOptions menuOptions;
     public CustomMenu gameOverMenu, winMenu;
-    float timer;
+
+    [SerializeField] Transform lowestPoint;
+    float timer; 
+    bool wonOrLost = false;
 
     private void Awake()
     {
@@ -44,8 +45,14 @@ public class GameManager : MonoBehaviour
             TogglePause();
         }
         timer += Time.deltaTime;
+
+        if(lowestPoint != null) {
+            // if player falls from map
+            if(player.transform.position.y < lowestPoint.position.y) GameOver();
+        }
     }
     public void TogglePause() {
+        if(wonOrLost) return;
         AudioManager.instance.PauseAudio(AudioTag.musicLevel01, null);
         GamePaused = !GamePaused;
         UIManager.Instance.DisplayPauseMenu(GamePaused);
@@ -65,11 +72,13 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         GamePaused = true;
+        wonOrLost = true;
         gameOverMenu?.Show();
     }
     public void Win()
     {
         GamePaused = true;
+        wonOrLost = true;
         UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
         winMenu.Show();
     }

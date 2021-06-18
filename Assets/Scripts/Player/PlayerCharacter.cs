@@ -86,8 +86,10 @@ public class PlayerCharacter : MonoBehaviour {
         deltaTime = Time.deltaTime;
         _isJumping = Input.GetKey(KeyCode.Space);
         _isInteracting = Input.GetKeyDown(KeyCode.E);
-        if(Input.GetKeyDown(KeyCode.Alpha1)) _isAiming = _hasBomb ? !_isAiming : false;
-        _isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
+        //if(Input.GetKeyDown(KeyCode.Alpha1)) _isAiming = _hasBomb ? !_isAiming : false;
+        //_isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
+        _isAiming = Input.GetMouseButton(1);
+        _isThrowing = Input.GetMouseButtonDown(0);
         _isRunning = Input.GetKey(KeyCode.LeftShift);
         _inputs = GetInputs();
 
@@ -134,7 +136,7 @@ public class PlayerCharacter : MonoBehaviour {
             root.ShowOutline(true);
             if(_isInteracting) root.Open();
         }
-        UIManager.Instance?.rootIndicator.SetActive(root != null);
+        //UIManager.Instance?.rootIndicator.SetActive(root != null);
 
         // Plants
         BombPlant bombPlant;
@@ -148,13 +150,13 @@ public class PlayerCharacter : MonoBehaviour {
                 AudioManager.instance?.PlaySound(AudioTag.fruitBombTaken, 1);
             }
         }
-        UIManager.Instance?.bombIndicator.SetActive(bombPlant != null);
+        //UIManager.Instance?.bombIndicator.SetActive(bombPlant != null);
     }
     void HandleThrowing() {
         if(_trajectoryHandler == null) return;
-        if(!_hasBomb) return;
 
-        _trajectoryHandler.IsDisplaying = _isAiming;
+        _trajectoryHandler.IsDisplaying = _isAiming && _hasBomb;
+        if(!_hasBomb) return;
         if (_isAiming){
             _trajectoryHandler.SetBombTrajectory();
             if (_isThrowing){
