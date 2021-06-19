@@ -4,6 +4,7 @@ using UnityEngine;
 using AshkynCore.Audio;
 
 public class AudioManager : MonoBehaviour {
+    public const string key_identifier = "Audio_", key_volumeSound = "volumeSound", key_volumeMusic = "volumeMusic";
     public static AudioManager instance = null;
 
     [Range(0f,1f)] public float volumeMusic = 0.5f, volumeSound = 0.5f;
@@ -26,6 +27,26 @@ public class AudioManager : MonoBehaviour {
 
         _musicSources = new List<AudioSource>();
         _soundSources = new List<AudioSource>();
+
+        // get the playerPrefs
+        LoadSettings();
+    }
+
+    void LoadSettings() {
+        LoadSetting(key_volumeMusic, ref volumeMusic); // setup music volume
+        LoadSetting(key_volumeSound, ref volumeSound); // setup sound volume
+    }
+    public void SaveSettings() {
+        PlayerPrefs.Save();
+    }
+    bool LoadSetting(string settingKey, ref float floatToLoad) {
+        string key = key_identifier + settingKey;
+        if(!PlayerPrefs.HasKey(key)) return false;
+        floatToLoad = PlayerPrefs.GetFloat(key);
+        return true;
+    }
+    void SaveSetting(string settingKey, float floatToSave) {
+        PlayerPrefs.SetFloat(key_identifier + settingKey, floatToSave);
     }
 
     public void PlaySound(AudioTag tag, float volumeScale = 1) => PlaySound(tag, null, volumeScale);
@@ -74,6 +95,7 @@ public class AudioManager : MonoBehaviour {
 
     public void ChangeVolumeMusic(float volume) {
         volumeMusic = volume;
+        SaveSetting(key_volumeMusic, volumeMusic);
         AudioAsset asset;
         for(int i=0; i<_musicSources.Count; i++) {
             asset = GetAsset(_musicSources[i]);
@@ -83,6 +105,7 @@ public class AudioManager : MonoBehaviour {
     }
     public void ChangeVolumeSound(float volume) {
         volumeSound = volume;
+        SaveSetting(key_volumeSound, volumeSound);
         AudioAsset asset;
         for(int i = 0; i < _soundSources.Count; i++) {
             asset = GetAsset(_soundSources[i]);

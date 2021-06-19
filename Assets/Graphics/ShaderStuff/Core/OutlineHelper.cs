@@ -115,11 +115,17 @@ public class OutlineHelper : MonoBehaviour {
             return;
         }
         if(isCloneVisible == show) return;
-        Renderer[] cloneRends = cloneObj.GetComponentsInChildren<Renderer>();
-        for(int i = 0; i < cloneRends.Length; i++) {
-            cloneRends[i].enabled = show;
-        }
+        UpdateOutline(show);
         isCloneVisible = show;
+    }
+    public void UpdateOutline(bool show) {
+        // supposedly, both object have the same exact hierarchy (give or take a few components)
+        // we take both renderer array to apply the original's state to the outline's
+        Renderer[] thisRends = GetComponentsInChildren<Renderer>(true);
+        Renderer[] cloneRends = cloneObj.GetComponentsInChildren<Renderer>(true);
+        for(int i = 0; i < thisRends.Length; i++) {
+            cloneRends[i].enabled = thisRends[i].enabled && show;
+        }
     }
     public void ResetScript(bool inEditor = false) {
         if(cloneObj != null) {

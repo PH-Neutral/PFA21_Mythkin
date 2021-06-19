@@ -91,7 +91,10 @@ public class GrassZoneGenerator : MonoBehaviour {
                 // if the collider does, in fact, belong to this object
                 if(Physics.Raycast(hit.point, dir, out hit, dir.magnitude, Utils.l_Terrain.ToLayerMask())) {
                     // there is a terrain surface in the zone
-                    return true;
+                    if(Vector3.Angle(Vector3.up, hit.normal) < 15) {
+                        // if the surface is mostly facing up (with 15° margin)
+                        return true;
+                    }
                 }
             }
         }

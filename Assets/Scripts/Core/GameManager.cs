@@ -82,4 +82,8 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
         winMenu.Show();
     }
+
+    private void OnApplicationQuit() {
+        PlayerPrefs.Save();
+    }
 }

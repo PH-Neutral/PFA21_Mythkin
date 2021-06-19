@@ -3310,6 +3310,8 @@ MonoBehaviour:
   firstMenuItem: {fileID: 710707297}
   returnMenu: {fileID: 395595954}
   showOnStart: 0
+  sliderMusic: {fileID: 710707299}
+  sliderSound: {fileID: 242901159}
 --- !u!1 &2965755157401255152
 GameObject:
   m_ObjectHideFlags: 0
@@ -3518,3 +3520,5 @@ MonoBehaviour:
   firstMenuItem: {fileID: 0}
   returnMenu: {fileID: 395595954}
   showOnStart: 0
+  sliderMusic: {fileID: 0}
+  sliderSound: {fileID: 0}

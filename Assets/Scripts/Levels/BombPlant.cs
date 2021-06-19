@@ -17,10 +17,12 @@ public class BombPlant : Interactable
     {
         _gotABomb = true;
         _fakeBomb.enabled = true;
+        UpdateOutline();
     }
     public void PickBomb()
     {
         //play anim PickBomb
         _fakeBomb.enabled = false;
+        UpdateOutline();
     }
 }

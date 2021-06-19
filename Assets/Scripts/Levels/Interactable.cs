@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Interactable : MonoBehaviour {
+    protected Animator animator;
+
     OutlineHelper outline;
     bool outlineVisible = false;
 
+    protected virtual void Awake() {
+        animator = GetComponentInChildren<Animator>();
+    }
     protected virtual void Start() {
         outline = GetComponent<OutlineHelper>();
         if(outline != null) {
@@ -25,6 +30,6 @@ public class Interactable : MonoBehaviour {
         outlineVisible = outline.isCloneVisible;
     }
     public void UpdateOutline() {
-        // set active or not based on model ??
+        outline.UpdateOutline(outline.isCloneVisible);
     }
 }

@@ -124,6 +124,10 @@ public static class Utils {
         else obj.localRotation = Quaternion.Slerp(obj.localRotation, newRotation, t);
         return t >= 1;
     }
+    public static void RotateAround(this Transform transform, Vector3 pivotPoint, Quaternion rotation) {
+        transform.position = rotation * (transform.position - pivotPoint) + pivotPoint;
+        transform.rotation = rotation * transform.rotation;
+    }
     public static Vector3 GetVector(this TunnelEntrance.Direction dir) {
         return directions[(int)dir];
     }

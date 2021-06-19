@@ -9,7 +9,7 @@ public class Root : Interactable {
     Collider _coll;
     GameObject _model;
 
-    private void Awake()
+    protected override void Awake()
     {
         _coll = GetComponentInChildren<Collider>();
         _model = transform.GetChild(0).gameObject;
@@ -17,6 +17,7 @@ public class Root : Interactable {
     public void Open()
     {
         AudioManager.instance.PlaySound(AudioTag.Roots, gameObject);
+        ShowOutline(false);
         _coll.enabled = false;
         _model.SetActive(false);
         Invoke(nameof(Close), openDuration);
@@ -27,6 +28,7 @@ public class Root : Interactable {
         CancelInvoke(nameof(Close));
         _coll.enabled = true;
         _model.SetActive(true);
+        ShowOutline(true);
         GameManager.Instance.UpdateNavMesh();
     }
 }
