@@ -6,10 +6,11 @@ using UnityEngine.UI;
 namespace AshkynCore.UI {
     public class MenuOptions : CustomMenu {
         [SerializeField] Slider sliderMusic, sliderSound;
-        protected override void Awake() {
-            base.Awake();
-            if(sliderMusic != null) sliderMusic.value = AudioManager.instance.volumeMusic;
-            if(sliderSound != null) sliderSound.value = AudioManager.instance.volumeSound;
+        protected override void Start()
+        {
+            base.Start();
+            if (sliderMusic != null) sliderMusic.value = AudioManager.instance.volumeMusic;
+            if (sliderSound != null) sliderSound.value = AudioManager.instance.volumeSound;
         }
 
         public void SetMusicVolume(Slider slider) {
