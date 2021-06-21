@@ -7,6 +7,7 @@ using AshkynCore.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public const int collectiblesTotal = 3;
     public static GameManager Instance;
 
     public bool GamePaused {
@@ -17,11 +18,13 @@ public class GameManager : MonoBehaviour
             Time.timeScale = value ? 0 : 1;
         }
     }
+    public bool isInvisible = true;
     public UnityEngine.AI.NavMeshSurface terrain;
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
     public MenuOptions menuOptions;
     public CustomMenu gameOverMenu, winMenu;
+    public int collectiblesCount = 0;
 
     [SerializeField] Transform lowestPoint;
     float timer; 
@@ -78,12 +81,18 @@ public class GameManager : MonoBehaviour
     public void Win()
     {
         GamePaused = true;
+        if (collectiblesCount > GameData.maxCollectiblesCount)
+        {
+            GameData.maxCollectiblesCount = collectiblesCount;
+        }
+        if (GameData.bestTime < 0 || timer < GameData.bestTime)
+        {
+            GameData.bestTime = timer;
+        }
+        GameData.invisible = isInvisible?1:0;
         wonOrLost = true;
         UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
         winMenu.Show();
     }
 
-    private void OnApplicationQuit() {
-        PlayerPrefs.Save();
-    }
 }
