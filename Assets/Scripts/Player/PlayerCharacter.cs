@@ -44,8 +44,17 @@ public class PlayerCharacter : MonoBehaviour {
     Vector3 FlatForward {
         get { return transform.forward.Flatten().normalized; }
     }
-    Vector3 ClimbCheckVector {
+    Vector3 ClimbCheckVectorTrigger {
         get { return transform.forward * (Radius + _wallCheckDistance); }
+    }
+    float ClimbCheckVectorWallLength {
+        get { return ClimbCheckVectorTrigger.magnitude * 1.5f; }
+    }
+    bool CanInteract {
+        get { return !_isOnClimbWall && !_hasBomb; }
+    }
+    bool CanThrow {
+        get { return _isAiming && _hasBomb; }
     }
     public Transform head;
 
@@ -53,16 +62,14 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] bool advancedMovement = false, debugDraws = false;
     [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f, _airDrag = 0.5f;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
-    [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 5;
+    [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 0.5f;
     [SerializeField] float _wallCheckDistance = 0.1f;
-    [Range(0, 1)] [SerializeField] float _climbWallDistanceOffsetRatio = 0.5f;
+    [Range(0, 0.99f)] [SerializeField] float _climbWallDistanceOffsetRatio = 0.5f;
     [SerializeField] float _climbMoveDistanceCheck = 0.2f;
     [Range(0, 89)][SerializeField] float _climbSideAngle = 40;
     [SerializeField] float _soundRadiusRun = 10f, _soundRadiusWalk = 5f;
     [SerializeField] float interactionRange = 3f;
     [SerializeField] MeshRenderer _fakebomb; //temporary. Will need to do it by animation
-    [SerializeField] float gizmoSize = 0.1f;
-    [SerializeField] bool chaosOn = false;
     CharacterController _charaCtrl;
     PlayerCamera _playerCam;
     TrajectoryHandler _trajectoryHandler;
@@ -70,7 +77,7 @@ public class PlayerCharacter : MonoBehaviour {
     Renderer[] _renderers;
     bool _isModelHidden = false;
     Vector3 _movement = Vector3.zero, _wallPoint, _inputs = Vector3.zero, _declimbPoint1, _declimbInputMask, _declimbBasePos, _declimbBaseDir;
-    RaycastHit _declimbHit;
+    RaycastHit _declimbHit, _tempHit;
     bool _wasGrounded = false, _wasClimbing = true, _wasPushed = false;
     bool _isOnClimbWall = false, _isDeclimbingUp = false, _declimbPart1 = true, _declimbCancel = false;
     bool _isAiming = false, _isThrowing = false, _hasBomb = false, _isInteracting = false, _isJumping = false, _isRunning = false;
@@ -129,7 +136,7 @@ public class PlayerCharacter : MonoBehaviour {
     void HandleMovement() {
         if(!_isDeclimbingUp) {
             _isOnClimbWall = CheckForClimb();
-            Debug.Log("Climbing = " + _isOnClimbWall);
+            //Debug.Log("Climbing = " + _isOnClimbWall);
             _climbPosOffset = Vector3.zero;
             if(!_wasPushed) {
                 _movement = _isOnClimbWall ? Climb() : Move();
@@ -168,9 +175,8 @@ public class PlayerCharacter : MonoBehaviour {
     void HandleThrowing() {
         if(_trajectoryHandler == null) return;
 
-        _trajectoryHandler.IsDisplaying = _isAiming && _hasBomb;
-        if(!_hasBomb) return;
-        if (_isAiming){
+        _trajectoryHandler.IsDisplaying = CanThrow;
+        if (CanThrow){
             _trajectoryHandler.SetBombTrajectory();
             if (_isThrowing){
                 _fakebomb.enabled = false;
@@ -275,41 +281,10 @@ public class PlayerCharacter : MonoBehaviour {
             move = Vector3.zero;
             transform.localRotation = Quaternion.Euler(0, transform.localRotation.eulerAngles.y, 0);
         }
-        if(_isAiming) transform.SlerpRotation(_playerCam.transform.forward.Flatten(), transform.up, RotationSpeed);
-        else if(flatInputs.magnitude > 0) transform.SlerpRotation(_playerCam.transform.TransformDirection(flatInputs), transform.up, RotationSpeed);
+        if(flatInputs.magnitude > 0) transform.SlerpRotation(_playerCam.transform.TransformDirection(flatInputs), transform.up, RotationSpeed);
+        else if(_isAiming && _charaCtrl.isGrounded) transform.SlerpRotation(_playerCam.transform.forward.Flatten(), transform.up, RotationSpeed);
 
-        if (advancedMovement) {
-            // jump
-            if (_charaCtrl.isGrounded && _isJumping)
-            {
-                AudioManager.instance.PlaySound(AudioTag.playerJump, gameObject);
-                move.y = _jumpHeight;
-            }
-            else if (_charaCtrl.isGrounded) move.y = -_groundPullMagnitude;
-            else move.y += Physics.gravity.y * deltaTime;
-            // move
-            if(flatInputs.x > 0) {
-                move.x += Mathf.Sign(flatInputs.x) * (move.x < 0 ? Deceleration : Acceleration) * deltaTime;
-            } else if(flatInputs.x < 0) {
-                move.x += Mathf.Sign(flatInputs.x) * (move.x > 0 ? Deceleration : Acceleration) * deltaTime;
-            } else {
-                move.x += -Mathf.Sign(move.x) * Mathf.Clamp((_charaCtrl.isGrounded ? 1 : 0.1f) * Deceleration * deltaTime, 0, Mathf.Abs(move.x));
-            }
-            if(flatInputs.z > 0) {
-                move.z += Mathf.Sign(flatInputs.z) * (move.z < 0 ? Deceleration : Acceleration) * deltaTime;
-            } else if(flatInputs.z < 0) {
-                move.z += Mathf.Sign(flatInputs.z) * (move.z > 0 ? Deceleration : Acceleration) * deltaTime;
-            } else if(_charaCtrl.isGrounded) {
-                move.z += -Mathf.Sign(move.z) * Mathf.Clamp((_charaCtrl.isGrounded ? 1 : 0.1f) * Deceleration * deltaTime, 0, Mathf.Abs(move.z));
-            }
-            Vector3 moveTemp = move;
-            moveTemp.y = 0;
-            moveTemp = Vector3.ClampMagnitude(moveTemp, Speed);
-            move.x = moveTemp.x;
-            move.z = moveTemp.z;
-            // full motion
-            return _playerCam.transform.TransformDirection(move);
-        } else {
+        if (!advancedMovement) {
             //Vector3 motion;
             //Vector3 slopeVector = GetSlopeVector();
             //bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeVector) - 90 < _charaCtrl.slopeLimit;
@@ -318,13 +293,16 @@ public class PlayerCharacter : MonoBehaviour {
             bool inSlopeLimit = Vector3.Angle(Vector3.up, slopeNormal) < _charaCtrl.slopeLimit;
             //Debug.Log($"slope angle: {slopeAngle} deg");
             if(_charaCtrl.isGrounded) {
-                motion = new Vector3(_inputs.x * Speed, _movement.y, _inputs.z * Speed);
+                //motion = new Vector3(_inputs.x * Speed, _movement.y, _inputs.z * Speed);
+                motion = new Vector3(_inputs.x * Speed, -_groundPullMagnitude, _inputs.z * Speed);
+                if(_wasGrounded) {
+                    //motion.y = -_groundPullMagnitude;
+                }
                 _isFalling = false;
                 if(_isInJump) {
                     _stopJumping = true;
                 }
-                if(inSlopeLimit && _isJumping)
-                {
+                if(inSlopeLimit && _isJumping) {
                     AudioManager.instance.PlaySound(AudioTag.playerJump, gameObject);
                     motion.y = _jumpHeight;
                     _isInJump = true;
@@ -349,7 +327,35 @@ public class PlayerCharacter : MonoBehaviour {
             }
             _movement += GetFrictionVector() * deltaTime;
             return _movement;
-
+        } else {
+            // jump
+            if(_charaCtrl.isGrounded && _isJumping) {
+                AudioManager.instance.PlaySound(AudioTag.playerJump, gameObject);
+                move.y = _jumpHeight;
+            } else if(_charaCtrl.isGrounded) move.y = -_groundPullMagnitude;
+            else move.y += Physics.gravity.y * deltaTime;
+            // move
+            if(flatInputs.x > 0) {
+                move.x += Mathf.Sign(flatInputs.x) * (move.x < 0 ? Deceleration : Acceleration) * deltaTime;
+            } else if(flatInputs.x < 0) {
+                move.x += Mathf.Sign(flatInputs.x) * (move.x > 0 ? Deceleration : Acceleration) * deltaTime;
+            } else {
+                move.x += -Mathf.Sign(move.x) * Mathf.Clamp((_charaCtrl.isGrounded ? 1 : 0.1f) * Deceleration * deltaTime, 0, Mathf.Abs(move.x));
+            }
+            if(flatInputs.z > 0) {
+                move.z += Mathf.Sign(flatInputs.z) * (move.z < 0 ? Deceleration : Acceleration) * deltaTime;
+            } else if(flatInputs.z < 0) {
+                move.z += Mathf.Sign(flatInputs.z) * (move.z > 0 ? Deceleration : Acceleration) * deltaTime;
+            } else if(_charaCtrl.isGrounded) {
+                move.z += -Mathf.Sign(move.z) * Mathf.Clamp((_charaCtrl.isGrounded ? 1 : 0.1f) * Deceleration * deltaTime, 0, Mathf.Abs(move.z));
+            }
+            Vector3 moveTemp = move;
+            moveTemp.y = 0;
+            moveTemp = Vector3.ClampMagnitude(moveTemp, Speed);
+            move.x = moveTemp.x;
+            move.z = moveTemp.z;
+            // full motion
+            return _playerCam.transform.TransformDirection(move);
         }
     }
     Vector3 GetSlopeVector() {
@@ -399,7 +405,7 @@ public class PlayerCharacter : MonoBehaviour {
             //Debug.LogError("climbing RETRIEVED");
         }
         RaycastHit hit;
-        if(!_wasClimbing ? FindClosestWallPoint(BodyCenter, ClimbCheckVector, out hit, 90, 1) : FindWallPoint(BodyCenter, ClimbCheckVector, out hit)) {
+        if(!_wasClimbing ? FindClosestWallPoint(BodyCenter, ClimbCheckVectorTrigger, out hit, 90, 1) : FindWallPoint(BodyCenter, ClimbCheckVectorTrigger, out hit)) {
             //Debug.Log(">>> WallPoint found at ");
             //Debug.DrawLine(BodyCenter, hit.point, Color.red, 0.1f);
             //_wallPoint = hit.point;
@@ -427,7 +433,7 @@ public class PlayerCharacter : MonoBehaviour {
                 //transform.SlerpRotation(-hit.normal, Vector3.up, RotationSpeed);
             }
             _climbPosOffset = helper.position - transform.position;
-            Debug.DrawRay(helper.position + helper.up * BodyCenterUp, ClimbCheckVector, Color.green);
+            Debug.DrawRay(helper.position + helper.up * BodyCenterUp, ClimbCheckVectorTrigger, Color.green);
             Debug.DrawRay(hit.point, Vector3.Cross(helper.up, -hit.normal), Color.blue); // perpendicualr to hit point
         }
 
@@ -512,6 +518,7 @@ public class PlayerCharacter : MonoBehaviour {
         //Debug.Log("<<< Stop Declimbing");
     }
     bool CheckForClimb() {
+        if(_hasBomb) return false;
         //return (CheckForClimbForward(BodyCenter) || CheckForClimbForward(BodyCenter, _climbSideAngle) || CheckForClimbForward(BodyCenter, -_climbSideAngle));
         if(!_wasClimbing) {
             return (CheckForClimbForward(BodyCenter) || CheckForClimbForward(BodyCenter, _climbSideAngle) || CheckForClimbForward(BodyCenter, -_climbSideAngle));
@@ -552,7 +559,10 @@ public class PlayerCharacter : MonoBehaviour {
         return wallFound;
     }
     bool FindWallPoint(Vector3 origin, Vector3 direction, out RaycastHit hit) {
-        return Physics.Raycast(origin, direction.normalized, out hit, direction.magnitude, Utils.l_Terrain.ToLayerMask());
+        if(Physics.Raycast(origin, direction.normalized, out hit, ClimbCheckVectorWallLength, Utils.l_Terrain.ToLayerMask())) {
+            return Physics.Raycast(origin, direction.normalized, out hit, direction.magnitude, Utils.l_Environment.ToLayerMask());
+        }
+        return false;
     }
     bool FindDeclimbHitPoint(Vector3 localDir, out RaycastHit hit) {
         Vector3 rayOrigin = BodyCenter;
@@ -583,18 +593,15 @@ public class PlayerCharacter : MonoBehaviour {
         Debug.DrawRay(rayOrigin, rayDir, Color.yellow);
         return false;
     }
-    float climbCheckSphereRadius = 0.05f;
     bool CheckForClimbForward(Vector3 rayOrigin, float angleY = 0) {
-        RaycastHit hit;
-        //Vector3 rayOrigin = _bodyCenter.position;
-        Vector3 rayDir = Quaternion.Euler(0, angleY, 0) * ClimbCheckVector;
+        Vector3 rayDir = Quaternion.Euler(0, angleY, 0) * ClimbCheckVectorTrigger;
         int layerMaskClimbZone = Utils.l_Environment.ToLayerMask();
         int layerMaskWall = Utils.l_Terrain.ToLayerMask();
-        if(Physics.SphereCast(rayOrigin, climbCheckSphereRadius, rayDir.normalized, out hit, rayDir.magnitude - climbCheckSphereRadius, layerMaskWall)) {
+        if(Physics.Raycast(rayOrigin, rayDir.normalized, out _tempHit, ClimbCheckVectorWallLength, layerMaskWall)) {
             // a surface blocks the "forward" direction
-            if(Physics.SphereCast(rayOrigin,climbCheckSphereRadius, rayDir.normalized, out hit, rayDir.magnitude - climbCheckSphereRadius, layerMaskClimbZone)) {
+            if(Physics.Raycast(rayOrigin, rayDir.normalized, out _tempHit, rayDir.magnitude, layerMaskClimbZone)) {
                 // this surface is NOT a climbable wall
-                if (hit.collider.CompareTag("tree"))
+                if (_tempHit.collider.CompareTag("tree"))
                 {
                     return true;
                 }
@@ -688,6 +695,7 @@ public class PlayerCharacter : MonoBehaviour {
     #region INTERACTIONS
     Root CheckRootsInteraction()
     {
+        if(!CanInteract) return null;
         RaycastHit hit;
         int layer = Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask();
         if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, layer))
@@ -699,8 +707,9 @@ public class PlayerCharacter : MonoBehaviour {
         }
         return null;
     }
-    BombPlant CheckPlantInteraction()
+    BombPlant CheckPlantInteraction() 
     {
+        if(!CanInteract) return null;
         RaycastHit hit;
         int layer = Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask();
         if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, layer))

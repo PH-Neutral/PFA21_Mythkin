@@ -14,13 +14,16 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SandboxPH.unity
     guid: 3339c4a990389454497f05be98fe9386
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Prototype 4.unity
     guid: ce9962d3fb81bbd4897dab369a42fedc
   - enabled: 0
     path: Assets/Scenes/SandboxArthur.unity
     guid: ca89aad3b2ac26449897ddd6766b2b0c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Prototype 5.unity
     guid: 45322655e4a9fe94584cebfc29d2d8a9
+  - enabled: 1
+    path: Assets/Scenes/Loading.unity
+    guid: 84063f68f57a5a3478df9f427c26ee63
   m_configObjects: {}

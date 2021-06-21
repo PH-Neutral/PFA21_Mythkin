@@ -63,13 +63,18 @@ namespace AshkynCore.UI {
         public void SelectUIObject(GameObject objToSelect) {
             EventSystem.current.SetSelectedGameObject(objToSelect);
         }
-        public void ReloadScene() 
+        public void ReloadScene(bool showLoadingScreen = false) 
         {
-            Destroy(GameManager.Instance.gameObject);
-            LoadScene(SceneManager.GetActiveScene().buildIndex);
+            //Destroy(GameManager.Instance.gameObject);
+            LoadScene(SceneManager.GetActiveScene().buildIndex, showLoadingScreen);
         } 
-        public void LoadScene(int index) {
-            SceneManager.LoadScene(index);
+        public void LoadScene(int index, bool showLoadingScreen = false) {
+            if(showLoadingScreen) {
+                AudioManager.instance?.ClearAllSources();
+                LoadingData.LoadScene(index);
+            } else {
+                SceneManager.LoadScene(index);
+            }
         }
         public void QuitGame() {
             Application.Quit(0);

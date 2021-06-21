@@ -14,6 +14,7 @@ public class AudioManager : MonoBehaviour {
     Dictionary<AudioKey, AudioSource> _sourceDic;
     Dictionary<AudioSource, AudioAsset> _sourceAssetDic;
     List<AudioSource> _musicSources, _soundSources;
+    List<AudioSource> _toBeRemoved;
 
     private void Awake() {
         if(instance == null) instance = this;
@@ -27,6 +28,7 @@ public class AudioManager : MonoBehaviour {
 
         _musicSources = new List<AudioSource>();
         _soundSources = new List<AudioSource>();
+        _toBeRemoved = new List<AudioSource>();
 
         // get the playerPrefs
         LoadSettings();
@@ -49,6 +51,12 @@ public class AudioManager : MonoBehaviour {
         PlayerPrefs.SetFloat(key_identifier + settingKey, floatToSave);
     }
 
+    public void ClearAllSources() {
+        _sourceAssetDic.Clear();
+        _sourceDic.Clear();
+        _musicSources.Clear();
+        _soundSources.Clear();
+    }
     public void PlaySound(AudioTag tag, float volumeScale = 1) => PlaySound(tag, null, volumeScale);
     public void PlaySound(AudioTag tag, GameObject target, float volumeScale = 1) {
         AudioAsset asset = GetSoundAsset(tag);
@@ -99,9 +107,14 @@ public class AudioManager : MonoBehaviour {
         AudioAsset asset;
         for(int i=0; i<_musicSources.Count; i++) {
             asset = GetAsset(_musicSources[i]);
+            if(_musicSources[i] == null) {
+                _toBeRemoved.Add(_musicSources[i]);
+                continue;
+            }
             if(asset == null) continue;
             _musicSources[i].volume = volume * asset.volume;
         }
+
     }
     public void ChangeVolumeSound(float volume) {
         volumeSound = volume;
@@ -109,7 +122,7 @@ public class AudioManager : MonoBehaviour {
         AudioAsset asset;
         for(int i = 0; i < _soundSources.Count; i++) {
             asset = GetAsset(_soundSources[i]);
-            if(asset == null) continue;
+            if(asset == null || _soundSources[i] == null) continue;
             _soundSources[i].volume = volume * asset.volume;
         }
     }

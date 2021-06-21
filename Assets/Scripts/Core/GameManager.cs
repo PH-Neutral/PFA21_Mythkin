@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
         }
         set {
             Time.timeScale = value ? 0 : 1;
+            UpdateCursor();
         }
     }
     public UnityEngine.AI.NavMeshSurface terrain;
@@ -24,8 +25,8 @@ public class GameManager : MonoBehaviour
     public CustomMenu gameOverMenu, winMenu;
 
     [SerializeField] Transform lowestPoint;
-    float timer; 
-    bool wonOrLost = false;
+    float timer;
+    bool wonOrLost = false, timerHasStarted = false;
 
     private void Awake()
     {
@@ -38,18 +39,22 @@ public class GameManager : MonoBehaviour
     {
         AudioManager.instance.PlayMusic(AudioTag.musicLevel01, true);
         GamePaused = false;
-        timer = 0;
     }
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
             TogglePause();
         }
-        timer += Time.deltaTime;
-
+        if(timerHasStarted) timer += Time.deltaTime;
+    }
+    private void LateUpdate() {
         if(lowestPoint != null) {
             // if player falls from map
             if(player.transform.position.y < lowestPoint.position.y) GameOver();
         }
+    }
+    public void StartGame() {
+        timer = 0;
+        timerHasStarted = true;
     }
     public void TogglePause() {
         if(wonOrLost) return;
@@ -58,7 +63,7 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.DisplayPauseMenu(GamePaused);
         if (GamePaused)
         {
-            AudioManager.instance.PlayMusic(AudioTag.musicMenu02);
+            AudioManager.instance.PlayMusic(AudioTag.musicMenu02, true);
         }
         else
         {
@@ -82,8 +87,20 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
         winMenu.Show();
     }
+    void UpdateCursor() {
+        if(GamePaused) {
+            Cursor.lockState = CursorLockMode.None;
+        } else {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
 
     private void OnApplicationQuit() {
         PlayerPrefs.Save();
+    }
+    private void OnApplicationFocus(bool focus) {
+        if(focus) {
+            UpdateCursor();
+        }
     }
 }
