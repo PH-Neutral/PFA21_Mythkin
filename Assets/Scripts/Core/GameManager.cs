@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
     public int collectiblesCount = 0;
 
     [SerializeField] Transform lowestPoint;
-    float timer;
+    public float timer;
     bool wonOrLost = false, timerHasStarted = false;
 
     private void Awake()
@@ -97,6 +97,7 @@ public class GameManager : MonoBehaviour
         GameData.invisible = isInvisible?1:0;
         wonOrLost = true;
         UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
+        UIManager.Instance.collectiblesTxt.text = "Collectibles : " + collectiblesCount + "/" + collectiblesTotal;
         winMenu.Show();
     }
     void UpdateCursor() {

@@ -68,6 +68,10 @@ namespace AshkynCore.UI {
             //Destroy(GameManager.Instance.gameObject);
             LoadScene(SceneManager.GetActiveScene().buildIndex, showLoadingScreen);
         } 
+        public void LoadScene(int index)
+        {
+            SceneManager.LoadScene(index);
+        }
         public void LoadScene(int index, bool showLoadingScreen = false) {
             if(showLoadingScreen) {
                 AudioManager.instance?.ClearAllSources();

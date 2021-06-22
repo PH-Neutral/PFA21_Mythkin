@@ -9,7 +9,10 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
 
     public MenuPause menuPause;
-    public Text invisibleTxt, timeTxt;
+    public Text invisibleTxt, timeTxt, collectiblesTxt;
+    public Text pauseInvisibleTxt, pauseTimeTxt, pauseCollectiblesTxt;
+
+    GameManager gm;
 
     private void Awake()
     {
@@ -23,8 +26,19 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        gm = GameManager.Instance;
+    }
+
     public void DisplayPauseMenu(bool display) {
-        if(display) menuPause.Show();
+        if (display)
+        {
+            pauseInvisibleTxt.text = "Invisible : " + (gm.isInvisible ? "yes" : "no");
+            pauseTimeTxt.text = "Timer : " + gm.timer.ChangePrecision(0).ToString() + "s";
+            pauseCollectiblesTxt.text = "Collectibles : " + gm.collectiblesCount.ToString() + "/" + GameManager.collectiblesTotal.ToString();
+            menuPause.Show();
+        }
         else menuPause.Hide();
     }
 }
