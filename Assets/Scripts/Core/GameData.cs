@@ -7,12 +7,25 @@ public class GameData : MonoBehaviour
     public const string key_Audio = "Audio_", key_volumeSound = "volumeSound", key_volumeMusic = "volumeMusic";
     public const string key_Highscore = "Highscore_", key_collectiblesCount = "collectiblesCount", key_bestTime = "bestTime", key_invisible = "invisible";
 
+
+    public static GameData instance = null;
+
     public static int maxCollectiblesCount = 0, invisible = 0;
     public static float volumeSound = 0.5f, volumeMusic = 0.5f, bestTime = -1;
 
     private void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+            LoadSettings();
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
         DontDestroyOnLoad(gameObject);
+
     }
     public void SaveSettings()
     {
