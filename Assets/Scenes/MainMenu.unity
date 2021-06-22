@@ -673,6 +673,7 @@ MonoBehaviour:
   firstMenuItem: {fileID: 1067906214}
   returnMenu: {fileID: 0}
   showOnStart: 1
+  backgroundMusic: 25
   invisible: {fileID: 70639040}
   bestTime: {fileID: 1236507196}
   collectibles: {fileID: 183894470}
