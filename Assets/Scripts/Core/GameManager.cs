@@ -94,7 +94,10 @@ public class GameManager : MonoBehaviour
         {
             GameData.bestTime = timer;
         }
-        GameData.invisible = isInvisible?1:0;
+        if (isInvisible)
+        {
+            GameData.invisible = 1;
+        }
         wonOrLost = true;
         UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
         UIManager.Instance.collectiblesTxt.text = "Collectibles : " + collectiblesCount + "/" + collectiblesTotal;
