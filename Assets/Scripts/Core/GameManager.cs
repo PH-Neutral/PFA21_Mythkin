@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
         }
     }
     public bool isInvisible = true;
+    public AudioTag backgroundMusic;
     public UnityEngine.AI.NavMeshSurface terrain;
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
@@ -40,7 +41,7 @@ public class GameManager : MonoBehaviour
     }
     private void Start()
     {
-        AudioManager.instance.PlayMusic(AudioTag.musicLevel01, true);
+        AudioManager.instance.PlayMusic(backgroundMusic, true);
         GamePaused = false;
     }
     private void Update() {
@@ -50,7 +51,7 @@ public class GameManager : MonoBehaviour
         if(timerHasStarted) timer += Time.deltaTime;
     }
     private void LateUpdate() {
-        if(lowestPoint != null) {
+        if(lowestPoint != null && player != null) {
             // if player falls from map
             if(player.transform.position.y < lowestPoint.position.y) GameOver();
         }
@@ -61,16 +62,10 @@ public class GameManager : MonoBehaviour
     }
     public void TogglePause() {
         if(wonOrLost) return;
-        AudioManager.instance.PauseAudio(AudioTag.musicLevel01, null);
+        //AudioManager.instance.PauseAudio(backgroundMusic, null);
         GamePaused = !GamePaused;
         UIManager.Instance.DisplayPauseMenu(GamePaused);
-        if (GamePaused)
-        {
-            AudioManager.instance.PlayMusic(AudioTag.musicMenu02, true);
-        }
-        else
-        {
-            AudioManager.instance.StopAudio(AudioTag.musicMenu02, null);
+        if (!GamePaused) {
             menuOptions.Hide();
         }
     }

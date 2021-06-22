@@ -14,7 +14,7 @@ public class AudioManager : MonoBehaviour {
     Dictionary<AudioKey, AudioSource> _sourceDic;
     Dictionary<AudioSource, AudioAsset> _sourceAssetDic;
     List<AudioSource> _musicSources, _soundSources;
-    List<AudioSource> _toBeRemoved;
+    List<AudioSource> _toBeRemoved, _toBeDestroyed;
 
     private void Awake() {
         if(instance == null) instance = this;
@@ -29,16 +29,14 @@ public class AudioManager : MonoBehaviour {
         _musicSources = new List<AudioSource>();
         _soundSources = new List<AudioSource>();
         _toBeRemoved = new List<AudioSource>();
+        _toBeDestroyed = new List<AudioSource>();
 
         // get the playerPrefs
         LoadSettings();
     }
-
-    void LoadSettings() {
-        volumeMusic = GameData.volumeMusic;
-        volumeSound = GameData.volumeSound;
+    private void Update() {
+        DestroyFinishedSounds();
     }
-    
 
     public void ClearAllSources() {
         _sourceAssetDic.Clear();
@@ -46,8 +44,10 @@ public class AudioManager : MonoBehaviour {
         _musicSources.Clear();
         _soundSources.Clear();
     }
-    public void PlaySound(AudioTag tag, float volumeScale = 1) => PlaySound(tag, null, volumeScale);
-    public void PlaySound(AudioTag tag, GameObject target, float volumeScale = 1) {
+    public void PlaySound(AudioTag tag, float volumeScale = 1) => PlaySound(tag, null, false, volumeScale);
+    public void PlaySound(AudioTag tag, bool destroyOnEnd, float volumeScale = 1) => PlaySound(tag, null, destroyOnEnd, volumeScale);
+    public void PlaySound(AudioTag tag, GameObject target, float volumeScale = 1) => PlaySound(tag, target, false, volumeScale);
+    public void PlaySound(AudioTag tag, GameObject target, bool destroyOnEnd, float volumeScale = 1) {
         AudioAsset asset = GetSoundAsset(tag);
         if(asset == null) return;
         AudioSource source = GetSource(tag, target);
@@ -58,6 +58,7 @@ public class AudioManager : MonoBehaviour {
         source.PlayOneShot(asset.GetClip(), volumeScale);
         SetSource(tag, target, source, asset);
         _soundSources.AddUnique(source);
+        if(destroyOnEnd) _toBeDestroyed.AddUnique(source);
     }
 
     public void PlayMusic(AudioTag tag, bool loop = false) => PlayMusic(tag, null, loop);
@@ -73,6 +74,15 @@ public class AudioManager : MonoBehaviour {
         source.Play();
         SetSource(tag, target, source, asset);
         _musicSources.AddUnique(source);
+    }
+
+    public void AdjustMusicVolume(AudioTag tag, float volumeRatio) => AdjustMusicVolume(tag, null, volumeRatio);
+    public void AdjustMusicVolume(AudioTag tag, GameObject target, float volumeRatio) {
+        AudioAsset asset = GetSoundAsset(tag);
+        if(asset == null) return;
+        AudioSource source = GetSource(tag, target);
+        if(source == null) return;
+        source.volume = volumeMusic * asset.volume * volumeRatio;
     }
 
     public void PauseAudio(AudioTag tag, GameObject target) => PauseAudio(new AudioKey(tag, target));
@@ -96,7 +106,6 @@ public class AudioManager : MonoBehaviour {
         for(int i=0; i<_musicSources.Count; i++) {
             asset = GetAsset(_musicSources[i]);
             if(_musicSources[i] == null) {
-                _toBeRemoved.Add(_musicSources[i]);
                 continue;
             }
             if(asset == null) continue;
@@ -145,5 +154,19 @@ public class AudioManager : MonoBehaviour {
     AudioAsset GetAsset(AudioSource source) {
         if(_sourceAssetDic.TryGetValue(source, out AudioAsset asset)) return asset;
         return null;
+    }
+
+    void LoadSettings() {
+        volumeMusic = GameData.volumeMusic;
+        volumeSound = GameData.volumeSound;
+    }
+    void DestroyFinishedSounds() {
+        AudioSource[] sources = _toBeDestroyed.ToArray();
+        for(int i=0; i< sources.Length; i++) {
+            if(!sources[i].isPlaying) {
+                _toBeDestroyed.Remove(sources[i]);
+                Destroy(sources[i].gameObject);
+            }
+        }
     }
 }

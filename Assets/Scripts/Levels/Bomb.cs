@@ -16,11 +16,11 @@ public class Bomb : MonoBehaviour
         // play explosion sound
         GameObject audioGO = new GameObject();
         audioGO.transform.position = transform.position;
-        AudioManager.instance.PlaySound(AshkynCore.Audio.AudioTag.fruitBombImpact, audioGO, 1);
+        AudioManager.instance.PlaySound(AshkynCore.Audio.AudioTag.fruitBombImpact, audioGO, true, 1); // audio source should be destroyed when finished playing
         // can be heard by ennemies
         Utils.EmitSound(_soundRadius, transform.position, false);
-        // destroy
-        Destroy(gameObject);
+
+        Destroy(gameObject); // destroy the bomb on impact
     }
     private void OnTriggerEnter(Collider other)
     {

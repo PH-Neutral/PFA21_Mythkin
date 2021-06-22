@@ -75,7 +75,7 @@ public abstract class Enemy : MonoBehaviour
         //_renderers = GetComponentsInChildren<MeshRenderer>();
     }
     protected virtual void Start() {
-        target = GameManager.Instance.player.head;
+        target = GameManager.Instance.player?.head;
         State = debugState;
 
         // set initial position and orientation forced by patrolPath
@@ -146,6 +146,8 @@ public abstract class Enemy : MonoBehaviour
         _speed = speed;
     }
     protected bool Look(out Vector3 targetPos) {
+        targetPos = Vector3.zero;
+        if(target == null) return false;
         targetPos = target.position;
 
         //bool detectionLeft = DetectTarget(eyeLeft, target.gameObject);

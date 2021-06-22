@@ -16,8 +16,6 @@ public class PlayerCamera : MonoBehaviour
         }
     }
     [HideInInspector] public Camera cam;
-    public Transform playerHead;
-    public float maxZoomRatio = 1;
 
     [SerializeField] Transform _swivel, _stick;
     [SerializeField] float _rotationLowest, _rotationHighest, rotationPower = 1;

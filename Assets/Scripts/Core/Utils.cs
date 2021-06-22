@@ -82,6 +82,9 @@ public static class Utils {
     public static void AddUnique<T>(this List<T> list, T element) where T : class {
         if(!list.Contains(element)) list.Add(element);
     }
+    public static float DecimalPart(this float f) {
+        return f - Mathf.Floor(f);
+    }
     #endregion
 
     #region SPECIFICS

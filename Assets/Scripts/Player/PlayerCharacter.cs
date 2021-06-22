@@ -58,7 +58,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     public Transform head;
 
-    [SerializeField] Transform _camCenter, _throwPoint;
+    [SerializeField] Transform _camCenter, _throwPoint, _rightHand;
     [SerializeField] bool advancedMovement = false, debugDraws = false;
     [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f, _airDrag = 0.5f;
     [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
@@ -71,6 +71,7 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] float interactionRange = 3f;
     [SerializeField] MeshRenderer _fakebomb; //temporary. Will need to do it by animation
     CharacterController _charaCtrl;
+    PlayerIKController _ikCtrl;
     PlayerCamera _playerCam;
     TrajectoryHandler _trajectoryHandler;
     Animator _anim;
@@ -81,7 +82,6 @@ public class PlayerCharacter : MonoBehaviour {
     bool _wasGrounded = false, _wasClimbing = true, _wasPushed = false;
     bool _isOnClimbWall = false, _isDeclimbingUp = false, _declimbPart1 = true, _declimbCancel = false;
     bool _isAiming = false, _isThrowing = false, _hasBomb = false, _isInteracting = false, _isJumping = false, _isRunning = false;
-    bool _isInJump = false, _startJumping = false, _stopJumping = false, _isFalling = false;
     float deltaTime;
     BombPlant lastPlant;
     Vector3 move = Vector3.zero, _jumpBasePos, _climbPosOffset;
@@ -89,6 +89,7 @@ public class PlayerCharacter : MonoBehaviour {
     List<ControllerColliderHit> ccHits = new List<ControllerColliderHit>();
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
+        _ikCtrl = GetComponent<PlayerIKController>();
         _playerCam = GetComponentInChildren<PlayerCamera>();
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
         if(_trajectoryHandler != null) _trajectoryHandler.playerCamera = _playerCam;
@@ -109,7 +110,7 @@ public class PlayerCharacter : MonoBehaviour {
         //_isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
         _isAiming = Input.GetMouseButton(1);
         _isThrowing = Input.GetMouseButtonDown(0);
-        _isRunning = Input.GetKey(KeyCode.LeftShift);
+        _isRunning = Input.GetKey(KeyCode.LeftShift) && !_hasBomb;
         _inputs = GetInputs();
 
 
@@ -164,6 +165,7 @@ public class PlayerCharacter : MonoBehaviour {
             bombPlant.ShowOutline(true);
             if (_isInteracting && !_hasBomb) { 
                 bombPlant.PickBomb();
+                OnPickup();
                 _hasBomb = true;
                 _fakebomb.enabled = true;
                 lastPlant = bombPlant;
@@ -181,6 +183,7 @@ public class PlayerCharacter : MonoBehaviour {
             if (_isThrowing){
                 _fakebomb.enabled = false;
                 _trajectoryHandler.ThrowBomb();
+                OnThrow();
                 lastPlant.GrowBomb();
                 _hasBomb = false;
                 _trajectoryHandler.IsDisplaying = false;
@@ -227,36 +230,30 @@ public class PlayerCharacter : MonoBehaviour {
         }
     }
     void HandleAnimations() {
-        if(_startJumping) {
-            _jumpBasePos = transform.position;
+        if(_isOnClimbWall || _charaCtrl.isGrounded) {
+            _anim.speed = Speed / _moveSpeed;
+        } else {
+            _anim.speed = 1;
         }
-        if(_isInJump) {
-            if(transform.position.y < _jumpBasePos.y - 1) {
-                _isInJump = false;
-                _isFalling = true;
-            }
-        }
-
-        _anim.SetBool("isAlive", true);
-        //float speed = _movement.Multiply(new Vector3(1, 0, 1)).magnitude / Speed;
-        //Debug.Log($"{_movement.Multiply(new Vector3(1, 0, 1)).magnitude}/{Speed} = {speed}");
-        _anim.SetFloat("SpeedX", motion.x);
-        _anim.SetFloat("SpeedY", motion.y);
-        _anim.SetFloat("SpeedXZ", motion.Flatten().magnitude);
         _anim.SetBool("isSprinting", _isRunning);
-        //_anim.SetFloat("ClimbSpeed", _movement.magnitude / ClimbSpeed);
-        _anim.SetBool("startJumping", _startJumping);
-        _anim.SetBool("isJumping", _isInJump);
-        _anim.SetBool("stopJumping", _stopJumping);
-        _anim.SetBool("isFalling", _isFalling);
-        _anim.SetBool("isClimbing", _isOnClimbWall);
+        _anim.SetFloat("MoveSpeed", motion.Flatten().magnitude / Speed);
 
-        // debug
-        if(_startJumping) _startJumping = false;
-        if(_stopJumping) {
-            _stopJumping = false;
-            _isInJump = false;
-        } 
+
+        if(CheckIsFalling() && !_isOnClimbWall && !_wasClimbing) {
+            _anim.SetBool("isJumping", false);
+            _anim.SetBool("isFalling", true);
+        }
+        if(CheckEndFalling() && !_isOnClimbWall) {
+            _anim.SetBool("isJumping", false);
+            _anim.SetBool("isFalling", false);
+        }
+
+        _anim.SetBool("isClimbing", _isOnClimbWall);
+        _anim.SetFloat("ClimbSpeedX", motion.x);
+        _anim.SetFloat("ClimbSpeedY", motion.y);
+        if(_isOnClimbWall && !_wasClimbing) {
+            PlayAnimClimb();
+        }
     }
     #endregion
     #region MOVEMENT
@@ -298,15 +295,10 @@ public class PlayerCharacter : MonoBehaviour {
                 if(_wasGrounded) {
                     //motion.y = -_groundPullMagnitude;
                 }
-                _isFalling = false;
-                if(_isInJump) {
-                    _stopJumping = true;
-                }
                 if(inSlopeLimit && _isJumping) {
                     AudioManager.instance.PlaySound(AudioTag.playerJump, gameObject);
                     motion.y = _jumpHeight;
-                    _isInJump = true;
-                    _startJumping = true;
+                    OnStartJumping();
                 }
                 _movement = _playerCam.transform.TransformDirection(motion);
 
@@ -389,11 +381,13 @@ public class PlayerCharacter : MonoBehaviour {
         }
         return friction;
     }
+    void OnStartJumping() {
+        _anim.SetBool("isJumping", true);
+        PlayAnimJump(); 
+    }
     #endregion
     #region CLIMBING
     Vector3 Climb() {
-        _isInJump = false;
-        _isFalling = false;
         // check for terrain under character
         bool isGrounded = CheckIfGrounded();
         // check if character can declimb on a ledge
@@ -409,13 +403,13 @@ public class PlayerCharacter : MonoBehaviour {
             //Debug.Log(">>> WallPoint found at ");
             //Debug.DrawLine(BodyCenter, hit.point, Color.red, 0.1f);
             //_wallPoint = hit.point;
-            Debug.Log("Angle w/ normal: " + Vector3.Angle(transform.forward, -hit.normal));
+            //Debug.Log("Angle w/ normal: " + Vector3.Angle(transform.forward, -hit.normal));
             //Debug.DrawRay(BodyCenter, ClimbCheckVector, Color.red);
             //Debug.DrawRay(hit.point, -hit.normal, Color.blue);
             helper.position = transform.position;
             helper.rotation = transform.rotation;
             if(Vector3.Angle(transform.forward, -hit.normal) != 0) {
-                Debug.Log($"Repositioning...");
+                //Debug.Log($"Repositioning...");
                 //transform.LookAt(transform.position - hit.normal, Vector3.up);
                 //Debug.Log($"Normal: {-hit.normal} || Angle: {Vector3.Angle(transform.forward, -hit.normal)}");
                 helper.position = BodyCenter;
@@ -451,6 +445,7 @@ public class PlayerCharacter : MonoBehaviour {
         if(_isJumping) {
             if (_inputs.z < 0) {
                 _movement = new Vector3(_inputs.x * Speed, _jumpHeight * 0.5f, _inputs.z * Speed * 0.5f);
+                OnStartJumping();
             }
         }
         // result
@@ -722,16 +717,45 @@ public class PlayerCharacter : MonoBehaviour {
         }
         return null;
     }
-    void GetBomb()
-    {
-        _fakebomb.enabled = true;
-        _hasBomb = true;
+    void OnPickup() {
+        PlayAnimPickup();
+        OpenRightHand(false);
+    }
+    void OnThrow() {
+        PlayAnimThrow();
+        OpenRightHand(true);
     }
     public void PushOut(Vector3 direction, float strength) {
         AudioManager.instance.PlaySound(AudioTag.playerGetsPushed, gameObject);
         _movement = direction.normalized * strength;
         _wasPushed = true;
     }
+    #endregion
+    #region ANIMATIONS
+    const string animNameClimb = "Climb Tree", animNameJump = "JumpMiddle", animNamePickup = "PickUpFruit", animaNameThrow = "ThrowFruit";
+    const float minFallVelocityY = -0.2f;
+    void PlayAnimClimb() {
+        _anim.Play(animNameClimb, 0, 0);
+    }
+    void PlayAnimJump() {
+        _anim.Play(animNameJump, 0, 0);
+    }
+    void PlayAnimPickup() {
+        _anim.Play(animNamePickup, 1, 0);
+    }
+    void PlayAnimThrow() {
+        _anim.Play(animaNameThrow, 1, 0);
+    }
+    bool CheckIsFalling() {
+        return _charaCtrl.velocity.y < minFallVelocityY;
+    }
+    bool CheckEndFalling() {
+        return _charaCtrl.isGrounded && _charaCtrl.velocity.y < 0;
+    }
+    void OpenRightHand(bool open) {
+        _anim.SetLayerWeight(2, open ? 0 : 1);
+    }
+
     #endregion
 
     public void HideMeshes(bool hide) {
@@ -745,7 +769,7 @@ public class PlayerCharacter : MonoBehaviour {
     private void OnControllerColliderHit(ControllerColliderHit hit) {
         ccHits.Add(hit);
     }
-
+    /*
     private void OnTriggerStay(Collider other) {
         if (other.TryGetComponent(out TunnelEntrance tEntrance)) {
             _playerCam.maxZoomRatio = tEntrance.GetCamLerpRatio(transform.position, true);
@@ -755,7 +779,7 @@ public class PlayerCharacter : MonoBehaviour {
         if(other.TryGetComponent(out TunnelEntrance tEntrance)) {
             _playerCam.maxZoomRatio = tEntrance.GetCamLerpRatio(transform.position, true);
         }
-    }
+    }*/
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected() {
         if(!debugDraws) return;

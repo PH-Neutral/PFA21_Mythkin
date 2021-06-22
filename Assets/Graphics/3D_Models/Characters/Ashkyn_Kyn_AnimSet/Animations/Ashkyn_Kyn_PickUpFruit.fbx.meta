@@ -38,8 +38,8 @@ ModelImporter:
       name: PickUpFruit
       takeName: mixamo.com
       internalID: 0
-      firstFrame: 0
-      lastFrame: 275
+      firstFrame: 20
+      lastFrame: 220
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
