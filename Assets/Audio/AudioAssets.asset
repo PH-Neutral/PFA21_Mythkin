@@ -92,7 +92,6 @@ MonoBehaviour:
   - tag: 12
     clips:
     - {fileID: 8300000, guid: 7ab67ec11722579419dfef295c3abdaf, type: 3}
-    - {fileID: 8300000, guid: 558be760c0fd8ba42b9cb95bd4bf5047, type: 3}
     volume: 0.5
   - tag: 13
     clips:

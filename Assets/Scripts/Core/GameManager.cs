@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -94,7 +95,7 @@ public class GameManager : MonoBehaviour
             GameData.invisible = 1;
         }
         wonOrLost = true;
-        UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
+        UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff");
         UIManager.Instance.collectiblesTxt.text = "Collectibles : " + collectiblesCount + "/" + collectiblesTotal;
         winMenu.Show();
     }

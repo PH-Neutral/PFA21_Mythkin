@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,7 +36,7 @@ public class UIManager : MonoBehaviour
         if (display)
         {
             pauseInvisibleTxt.text = "Invisible : " + (gm.isInvisible ? "yes" : "no");
-            pauseTimeTxt.text = "Timer : " + gm.timer.ChangePrecision(0).ToString() + "s";
+            pauseTimeTxt.text = "Timer : " + TimeSpan.FromSeconds(gm.timer).ToString("m\\:ss\\.fff");
             pauseCollectiblesTxt.text = "Collectibles : " + gm.collectiblesCount.ToString() + "/" + GameManager.collectiblesTotal.ToString();
             menuPause.Show();
         }
