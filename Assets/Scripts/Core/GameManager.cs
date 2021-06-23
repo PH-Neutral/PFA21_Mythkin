@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
         }
     }
     public Intro intro;
+    public bool isInTutorial;
     public AudioTag backgroundMusic;
     public UnityEngine.AI.NavMeshSurface terrain;
     public PlayerCharacter player;
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
             }
             return;
         }
-        if (Input.GetKeyDown(KeyCode.Escape)) {
+        if (Input.GetKeyDown(KeyCode.Escape) && !isInTutorial) {
             TogglePause();
         }
         timer += Time.deltaTime;

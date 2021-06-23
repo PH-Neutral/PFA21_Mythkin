@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
     public MenuPause menuPause;
     public Text invisibleTxt, timeTxt, collectiblesTxt;
     public Text pauseInvisibleTxt, pauseTimeTxt, pauseCollectiblesTxt;
+    public Text tutoTxt;
 
     GameManager gm;
 
