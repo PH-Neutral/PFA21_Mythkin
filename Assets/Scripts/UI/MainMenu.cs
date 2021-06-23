@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,12 +14,13 @@ namespace AshkynCore.UI {
             base.Start();
             AudioManager.instance.PlayMusic(backgroundMusic, true);
 
-            bestTime.text = "Best time : " + (GameData.bestTime!=-1? GameData.bestTime.ChangePrecision(1) + "s":"???");
+            bestTime.text = "Best time : " + (GameData.bestTime!=-1? TimeSpan.FromSeconds(GameData.bestTime).ToString("m\\:ss\\.fff"):"???");
             invisible.text = "Invisible : " + (GameData.invisible == 1 ? "Yes" : "No");
             collectibles.text = "Collectibles : " + GameData.maxCollectiblesCount + "/" + GameManager.collectiblesTotal;
         }
         public void LoadGame() {
             AudioManager.instance.StopAudio(backgroundMusic, null);
+            GameData.showIntro = true;
             LoadScene(1, true);
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,8 @@ public class GameManager : MonoBehaviour
             UpdateCursor();
         }
     }
-    public bool isInvisible = true;
+    public Intro intro;
+    public bool isInTutorial;
     public AudioTag backgroundMusic;
     public UnityEngine.AI.NavMeshSurface terrain;
     public PlayerCharacter player;
@@ -27,10 +29,11 @@ public class GameManager : MonoBehaviour
     public MenuOptions menuOptions;
     public CustomMenu gameOverMenu, winMenu;
     public int collectiblesCount = 0;
+    public bool isInvisible = true;
 
     [SerializeField] Transform lowestPoint;
     public float timer;
-    bool wonOrLost = false, timerHasStarted = false;
+    bool wonOrLost = false, gameHasStarted = false;
 
     private void Awake()
     {
@@ -41,14 +44,22 @@ public class GameManager : MonoBehaviour
     }
     private void Start()
     {
-        AudioManager.instance.PlayMusic(backgroundMusic, true);
-        GamePaused = false;
+        
     }
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Escape)) {
+        if (!gameHasStarted)
+        {
+            if (intro.HasFinished)
+            {
+                intro.Hide();
+                StartGame();
+            }
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.Escape) && !isInTutorial) {
             TogglePause();
         }
-        if(timerHasStarted) timer += Time.deltaTime;
+        timer += Time.deltaTime;
     }
     private void LateUpdate() {
         if(lowestPoint != null && player != null) {
@@ -56,9 +67,24 @@ public class GameManager : MonoBehaviour
             if(player.transform.position.y < lowestPoint.position.y) GameOver();
         }
     }
+    public void StartScene() {
+        if (GameData.showIntro)
+        {
+            intro.StartIntro();
+            GameData.showIntro = false;
+            GamePaused = true;
+        }
+        else
+        {
+            intro.Hide();
+            StartGame();
+        }
+    }
     public void StartGame() {
+        GamePaused = false;
         timer = 0;
-        timerHasStarted = true;
+        gameHasStarted = true;
+        AudioManager.instance.PlayMusic(backgroundMusic, true);
     }
     public void TogglePause() {
         if(wonOrLost) return;
@@ -94,7 +120,7 @@ public class GameManager : MonoBehaviour
             GameData.invisible = 1;
         }
         wonOrLost = true;
-        UIManager.Instance.timeTxt.text = "Time : " + timer.ChangePrecision(0).ToString() + "s";
+        UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff");
         UIManager.Instance.collectiblesTxt.text = "Collectibles : " + collectiblesCount + "/" + collectiblesTotal;
         winMenu.Show();
     }
