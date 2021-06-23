@@ -9,7 +9,7 @@ public class Snake : Enemy
     Transform tHead {
         get { return debugHead; }
     }
-    [SerializeField] float inGroundTime = 5f, attackDelay = 1f, headRadius = 0.5f;
+    [SerializeField] float attackDelay = 1f, headRadius = 0.5f;
     [SerializeField] Transform debugHead;
     Quaternion baseRotation;
     Vector3 attackPos, headStartPos;
@@ -158,11 +158,12 @@ public class Snake : Enemy
     void GoInHole()
     {
         head.gameObject.SetActive(false);
+        debugHead.gameObject.SetActive(false);
 
         AudioManager.instance.PlaySound(AudioTag.snakeGoesInHole, gameObject);
         //play anim goInHole
         isInGround = true;
-        Invoke(nameof(LeaveHole), inGroundTime);
+        // Invoke(nameof(LeaveHole), inGroundTime);
     }
     void LeaveHole()
     {

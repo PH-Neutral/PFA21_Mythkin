@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Tutorial : MonoBehaviour
 {
-    public string txtStr;
+    [TextArea]public string txtStr;
     Text txtObj;
     bool isInTutorial = false;
 
@@ -28,7 +28,7 @@ public class Tutorial : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer(Utils.l_Player))
         {
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.isInTutorial = true;
-            txtObj.text = txtStr;
+            txtObj.text = txtStr + "\n\n(Appuyez sur \"Entrée\")";
         }
     }
 }

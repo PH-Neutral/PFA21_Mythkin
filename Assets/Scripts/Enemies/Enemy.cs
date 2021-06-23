@@ -250,6 +250,7 @@ public abstract class Enemy : MonoBehaviour
         Material[] mats;
         for (int i = 0; i < _renderers.Length; i++) {
             mats = _renderers[i].sharedMaterials;
+            if (index >= mats.Length) continue;
             mats[index] = mat;
             _renderers[i].sharedMaterials = mats;
         }

@@ -290,7 +290,7 @@ MonoBehaviour:
   _renderers:
   - {fileID: 1223666516033215110}
   - {fileID: 1223666517384926997}
-  inGroundTime: 5
+  - {fileID: 6290965533618641183}
   attackDelay: 1
   headRadius: 0.5
   debugHead: {fileID: 7055955248186567479}

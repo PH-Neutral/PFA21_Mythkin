@@ -255,7 +255,7 @@ public class PlayerCharacter : MonoBehaviour {
             _anim.SetBool("isJumping", false);
             _anim.SetBool("isFalling", true);
         }
-        if(CheckEndFalling() && !_isOnClimbWall) {
+        if(CheckEndFalling() || _isOnClimbWall) {
             _anim.SetBool("isJumping", false);
             _anim.SetBool("isFalling", false);
         }
@@ -518,8 +518,8 @@ public class PlayerCharacter : MonoBehaviour {
     }
     Vector3 FindDeclimbPoint1() {
         Vector3 vHit = _declimbHit.point - transform.position;
-        float upMagn = vHit.magnitude * Mathf.Sin(Vector3.Angle(vHit, transform.forward) * Mathf.Deg2Rad);
-        return transform.position + transform.up * upMagn;
+        float upMagn = vHit.magnitude * Mathf.Sin(Vector3.Angle(vHit, FlatForward) * Mathf.Deg2Rad);
+        return transform.position + Vector3.up * upMagn;
     }
     void ResetDeclimb() {
         _isDeclimbingUp = false;
@@ -592,7 +592,7 @@ public class PlayerCharacter : MonoBehaviour {
         }
         Debug.DrawRay(rayOrigin, rayDir, Color.yellow);
         rayOrigin += rayDir;
-        rayDir = -transform.up * (Height * 0.5f + _climbMoveDistanceCheck * 2);
+        rayDir = -transform.up * (Height + _climbMoveDistanceCheck);
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
             // a surface blocks the "forward -> down" direction
             Debug.DrawLine(rayOrigin, hit.point, Color.yellow);
