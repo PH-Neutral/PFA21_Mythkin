@@ -35,7 +35,7 @@ public class LoadingScreen : MonoBehaviour {
             cGroup.alpha = Mathf.Lerp(cGroup.alpha, 0, Time.unscaledTime / fadeDuration);
             yield return null;
         }
-        GameManager.Instance?.StartGame();
+        GameManager.Instance?.StartScene();
         Destroy(gameObject);
         yield break;
     }

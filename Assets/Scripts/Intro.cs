@@ -14,39 +14,48 @@ public class Intro : MonoBehaviour
     }
     public Slide[] slides = new Slide[0];
 
+
+    public bool HasFinished
+    {
+        get { return slides.Length <= i; }
+    }
     public Image currentImage;
     public Text currentText;
 
     int i = 0;
     float timer = 0f;
+    bool hasStarted = false;
 
-    private void Start()
+
+    public void StartIntro()
     {
+        currentImage.color = Color.white;
+        gameObject.SetActive(true);
+        i = 0;
+        timer = 0f;
+        hasStarted = true;
         ShowSlide();
     }
 
     private void Update()
     {
+        if (!hasStarted) return;
+
         timer += Time.unscaledDeltaTime;
 
-        if (timer >= slides[i - 1].duration)
+        if (timer >= slides[i - 1].duration || Input.GetKeyDown(KeyCode.Space))
         {
-            if (slides.Length > i)
+            if (!HasFinished)
             {
-                timer = 0;
+                timer = 0f;
                 ShowSlide();
             }
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (slides.Length > i)
-            {
-                timer = 0;
-                CancelInvoke();
-                ShowSlide();
-            }
-        }
+    public void Hide()
+    {
+        gameObject.SetActive(false);
     }
 
     void ShowSlide()

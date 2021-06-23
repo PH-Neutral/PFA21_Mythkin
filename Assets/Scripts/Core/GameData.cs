@@ -10,6 +10,7 @@ public class GameData : MonoBehaviour
 
     public static GameData instance = null;
 
+    public static bool showIntro = true;
     public static int maxCollectiblesCount = 0, invisible = 0;
     public static float volumeSound = 0.5f, volumeMusic = 0.5f, bestTime = -1;
 
