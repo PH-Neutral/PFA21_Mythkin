@@ -24,9 +24,19 @@ public class PlayerCharacter : MonoBehaviour {
             return _climbSpeed * (_isRunning ? _sprintRatio : 1);
         }
     }
+    public float AirSpeed {
+        get {
+            return _moveSpeed * (_isRunning ? AirSprintRatio : 1);
+        }
+    }
     public float RotationSpeed {
         get {
             return _rotationSpeed * 360;
+        }
+    }
+    float AirSprintRatio {
+        get {
+            return 1 + (_sprintRatio - 1) * _airSprintRatio;
         }
     }
     float Radius {
@@ -61,7 +71,7 @@ public class PlayerCharacter : MonoBehaviour {
     [SerializeField] Transform _camCenter, _throwPoint, _rightHand;
     [SerializeField] bool advancedMovement = false, debugDraws = false;
     [SerializeField] float _accelerationTime = 0.5f, _decelerationTime = 0.2f, _airDrag = 0.5f;
-    [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
+    [SerializeField] float _moveSpeed = 5, _sprintRatio = 1.5f, _airSprintRatio = 0.5f, _climbSpeed = 2, _rotationSpeed = 20, _jumpHeight = 5;
     [SerializeField] float _inAirMoveRatio = 1, _groundPullMagnitude = 0.5f;
     [SerializeField] float _wallCheckDistance = 0.1f;
     [Range(0, 0.99f)] [SerializeField] float _climbWallDistanceOffsetRatio = 0.5f;
@@ -69,7 +79,7 @@ public class PlayerCharacter : MonoBehaviour {
     [Range(0, 89)][SerializeField] float _climbSideAngle = 40;
     [SerializeField] float _soundRadiusRun = 10f, _soundRadiusWalk = 5f;
     [SerializeField] float interactionRange = 3f;
-    [SerializeField] MeshRenderer _fakebomb; //temporary. Will need to do it by animation
+    [SerializeField] MeshRenderer _fakebomb; //temporary, but too late to remove I believe
     CharacterController _charaCtrl;
     PlayerIKController _ikCtrl;
     PlayerCamera _playerCam;
@@ -77,16 +87,17 @@ public class PlayerCharacter : MonoBehaviour {
     Animator _anim;
     Renderer[] _renderers;
     bool _isModelHidden = false;
-    Vector3 _movement = Vector3.zero, _wallPoint, _inputs = Vector3.zero, _declimbPoint1, _declimbInputMask, _declimbBasePos, _declimbBaseDir;
+    Vector3 _movement = Vector3.zero, _inputs = Vector3.zero, _declimbPoint1, _declimbInputMask, _declimbBasePos, _declimbBaseDir;
     RaycastHit _declimbHit, _tempHit;
-    bool _wasGrounded = false, _wasClimbing = true, _wasPushed = false;
+    bool _wasGrounded = true, _wasClimbing = false, _wasPushed = false;
     bool _isOnClimbWall = false, _isDeclimbingUp = false, _declimbPart1 = true, _declimbCancel = false;
     bool _isAiming = false, _isThrowing = false, _hasBomb = false, _isInteracting = false, _isJumping = false, _isRunning = false;
     float deltaTime;
     BombPlant lastPlant;
-    Vector3 move = Vector3.zero, _jumpBasePos, _climbPosOffset;
+    Vector3 move = Vector3.zero, _climbPosOffset;
     Transform helper;
     List<ControllerColliderHit> ccHits = new List<ControllerColliderHit>();
+
     private void Awake() {
         _charaCtrl = GetComponent<CharacterController>();
         _ikCtrl = GetComponent<PlayerIKController>();
@@ -129,6 +140,9 @@ public class PlayerCharacter : MonoBehaviour {
         _wasPushed = false;
     }
     #region GENERAL
+    public void Die() {
+        GameManager.Instance.GameOver();
+    }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         _playerCam.RotateHorizontal(inputs.x);
@@ -165,7 +179,7 @@ public class PlayerCharacter : MonoBehaviour {
             bombPlant.ShowOutline(true);
             if (_isInteracting && !_hasBomb) { 
                 bombPlant.PickBomb();
-                OnPickup();
+                PlayAnimPickup();
                 _hasBomb = true;
                 _fakebomb.enabled = true;
                 lastPlant = bombPlant;
@@ -183,7 +197,7 @@ public class PlayerCharacter : MonoBehaviour {
             if (_isThrowing){
                 _fakebomb.enabled = false;
                 _trajectoryHandler.ThrowBomb();
-                OnThrow();
+                PlayAnimThrow();
                 lastPlant.GrowBomb();
                 _hasBomb = false;
                 _trajectoryHandler.IsDisplaying = false;
@@ -230,14 +244,12 @@ public class PlayerCharacter : MonoBehaviour {
         }
     }
     void HandleAnimations() {
-        if(_isOnClimbWall || _charaCtrl.isGrounded) {
-            _anim.speed = Speed / _moveSpeed;
-        } else {
-            _anim.speed = 1;
+        if(!_isDeclimbingUp) {
+            _anim.SetBool("hasDeclimbedUp", true);
+            AdjustAnimSpeed(_isOnClimbWall || _charaCtrl.isGrounded ? Speed / _moveSpeed : 1);
         }
         _anim.SetBool("isSprinting", _isRunning);
         _anim.SetFloat("MoveSpeed", motion.Flatten().magnitude / Speed);
-
 
         if(CheckIsFalling() && !_isOnClimbWall && !_wasClimbing) {
             _anim.SetBool("isJumping", false);
@@ -252,7 +264,7 @@ public class PlayerCharacter : MonoBehaviour {
         _anim.SetFloat("ClimbSpeedX", motion.x);
         _anim.SetFloat("ClimbSpeedY", motion.y);
         if(_isOnClimbWall && !_wasClimbing) {
-            PlayAnimClimb();
+            //PlayAnimClimb();
         }
     }
     #endregion
@@ -268,18 +280,17 @@ public class PlayerCharacter : MonoBehaviour {
     }
     Vector3 motion;
     Vector3 Move() {
-        if(_wasClimbing) {
-            //Debug.LogError("climbing LOST");
-        }
-        Vector3 flatInputs = new Vector3(_inputs.x, 0, _inputs.z);
+        Vector3 flatInputs = _inputs.Flatten();
         //Debug.Log(flatInputs);
         if(_wasClimbing) {
+            //Debug.LogError("climbing LOST");
             _movement = Vector3.zero;
             move = Vector3.zero;
             transform.localRotation = Quaternion.Euler(0, transform.localRotation.eulerAngles.y, 0);
         }
         if(flatInputs.magnitude > 0) transform.SlerpRotation(_playerCam.transform.TransformDirection(flatInputs), transform.up, RotationSpeed);
         else if(_isAiming && _charaCtrl.isGrounded) transform.SlerpRotation(_playerCam.transform.forward.Flatten(), transform.up, RotationSpeed);
+        else if(!_charaCtrl.isGrounded) transform.SlerpRotation(_movement.Flatten(), transform.up, RotationSpeed);
 
         if (!advancedMovement) {
             //Vector3 motion;
@@ -297,7 +308,7 @@ public class PlayerCharacter : MonoBehaviour {
                 }
                 if(inSlopeLimit && _isJumping) {
                     AudioManager.instance.PlaySound(AudioTag.playerJump, gameObject);
-                    motion.y = _jumpHeight;
+                    motion.y = _jumpHeight * (_isRunning ? AirSprintRatio : 1);
                     OnStartJumping();
                 }
                 _movement = _playerCam.transform.TransformDirection(motion);
@@ -311,7 +322,7 @@ public class PlayerCharacter : MonoBehaviour {
                 }
             } else {
                 //if(_wasGrounded && _movement.y < -0.5f) _movement.y = -0.5f;
-                motion = flatInputs * Speed * _inAirMoveRatio * Time.deltaTime;
+                motion = flatInputs * _moveSpeed * _inAirMoveRatio * Time.deltaTime;
                 _movement += -_charaCtrl.velocity.Flatten().normalized * Mathf.Clamp(_airDrag * deltaTime, 0, _charaCtrl.velocity.Flatten().magnitude);
                 _movement += _playerCam.transform.TransformDirection(motion);
                 if(_wasGrounded && _movement.y < 0) _movement.y = 0;
@@ -437,14 +448,13 @@ public class PlayerCharacter : MonoBehaviour {
         if(isGrounded && _inputs.z < 0) {
             _movement = new Vector3(_inputs.x, -_groundPullMagnitude, _inputs.z) * Speed;
         }
-        bool canMoveHori = true;// CanClimbHorizontal(_inputs.x);
-        bool canMoveVert = CanClimbVertical(_inputs.z);
-        if(!canMoveHori) _movement.x = 0;
-        if(!canMoveVert) _movement.y = 0;
+        //if(!canMoveHori) _movement.x = 0;
+        if(_inputs.z > 0 && !CanClimbVertical(_inputs.z)) _movement.y = 0;
         // jumping
         if(_isJumping) {
             if (_inputs.z < 0) {
-                _movement = new Vector3(_inputs.x * Speed, _jumpHeight * 0.5f, _inputs.z * Speed * 0.5f);
+                _movement = new Vector3(_inputs.x * Speed, 0, _jumpHeight * -0.5f);
+                transform.rotation = Quaternion.LookRotation(-FlatForward, Vector3.up); // turn player on the opposite direction
                 OnStartJumping();
             }
         }
@@ -469,9 +479,9 @@ public class PlayerCharacter : MonoBehaviour {
             _declimbBaseDir = transform.forward;
             _declimbCancel = false;
             _declimbPoint1 = FindDeclimbPoint1();
-            _isOnClimbWall = false;
             _isDeclimbingUp = true;
             _declimbPart1 = true;
+            PlayAnimDeclimbUp();
             return true;
         }
         return false;
@@ -479,12 +489,13 @@ public class PlayerCharacter : MonoBehaviour {
     void Declimb() {
         // check for correct input to decide if declimb yes or no
         _declimbCancel = _declimbPart1 && (_inputs.Multiply(_declimbInputMask).normalized != _declimbInputMask);
-        //Debug.Log($"DECLIMB: [_declimbPart1={_declimbPart1} && (_inputs.Multiply(_declimbInputMask={_declimbInputMask}).normalized={_inputs.Multiply(_declimbInputMask).normalized} != _declimbInputMask={_declimbInputMask})] = {_declimbCancel}");
+        InvertAnimDeclimbUp(_declimbCancel);
 
         if(_declimbCancel) {
             // go back to previous pos and orientation
             transform.SlerpRotation(_declimbBaseDir, Vector3.up, RotationSpeed);
             if(transform.LerpPosition(_declimbBasePos, _climbSpeed)) {
+                StopAnimDeclimbUp();
                 ResetDeclimb();
             }
         } else {
@@ -493,7 +504,9 @@ public class PlayerCharacter : MonoBehaviour {
             if(_declimbPart1) {
                 // transform.pos to up
                 if(transform.LerpPosition(_declimbPoint1, _climbSpeed)) {
+                    _isOnClimbWall = false;
                     _declimbPart1 = false;
+                    StopAnimDeclimbUp();
                 }
             }
             if(!_declimbPart1) {
@@ -561,7 +574,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     bool FindDeclimbHitPoint(Vector3 localDir, out RaycastHit hit) {
         Vector3 rayOrigin = BodyCenter;
-        Vector3 rayDir = transform.up * (Height * 0.5f + _climbMoveDistanceCheck * 1.1f);
+        Vector3 rayDir = transform.up * (Height * 0.5f + _climbMoveDistanceCheck * 1.5f); // pu a bigger multiplier like 1.5f
         int layerMaskTerrain = Utils.l_Terrain.ToLayerMask();
         if(Physics.Raycast(rayOrigin, rayDir.normalized, out hit, rayDir.magnitude, layerMaskTerrain)) {
             // a surface blocks the "forward" direction
@@ -717,14 +730,6 @@ public class PlayerCharacter : MonoBehaviour {
         }
         return null;
     }
-    void OnPickup() {
-        PlayAnimPickup();
-        OpenRightHand(false);
-    }
-    void OnThrow() {
-        PlayAnimThrow();
-        OpenRightHand(true);
-    }
     public void PushOut(Vector3 direction, float strength) {
         AudioManager.instance.PlaySound(AudioTag.playerGetsPushed, gameObject);
         _movement = direction.normalized * strength;
@@ -732,19 +737,31 @@ public class PlayerCharacter : MonoBehaviour {
     }
     #endregion
     #region ANIMATIONS
-    const string animNameClimb = "Climb Tree", animNameJump = "JumpMiddle", animNamePickup = "PickUpFruit", animaNameThrow = "ThrowFruit";
+    const string animNameClimb = "Climb Tree", animNameJump = "JumpMiddle", animNamePickup = "PickUpFruit", animaNameThrow = "ThrowFruit", animNameDeclimb = "ClimbToLedge";
     const float minFallVelocityY = -0.2f;
     void PlayAnimClimb() {
         _anim.Play(animNameClimb, 0, 0);
+    }
+    void PlayAnimDeclimbUp() {
+        _anim.SetBool("hasDeclimbedUp", false);
+        _anim.Play(animNameDeclimb, 0, 0);
+    }
+    void StopAnimDeclimbUp() {
+        _anim.SetBool("hasDeclimbedUp", true);
+    }
+    void InvertAnimDeclimbUp(bool invert) {
+        _anim.SetFloat("DeclimbUpSpeedRatio", invert ? -1 : 1);
     }
     void PlayAnimJump() {
         _anim.Play(animNameJump, 0, 0);
     }
     void PlayAnimPickup() {
         _anim.Play(animNamePickup, 1, 0);
+        OpenRightHand(false);
     }
     void PlayAnimThrow() {
         _anim.Play(animaNameThrow, 1, 0);
+        OpenRightHand(true);
     }
     bool CheckIsFalling() {
         return _charaCtrl.velocity.y < minFallVelocityY;
@@ -754,6 +771,9 @@ public class PlayerCharacter : MonoBehaviour {
     }
     void OpenRightHand(bool open) {
         _anim.SetLayerWeight(2, open ? 0 : 1);
+    }
+    void AdjustAnimSpeed(float speed) {
+        _anim.speed = speed;
     }
 
     #endregion

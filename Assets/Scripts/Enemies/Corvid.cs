@@ -13,6 +13,11 @@ public class Corvid : Enemy {
     protected override void Update() {
         base.Update();
     }
+
+    public override void HitPlayer(Vector3 direction) {
+        Vector3 pushDir = Utils.GetDirectionUpped(direction, 10);
+        GameManager.Instance.player.PushOut(pushDir, _knockbackStrength);
+    }
     protected override void OnUpdate() {
         if(Look(out Vector3 targetPos)) {
             // if player seen
@@ -92,7 +97,7 @@ public class Corvid : Enemy {
                 bool touchedPlayer = CheckForTouch(lastPos, transform.position);
                 if(finishedMoving || touchedPlayer) {
                     if(touchedPlayer) {
-                        PushPlayer(transform.position - lastPos);
+                        HitPlayer(transform.position - lastPos);
                     }
                     _attackDone = true;
                     _afterAttackPos = transform.position + Utils.GetDirectionUpped(transform.position - lastPos, _afterAttackUpAngle) * 10;
@@ -105,12 +110,6 @@ public class Corvid : Enemy {
                 }
             }
         }
-    }
-    void PushPlayer(Vector3 direction) {
-        Debug.LogWarning("Player was pushed by a big bird!");
-        // push player away
-        Vector3 pushDir = Utils.GetDirectionUpped(direction, 10);
-        GameManager.Instance.player.PushOut(pushDir, _knockbackStrength);
     }
     bool CheckForTouch(Vector3 start, Vector3 end) {
         Ray ray = new Ray(start, end - start);

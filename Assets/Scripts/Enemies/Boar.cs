@@ -53,6 +53,10 @@ public class Boar : Enemy
 
         HandleSound();
     }
+    public override void HitPlayer(Vector3 direction) {
+        base.HitPlayer(direction);
+        //GameManager.Instance.player.PushOut(Utils.GetDirectionUpped(transform.forward, 10), 20);
+    }
     protected override void OnUpdate() {
         if(Look(out Vector3 targetPos)) {
             State = EnemyState.Aggro;
@@ -106,8 +110,7 @@ public class Boar : Enemy
             return;
         }
         if(CheckFrontAttack()) {
-            Debug.LogWarning($"Player was attacked by {name}!");
-            GameManager.Instance.player.PushOut(Utils.GetDirectionUpped(transform.forward, 10), 20);
+            HitPlayer(Vector3.zero);
             IsCharging = false;
             _afterAttackTimer = afterAttackDelay;
             return;

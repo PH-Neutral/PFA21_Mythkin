@@ -49,8 +49,8 @@ public static class Utils {
     public static Vector3 Multiply(this Vector3 vector, Vector3 other) {
         return new Vector3(vector.x * other.x, vector.y * other.y, vector.z * other.z);
     }
-    public static Vector3 Flatten(this Vector3 vector) {
-        return new Vector3(vector.x, 0, vector.z);
+    public static Vector3 Flatten(this Vector3 vector, float newY = 0) {
+        return new Vector3(vector.x, newY, vector.z);
     }
     public static float ChangePrecision(this float f, int nbDecimals) {
         return ((int)(f * Mathf.Pow(10, nbDecimals))) / Mathf.Pow(10, nbDecimals);
@@ -110,6 +110,7 @@ public static class Utils {
         return false;
     }
     public static bool LerpPosition(this Transform obj, Vector3 targetPos, float lerpSpeed) {
+        if(Vector3.Distance(obj.position, targetPos) == 0) return true;
         float t = lerpSpeed * Time.deltaTime / Vector3.Distance(obj.position, targetPos);
         obj.position = Vector3.Lerp(obj.position, targetPos, t);
         return t >= 1;
@@ -174,8 +175,9 @@ public static class Utils {
                 if(Physics.Raycast(ray, dist, l_Terrain.ToLayerMask())) continue;
                 relativePos = soundPosition - enemy.transform.position;
                 soundLevel = CalculateSoundLevel(soundRadius, relativePos.magnitude);
-                if (Mathf.Abs(enemy.transform.position.y - soundPosition.y) < 3f /*layer thickness (put a real var later)*/)
-                enemy.HearSound(relativePos, soundLevel, isPlayer);
+                if (soundPosition.y > enemy.minHeightDetection && soundPosition.y <= enemy.maxHeightDetection) {
+                    enemy.HearSound(relativePos, soundLevel, isPlayer);
+                }
             }
         }
     }

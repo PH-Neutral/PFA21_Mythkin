@@ -54,7 +54,7 @@ public abstract class Enemy : MonoBehaviour
     [Range(0, 100)]
     [SerializeField] protected float hearingLevelMin = 0f;
     [SerializeField] protected float rangeOfSight = 50, fieldOfView = 120, grassVerticalViewAngleMax = 50;
-    [SerializeField] protected float minHeightDetection = 0, maxHeightDetection = 6;
+    [SerializeField] public float minHeightDetection = 0, maxHeightDetection = 6;
     [SerializeField] protected PatrolPath patrolPath = null;
     [SerializeField] protected Transform head;
     protected Transform target;
@@ -69,6 +69,7 @@ public abstract class Enemy : MonoBehaviour
     bool _patrolJustStarted = true, _patrolAscending = true;
     float _speed, _patrolWaitTimer = 0;
     int _patPathIndex = 0;
+    Vector3 _dummyV3;
 
     protected virtual void Awake()
     {
@@ -90,6 +91,7 @@ public abstract class Enemy : MonoBehaviour
     }
     protected virtual void Update()
     {
+        if(GameManager.Instance.GamePaused) return;
         // ------ debug ------
         if (debugState != State)
         {
@@ -113,8 +115,13 @@ public abstract class Enemy : MonoBehaviour
         }
     }
 
+    public virtual void HitPlayer(Vector3 direction) {
+        if(debugLogs) Debug.LogWarning($"Player was hit by {name}!");
+        GameManager.Instance.player.Die();
+    }
     public void HearSound(Vector3 soundVector, float soundLevel, bool isPlayer)
     {
+        //Debug.LogWarning($"{name} heard the fucking sound!!!");
         if (soundLevel > hearingLevelMin)
         {
             // if sound is loud enough for the enemy to hear, then raise flag and save sound direction
@@ -123,7 +130,7 @@ public abstract class Enemy : MonoBehaviour
             soundHeard = true;
             if (debugLogs)
             {
-                Debug.Log($"The enemy \"{name}\" heard a sound of intensity {soundLevel.ChangePrecision(0)} coming from {soundVector.magnitude.ChangePrecision(2)}m away.");
+                //Debug.LogWarning($"The enemy \"{name}\" heard a sound of intensity {soundLevel.ChangePrecision(0)} coming from {soundVector.magnitude.ChangePrecision(2)}m away.");
             }
             OnSoundHeard();
         }
@@ -145,6 +152,7 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void SetSpeed(float speed) {
         _speed = speed;
     }
+    protected bool Look() => Look(out _dummyV3);
     protected bool Look(out Vector3 targetPos) {
         targetPos = Vector3.zero;
         if(target == null) return false;
