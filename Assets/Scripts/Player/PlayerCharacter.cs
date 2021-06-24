@@ -34,6 +34,7 @@ public class PlayerCharacter : MonoBehaviour {
             return _rotationSpeed * 360;
         }
     }
+    public bool canJump = true;
     float AirSprintRatio {
         get {
             return 1 + (_sprintRatio - 1) * _airSprintRatio;
@@ -117,7 +118,7 @@ public class PlayerCharacter : MonoBehaviour {
         if(GameManager.Instance.GamePaused || !isAlive) return;
 
         deltaTime = Time.deltaTime;
-        _isJumping = Input.GetKey(KeyCode.Space);
+        _isJumping = Input.GetKey(KeyCode.Space) && canJump;
         _isInteracting = Input.GetKeyDown(KeyCode.E);
         //if(Input.GetKeyDown(KeyCode.Alpha1)) _isAiming = _hasBomb ? !_isAiming : false;
         //_isThrowing = Input.GetKeyDown(KeyCode.Alpha2);
@@ -126,6 +127,8 @@ public class PlayerCharacter : MonoBehaviour {
         _isRunning = Input.GetKey(KeyCode.LeftShift) && !_hasBomb;
         _inputs = GetInputs();
         bool wasGrounded = _charaCtrl.isGrounded;
+
+        if (!canJump && Input.GetKeyUp(KeyCode.Space)) canJump = true;
 
         Look();
         HandleMovement();
@@ -175,8 +178,8 @@ public class PlayerCharacter : MonoBehaviour {
         // Roots
         Root root;
         if ((root = CheckRootsInteraction()) != null) {
-            root.ShowOutline(true);
-            if(_isInteracting) root.Open();
+            if (root.isInteractable) root.ShowOutline(true);
+            if(_isInteracting && root.isInteractable) root.Open();
         }
         //UIManager.Instance?.rootIndicator.SetActive(root != null);
 

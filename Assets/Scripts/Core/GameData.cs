@@ -12,6 +12,7 @@ public class GameData : MonoBehaviour
 
     public static bool showIntro = true;
     public static int maxCollectiblesCount = 0, invisible = 0;
+    public static Sprite invisibleSprt, notInvisibleSprt, allCollectiblesSprt, notAllCollectiblesSprt;
     public static float volumeSound = 0.5f, volumeMusic = 0.5f, bestTime = -1;
 
     private void Awake()
@@ -51,6 +52,10 @@ public class GameData : MonoBehaviour
     }
     void LoadSettings()
     {
+        invisibleSprt = Resources.Load<Sprite>("Token_Invisible_On");
+        notInvisibleSprt = Resources.Load<Sprite>("Token_Invisible_Off");
+        allCollectiblesSprt = Resources.Load<Sprite>("Token_Collectible_On");
+        notAllCollectiblesSprt = Resources.Load<Sprite>("Token_Collectible_Off");
         LoadSetting(key_Audio + key_volumeMusic, ref volumeMusic); // setup music volume
         LoadSetting(key_Audio + key_volumeSound, ref volumeSound); // setup sound volume
         LoadSetting(key_Highscore + key_collectiblesCount, ref maxCollectiblesCount);

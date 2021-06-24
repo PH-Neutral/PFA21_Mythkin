@@ -15,10 +15,7 @@ public class Intro : MonoBehaviour
     public Slide[] slides = new Slide[0];
 
 
-    public bool HasFinished
-    {
-        get { return slides.Length <= i; }
-    }
+    public bool hasFinished;
     public Image currentImage;
     public Text currentText;
 
@@ -34,6 +31,7 @@ public class Intro : MonoBehaviour
         i = 0;
         timer = 0f;
         hasStarted = true;
+        hasFinished = false;
         ShowSlide();
     }
 
@@ -45,10 +43,14 @@ public class Intro : MonoBehaviour
 
         if (timer >= slides[i - 1].duration || Input.GetKeyDown(KeyCode.Space))
         {
-            if (!HasFinished)
+            if (i < slides.Length)
             {
                 timer = 0f;
                 ShowSlide();
+            }
+            else
+            {
+                hasFinished = true;
             }
         }
     }

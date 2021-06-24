@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
     public MenuOptions menuOptions;
-    public CustomMenu gameOverMenu, winMenu;
+    public CustomMenu winMenu;
     public int collectiblesCount = 0;
     public bool isInvisible = true;
 
@@ -49,7 +49,7 @@ public class GameManager : MonoBehaviour
     private void Update() {
         if (!gameHasStarted)
         {
-            if (intro.HasFinished)
+            if (intro.hasFinished)
             {
                 intro.Hide();
                 StartGame();
@@ -100,13 +100,16 @@ public class GameManager : MonoBehaviour
     }
     public void GameOver()
     {
+        UIManager.Instance.winOrLoseTxt.text = "Game Over";
         GamePaused = true;
         disablePauseToggle = true;
         stopTimer = true;
-        gameOverMenu?.Show();
+        UpdateWinOrLoseLayout();
+        winMenu.Show();
     }
     public void Win()
     {
+        UIManager.Instance.winOrLoseTxt.text = "You Win";
         GamePaused = true;
         disablePauseToggle = true;
         stopTimer = true;
@@ -122,10 +125,18 @@ public class GameManager : MonoBehaviour
         {
             GameData.invisible = 1;
         }
-        UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff");
-        UIManager.Instance.collectiblesTxt.text = "Collectibles : " + collectiblesCount + "/" + collectiblesTotal;
+        UpdateWinOrLoseLayout();
         winMenu.Show();
     }
+
+    public void UpdateWinOrLoseLayout()
+    {
+        UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff");
+        UIManager.Instance.collectiblesTxt.text = collectiblesCount + "/" + collectiblesTotal;
+        UIManager.Instance.collectiblesImg.sprite = collectiblesCount == collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
+        UIManager.Instance.invisibleImg.sprite = isInvisible ? GameData.invisibleSprt : GameData.notInvisibleSprt;
+    }
+
     void UpdateCursor() {
         if(GamePaused) {
             Cursor.lockState = CursorLockMode.None;

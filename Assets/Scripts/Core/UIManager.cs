@@ -10,9 +10,12 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
 
     public MenuPause menuPause;
-    public Text invisibleTxt, timeTxt, collectiblesTxt;
-    public Text pauseInvisibleTxt, pauseTimeTxt, pauseCollectiblesTxt;
+    public Text timeTxt, collectiblesTxt;
+    public Text pauseTimeTxt, pauseCollectiblesTxt;
     public Text tutoTxt;
+    public Text winOrLoseTxt;
+
+    public Image pauseInvisibleImg, PauseCollectiblesImg, invisibleImg, collectiblesImg;
 
     GameManager gm;
 
@@ -36,9 +39,10 @@ public class UIManager : MonoBehaviour
     public void DisplayPauseMenu(bool display) {
         if (display)
         {
-            pauseInvisibleTxt.text = "Invisible : " + (gm.isInvisible ? "yes" : "no");
+            pauseInvisibleImg.sprite = gm.isInvisible ? GameData.invisibleSprt : GameData.notInvisibleSprt;
             pauseTimeTxt.text = "Timer : " + TimeSpan.FromSeconds(gm.timer).ToString("m\\:ss\\.fff");
-            pauseCollectiblesTxt.text = "Collectibles : " + gm.collectiblesCount.ToString() + "/" + GameManager.collectiblesTotal.ToString();
+            pauseCollectiblesTxt.text = gm.collectiblesCount.ToString() + "/" + GameManager.collectiblesTotal.ToString();
+            PauseCollectiblesImg.sprite = gm.collectiblesCount == GameManager.collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
             menuPause.Show();
         }
         else menuPause.Hide();

@@ -27,7 +27,6 @@ public abstract class Enemy : MonoBehaviour
                     break;
                 case EnemyState.Aggro:
                     newMat = GameManager.Instance.matEnemyAttack;
-                    UIManager.Instance.invisibleTxt.enabled = false;
                     GameManager.Instance.isInvisible = false;
                     OnAggro();
                     break;

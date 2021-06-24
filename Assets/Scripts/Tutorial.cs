@@ -18,6 +18,7 @@ public class Tutorial : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && isInTutorial)
         {
+            GameManager.Instance.player.canJump = false;
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.disablePauseToggle = false;
             Destroy(gameObject);
         }
