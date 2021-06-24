@@ -36,7 +36,7 @@ public class Snake : Enemy
         // decide the state you in
         if(soundHeard && !lastSoundIsPlayer) {
             GoInHole();
-        } else if(targetInRange) {
+        } else if(CheckLineOfSight()) {
             State = EnemyState.Aggro;
         }
     }
@@ -116,7 +116,7 @@ public class Snake : Enemy
         if(reloadAttack) {
             // head go back at start pos
             if(MoveHead(headStartPos) && transform.SlerpRotation(baseRotation, rotationSpeed)) {
-                if(targetInRange) {
+                if(CheckLineOfSight()) {
                     OnAggro();
                 } else {
                     State = EnemyState.Search;
@@ -146,6 +146,16 @@ public class Snake : Enemy
     }
     bool MoveHead(Vector3 targetPos) {
         return tHead.LerpPosition(targetPos, SprintSpeed);
+    }
+    bool CheckLineOfSight() {
+        if(debugDraws) Debug.DrawLine(headStartPos, target.position, targetInRange ? Color.green : Color.red);
+        if(!targetInRange) return false;
+        Ray ray = new Ray(headStartPos, target.position - headStartPos);
+        int layerMask = Utils.l_Terrain.ToLayerMask() | Utils.l_Interactibles.ToLayerMask();
+        if(Physics.Raycast(ray, (target.position - headStartPos).magnitude, layerMask)) {
+            return false;
+        }
+        return true;
     }
     bool CheckHeadCollision(Vector3 startPos, Vector3 dirVector) {
         Ray ray = new Ray(startPos, dirVector);

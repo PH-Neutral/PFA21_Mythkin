@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 2828889521628467117}
   - component: {fileID: 1219885737251586056}
   - component: {fileID: 3965719451900490946}
-  m_Layer: 0
+  - component: {fileID: 3192833459074679759}
+  m_Layer: 7
   m_Name: Cailloux_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -81,3 +82,17 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &3192833459074679759
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3173327604795905303}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 6461297695846733525, guid: c6a98ac8b7782bb4bbbc513a9acf86c8, type: 3}

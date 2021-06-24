@@ -58,10 +58,11 @@ public class TrajectoryHandler : MonoBehaviour {
     }
     Vector3 ProjectilePosition(Vector3 throwVector, float t)
     {
+        float angle = Vector3.SignedAngle(Vector3.forward, throwVector, -Vector3.right) * Mathf.Deg2Rad;
         return new Vector3(
             0,
-            throwVector.magnitude * t * Mathf.Sin(Vector3.Angle(Vector3.forward, throwVector) * Mathf.Deg2Rad) - 0.5f * Physics.gravity.magnitude * Mathf.Pow(t, 2),
-            throwVector.magnitude * t * Mathf.Cos(Vector3.Angle(Vector3.forward, throwVector) * Mathf.Deg2Rad)
+            throwVector.magnitude * t * Mathf.Sin(angle) - 0.5f * Physics.gravity.magnitude * Mathf.Pow(t, 2),
+            throwVector.magnitude * t * Mathf.Cos(angle)
             );
     }
     public void ThrowBomb()

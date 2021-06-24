@@ -123,7 +123,7 @@ public class PlayerCharacter : MonoBehaviour {
         _isThrowing = Input.GetMouseButtonDown(0);
         _isRunning = Input.GetKey(KeyCode.LeftShift) && !_hasBomb;
         _inputs = GetInputs();
-
+        bool wasGrounded = _charaCtrl.isGrounded;
 
         Look();
         HandleMovement();
@@ -133,7 +133,7 @@ public class PlayerCharacter : MonoBehaviour {
         HandleAnimations();
 
         _wasClimbing = _isOnClimbWall;
-        _wasGrounded = _charaCtrl.isGrounded;
+        _wasGrounded = wasGrounded;
     }
     private void LateUpdate() {
         ccHits.Clear();
@@ -251,13 +251,14 @@ public class PlayerCharacter : MonoBehaviour {
         _anim.SetBool("isSprinting", _isRunning);
         _anim.SetFloat("MoveSpeed", motion.Flatten().magnitude / Speed);
 
-        if(CheckIsFalling() && !_isOnClimbWall && !_wasClimbing) {
-            _anim.SetBool("isJumping", false);
-            _anim.SetBool("isFalling", true);
-        }
-        if(CheckEndFalling() || _isOnClimbWall) {
+        
+        if(CheckEndFalling()) {
             _anim.SetBool("isJumping", false);
             _anim.SetBool("isFalling", false);
+        } else if(CheckIsFalling()) {
+            //Debug.Log($"Velocity: {_charaCtrl.velocity}");
+            _anim.SetBool("isJumping", false);
+            _anim.SetBool("isFalling", true);
         }
 
         _anim.SetBool("isClimbing", _isOnClimbWall);
@@ -325,8 +326,12 @@ public class PlayerCharacter : MonoBehaviour {
                 motion = flatInputs * _moveSpeed * _inAirMoveRatio * Time.deltaTime;
                 _movement += -_charaCtrl.velocity.Flatten().normalized * Mathf.Clamp(_airDrag * deltaTime, 0, _charaCtrl.velocity.Flatten().magnitude);
                 _movement += _playerCam.transform.TransformDirection(motion);
-                if(_wasGrounded && _movement.y < 0) _movement.y = 0;
+                //Debug.Log($"IN AIR: WasGrounded = {_wasGrounded} || Movement.y = {_movement.y}");
+                if(_wasGrounded && _movement.y < 0) {
+                    _movement.y = 0;
+                }
                 else _movement += Physics.gravity * deltaTime;
+                //Debug.Log(">>> Movement.y = " + _movement.y);
             }
             _movement += GetFrictionVector() * deltaTime;
             return _movement;
@@ -488,7 +493,7 @@ public class PlayerCharacter : MonoBehaviour {
     }
     void Declimb() {
         // check for correct input to decide if declimb yes or no
-        _declimbCancel = _declimbPart1 && (_inputs.Multiply(_declimbInputMask).normalized != _declimbInputMask);
+        _declimbCancel = _declimbPart1 && (_inputs.Multiply(Utils.Abs(_declimbInputMask)).normalized != _declimbInputMask);
         InvertAnimDeclimbUp(_declimbCancel);
 
         if(_declimbCancel) {
@@ -738,7 +743,7 @@ public class PlayerCharacter : MonoBehaviour {
     #endregion
     #region ANIMATIONS
     const string animNameClimb = "Climb Tree", animNameJump = "JumpMiddle", animNamePickup = "PickUpFruit", animaNameThrow = "ThrowFruit", animNameDeclimb = "ClimbToLedge";
-    const float minFallVelocityY = -0.2f;
+    const float minFallVelocityY = -2.1f;
     void PlayAnimClimb() {
         _anim.Play(animNameClimb, 0, 0);
     }
@@ -764,10 +769,10 @@ public class PlayerCharacter : MonoBehaviour {
         OpenRightHand(true);
     }
     bool CheckIsFalling() {
-        return _charaCtrl.velocity.y < minFallVelocityY;
+        return _charaCtrl.velocity.y < minFallVelocityY && !_charaCtrl.isGrounded && !_isOnClimbWall && !_wasClimbing;
     }
     bool CheckEndFalling() {
-        return _charaCtrl.isGrounded && _charaCtrl.velocity.y < 0;
+        return _charaCtrl.isGrounded || _isOnClimbWall;
     }
     void OpenRightHand(bool open) {
         _anim.SetLayerWeight(2, open ? 0 : 1);

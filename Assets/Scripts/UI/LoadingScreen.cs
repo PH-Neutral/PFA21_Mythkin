@@ -7,6 +7,9 @@ using UnityEngine.SceneManagement;
 public class LoadingScreen : MonoBehaviour {
     [SerializeField] Slider progressBar;
     [SerializeField] float fadeDuration = 1;
+    [SerializeField] Transform circle;
+    [Tooltip("In turn per second.")]
+    [SerializeField] float rotateSpeed = 1;
     CanvasGroup cGroup;
     AsyncOperation loadingOperation;
     float progress = 0;
@@ -20,6 +23,9 @@ public class LoadingScreen : MonoBehaviour {
         if(progressBar != null) progressBar.interactable = false;
         loadingOperation = SceneManager.LoadSceneAsync(LoadingData.sceneToLoadIndex);
         StartCoroutine(Load());
+    }
+    private void Update() {
+        if(circle != null) circle.Rotate(Vector3.forward, rotateSpeed * 360 / Time.unscaledTime);
     }
 
     IEnumerator Load() {
