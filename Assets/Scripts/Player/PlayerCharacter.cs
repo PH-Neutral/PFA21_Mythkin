@@ -183,7 +183,7 @@ public class PlayerCharacter : MonoBehaviour {
         // Plants
         BombPlant bombPlant;
         if ((bombPlant = CheckPlantInteraction()) != null) {
-            bombPlant.ShowOutline(true);
+            if (bombPlant.gotABomb) bombPlant.ShowOutline(true);
             if (_isInteracting && !_hasBomb) { 
                 bombPlant.PickBomb();
                 PlayAnimPickup();
@@ -735,7 +735,7 @@ public class PlayerCharacter : MonoBehaviour {
         if (Physics.Raycast(_playerCam.transform.position, _playerCam.CamForward, out hit, interactionRange, layer))
         {
             if (hit.collider.TryGetComponent(out BombPlant bp)){
-                if (bp._gotABomb){
+                if (bp.gotABomb){
                     return bp;
                 }
             }

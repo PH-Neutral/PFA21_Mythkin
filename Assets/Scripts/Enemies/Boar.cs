@@ -6,6 +6,10 @@ using AshkynCore.Audio;
 
 public class Boar : Enemy
 {
+    public enum AnimState
+    {
+        Search, Hit, Charge, WalkIdle
+    }
     bool IsCharging
     {
         get { return _isCharging; }
@@ -49,12 +53,14 @@ public class Boar : Enemy
             _agent.angularSpeed = rotationSpeed;
         }
         // --------------- //
+
         base.Update();
 
         HandleSound();
     }
     public override void HitPlayer(Vector3 direction) {
         base.HitPlayer(direction);
+        anim.SetInteger("State", (int)AnimState.Hit);
         //GameManager.Instance.player.PushOut(Utils.GetDirectionUpped(transform.forward, 10), 20);
     }
     protected override void OnUpdate() {
@@ -80,16 +86,19 @@ public class Boar : Enemy
         _afterAttackTimer = 0;
         _stunTimer = 0;
         AudioManager.instance.PlaySound(AudioTag.boarScream, 1);
+        anim.SetInteger("State", (int)AnimState.Charge);
     }
     protected override void OnSearch()
     {
         base.OnSearch();
         Speed = moveSpeed;
         AudioManager.instance.PlaySound(AudioTag.boarTalk, 1);
+        anim.SetInteger("State", (int)AnimState.Search);
     }
     protected override void OnPassive() {
         base.OnPassive();
         Speed = moveSpeed;
+        anim.SetInteger("State", (int)AnimState.WalkIdle);
     }
     protected override void Aggro()
     {
