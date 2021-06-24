@@ -162,7 +162,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 599029304219118708}
   m_LocalRotation: {x: -0.000000007450581, y: 0.000000029688916, z: -0.0000000025974447, w: 1}
-  m_LocalPosition: {x: -0.000000834465, y: 0.00000023841858, z: 1.9900005}
+  m_LocalPosition: {x: -0.000000834465, y: 0, z: 1.9900005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 7132609203646653705}
@@ -225,7 +225,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_CollideAgainst:
     serializedVersion: 2
-    m_Bits: 5248
+    m_Bits: 1153
   m_IgnoreTag: Player
   m_TransparentLayers:
     serializedVersion: 2
@@ -239,7 +239,7 @@ MonoBehaviour:
   m_MaximumEffort: 4
   m_SmoothingTime: 0
   m_Damping: 0.1
-  m_DampingWhenOccluded: 0.1
+  m_DampingWhenOccluded: 0
   m_OptimalTargetDistance: 0
 --- !u!1 &1560668727204558771
 GameObject:
