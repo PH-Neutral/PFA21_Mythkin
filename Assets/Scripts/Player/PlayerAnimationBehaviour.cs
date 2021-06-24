@@ -2,14 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAnimationBehaviour : StateMachineBehaviour
-{
+public class PlayerAnimationBehaviour : StateMachineBehaviour {
+    const string animNameDead = "Dead";
     public float exitTransitionDuration = 0;
 
     float elapsedTime, remainingTime, layerWeight;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
-        animator.SetLayerWeight(layerIndex, 1);
+        animator.SetLayerWeight(layerIndex, 1); 
+        if(stateInfo.IsName(animNameDead)) OnPlayerDeathEnds();
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -41,4 +42,8 @@ public class PlayerAnimationBehaviour : StateMachineBehaviour
     //{
     //    // Implement code that sets up animation IK (inverse kinematics)
     //}
+
+    public void OnPlayerDeathEnds() {
+        GameManager.Instance.GameOver();
+    }
 }

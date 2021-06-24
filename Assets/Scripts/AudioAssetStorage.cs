@@ -13,14 +13,17 @@ namespace AshkynCore.Audio {
         fruitBombTaken, fruitBombImpact, fruitBombThrow,
         creepyTombAmbience, deepCinematicWindAmbience, scaryForestNightAmbience, 
         musicMenu01, musicMenu02, musicLevel01,
-        Roots
+        Roots, uiClicClicMusic, uiClicClicSound,
+        snakeScream
     }
     [System.Serializable]
     public class AudioAsset {
         public AudioTag tag;
         public AudioClip[] clips;
+        public bool asMusic = false;
         [Range(0f, 2f)]
         public float volume = 1f;
+        [HideInInspector] public float inGameVolumeRatio = 1;
 
         public AudioClip GetClip() {
             if(clips == null || clips.Length == 0) return null;

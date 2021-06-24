@@ -66,6 +66,7 @@ public class PlayerCharacter : MonoBehaviour {
     bool CanThrow {
         get { return _isAiming && _hasBomb; }
     }
+    [HideInInspector] public bool isAlive = true;
     public Transform head;
 
     [SerializeField] Transform _camCenter, _throwPoint, _rightHand;
@@ -105,6 +106,7 @@ public class PlayerCharacter : MonoBehaviour {
         _trajectoryHandler = GetComponentInChildren<TrajectoryHandler>();
         if(_trajectoryHandler != null) _trajectoryHandler.playerCamera = _playerCam;
         _anim = GetComponentInChildren<Animator>();
+        _anim.SetBool("isAlive", true);
         //_renderers = _model.GetComponentsInChildren<Renderer>();
     }
     private void Start() {
@@ -112,7 +114,7 @@ public class PlayerCharacter : MonoBehaviour {
         helper = new GameObject("Helper_" + name).transform;
     }
     private void Update() {
-        if(GameManager.Instance.GamePaused) return;
+        if(GameManager.Instance.GamePaused || !isAlive) return;
 
         deltaTime = Time.deltaTime;
         _isJumping = Input.GetKey(KeyCode.Space);
@@ -141,7 +143,12 @@ public class PlayerCharacter : MonoBehaviour {
     }
     #region GENERAL
     public void Die() {
-        GameManager.Instance.GameOver();
+        isAlive = false; // stop player controls
+        GameManager.Instance.disablePauseToggle = true;
+        _anim.SetBool("isAlive", false); // play anim Death
+        _anim.SetTrigger("Die");
+        // On anim end, gameOver should come up
+        //GameManager.Instance.GameOver();
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));

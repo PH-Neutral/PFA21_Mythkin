@@ -7,10 +7,10 @@ using AshkynCore.Audio;
 public class Snake : Enemy
 {
     Transform tHead {
-        get { return debugHead; }
+        get { return model; }
     }
     [SerializeField] float attackDelay = 1f, headRadius = 0.5f;
-    [SerializeField] Transform debugHead;
+    [SerializeField] Transform model, debugHead;
     Quaternion baseRotation;
     Vector3 attackPos, headStartPos;
     bool isInGround, targetInRange, startAttack, reloadAttack;
@@ -21,7 +21,7 @@ public class Snake : Enemy
     {
         base.Awake();
         baseRotation = transform.rotation;
-        debugHead.GetComponentInChildren<Collider>().enabled = false;
+        //debugHead.GetComponentInChildren<Collider>().enabled = false;
         headStartPos = tHead.position;
     }
     protected override void Update()
@@ -47,7 +47,6 @@ public class Snake : Enemy
         attackTimer = 0;
         startAttack = true;
         reloadAttack = false;
-        AudioManager.instance.PlaySound(AudioTag.snakeTalk, gameObject, 1.5f);
         if(debugLogs) Debug.Log($"{name} => AGGRO !");
     }
     protected override void OnSearch() {
@@ -98,6 +97,7 @@ public class Snake : Enemy
         if(startAttack) {
             startAttack = false;
             attackPos = target.position;
+            AudioManager.instance.PlaySound(AudioTag.snakeScream, gameObject);
         }
         if(!reloadAttack) {
             // move head to target over time
@@ -165,14 +165,13 @@ public class Snake : Enemy
         }
         return false;
     }
-    void GoInHole()
-    {
-        head.gameObject.SetActive(false);
-        debugHead.gameObject.SetActive(false);
+    void GoInHole() {
+        isInGround = true;
+        //head.gameObject.SetActive(false);
+        //debugHead.gameObject.SetActive(false);
 
         AudioManager.instance.PlaySound(AudioTag.snakeGoesInHole, gameObject);
         //play anim goInHole
-        isInGround = true;
         // Invoke(nameof(LeaveHole), inGroundTime);
     }
     void LeaveHole()

@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
         }
     }
     public Intro intro;
-    public bool isInTutorial;
+    public bool disablePauseToggle = false;
     public AudioTag backgroundMusic;
     public UnityEngine.AI.NavMeshSurface terrain;
     public PlayerCharacter player;
@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Transform lowestPoint;
     public float timer;
-    bool wonOrLost = false, gameHasStarted = false;
+    bool gameHasStarted = false, stopTimer = true;
 
     private void Awake()
     {
@@ -56,10 +56,10 @@ public class GameManager : MonoBehaviour
             }
             return;
         }
-        if (Input.GetKeyDown(KeyCode.Escape) && !isInTutorial) {
+        if (Input.GetKeyDown(KeyCode.Escape) && !disablePauseToggle) {
             TogglePause();
         }
-        timer += Time.deltaTime;
+        if(!stopTimer) timer += Time.deltaTime;
     }
     private void LateUpdate() {
         if(lowestPoint != null && player != null) {
@@ -82,12 +82,12 @@ public class GameManager : MonoBehaviour
     }
     public void StartGame() {
         GamePaused = false;
+        stopTimer = false;
         timer = 0;
         gameHasStarted = true;
         AudioManager.instance.PlayMusic(backgroundMusic, true);
     }
     public void TogglePause() {
-        if(wonOrLost) return;
         //AudioManager.instance.PauseAudio(backgroundMusic, null);
         GamePaused = !GamePaused;
         UIManager.Instance.DisplayPauseMenu(GamePaused);
@@ -101,12 +101,15 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         GamePaused = true;
-        wonOrLost = true;
+        disablePauseToggle = true;
+        stopTimer = true;
         gameOverMenu?.Show();
     }
     public void Win()
     {
         GamePaused = true;
+        disablePauseToggle = true;
+        stopTimer = true;
         if (collectiblesCount > GameData.maxCollectiblesCount)
         {
             GameData.maxCollectiblesCount = collectiblesCount;
@@ -119,7 +122,6 @@ public class GameManager : MonoBehaviour
         {
             GameData.invisible = 1;
         }
-        wonOrLost = true;
         UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff");
         UIManager.Instance.collectiblesTxt.text = "Collectibles : " + collectiblesCount + "/" + collectiblesTotal;
         winMenu.Show();

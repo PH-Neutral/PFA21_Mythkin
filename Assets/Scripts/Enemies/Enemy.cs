@@ -98,7 +98,9 @@ public abstract class Enemy : MonoBehaviour
             State = debugState;
         }
         // -------------------
-
+        if(!GameManager.Instance.player.isAlive) {
+            return;
+        }
         OnUpdate();
 
         if (State == EnemyState.Passive)

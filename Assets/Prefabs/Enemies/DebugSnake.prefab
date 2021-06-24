@@ -295,6 +295,7 @@ MonoBehaviour:
   - {fileID: 6290965533618641183}
   attackDelay: 1
   headRadius: 0.5
+  model: {fileID: 4418457055791641135}
   debugHead: {fileID: 7055955248186567479}
 --- !u!135 &1223666517432126469
 SphereCollider:
@@ -327,7 +328,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7055955248186567479
 Transform:
   m_ObjectHideFlags: 0

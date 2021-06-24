@@ -18,7 +18,7 @@ public class Tutorial : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return) && isInTutorial)
         {
-            txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.isInTutorial = false;
+            txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.disablePauseToggle = false;
             Destroy(gameObject);
         }
     }
@@ -27,7 +27,7 @@ public class Tutorial : MonoBehaviour
     {
         if (other.gameObject.layer == LayerMask.NameToLayer(Utils.l_Player))
         {
-            txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.isInTutorial = true;
+            txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.disablePauseToggle = true;
             txtObj.text = txtStr + "\n\n(Appuyez sur \"Entrée\")";
         }
     }

@@ -14,7 +14,7 @@ public class AudioManager : MonoBehaviour {
     Dictionary<AudioKey, AudioSource> _sourceDic;
     Dictionary<AudioSource, AudioAsset> _sourceAssetDic;
     List<AudioSource> _musicSources, _soundSources;
-    List<AudioSource> _toBeRemoved, _toBeDestroyed;
+    List<AudioSource> _toBeDestroyed;
 
     private void Awake() {
         if(instance == null) instance = this;
@@ -28,7 +28,6 @@ public class AudioManager : MonoBehaviour {
 
         _musicSources = new List<AudioSource>();
         _soundSources = new List<AudioSource>();
-        _toBeRemoved = new List<AudioSource>();
         _toBeDestroyed = new List<AudioSource>();
 
         // get the playerPrefs
@@ -47,13 +46,14 @@ public class AudioManager : MonoBehaviour {
     public void PlaySound(AudioTag tag, float volumeScale = 1) => PlaySound(tag, null, false, volumeScale);
     public void PlaySound(AudioTag tag, bool destroyOnEnd, float volumeScale = 1) => PlaySound(tag, null, destroyOnEnd, volumeScale);
     public void PlaySound(AudioTag tag, GameObject target, float volumeScale = 1) => PlaySound(tag, target, false, volumeScale);
+    //public void PlaySound(AudioTag tag, GameObject target, bool destroyOnEnd, float volumeScale = 1) => PlaySound(tag, target, destroyOnEnd, volumeScale);
     public void PlaySound(AudioTag tag, GameObject target, bool destroyOnEnd, float volumeScale = 1) {
         AudioAsset asset = GetSoundAsset(tag);
         if(asset == null) return;
         AudioSource source = GetSource(tag, target);
         if(source == null) source = (target != null ? target : new GameObject()).AddComponent<AudioSource>();
         //source.clip = asset.clip;
-        source.volume = volumeSound * asset.volume;
+        source.volume = (asset.asMusic ? volumeMusic : volumeSound) * asset.volume * asset.inGameVolumeRatio;
         source.spatialBlend = target != null ? 1 : 0; // [0: 2D] [1: 3D]
         source.PlayOneShot(asset.GetClip(), volumeScale);
         SetSource(tag, target, source, asset);
@@ -69,7 +69,7 @@ public class AudioManager : MonoBehaviour {
         if(source == null) source = (target != null ? target : new GameObject()).AddComponent<AudioSource>();
         source.clip = asset.GetClip();
         source.loop = loop;
-        source.volume = volumeMusic * asset.volume;
+        source.volume = (asset.asMusic ? volumeMusic : volumeSound) * asset.volume * asset.inGameVolumeRatio;
         source.spatialBlend = target != null ? 1 : 0; // [0: 2D] [1: 3D]
         source.Play();
         SetSource(tag, target, source, asset);
@@ -80,9 +80,10 @@ public class AudioManager : MonoBehaviour {
     public void AdjustMusicVolume(AudioTag tag, GameObject target, float volumeRatio) {
         AudioAsset asset = GetSoundAsset(tag);
         if(asset == null) return;
+        asset.inGameVolumeRatio = volumeRatio;
         AudioSource source = GetSource(tag, target);
         if(source == null) return;
-        source.volume = volumeMusic * asset.volume * volumeRatio;
+        source.volume = (asset.asMusic ? volumeMusic : volumeSound) * asset.volume * asset.inGameVolumeRatio;
     }
 
     public void PauseAudio(AudioTag tag, GameObject target) => PauseAudio(new AudioKey(tag, target));
@@ -109,7 +110,7 @@ public class AudioManager : MonoBehaviour {
                 continue;
             }
             if(asset == null) continue;
-            _musicSources[i].volume = volume * asset.volume;
+            _musicSources[i].volume = (asset.asMusic ? volumeMusic : volumeSound) * asset.volume * asset.inGameVolumeRatio;
         }
 
     }
@@ -119,7 +120,7 @@ public class AudioManager : MonoBehaviour {
         for(int i = 0; i < _soundSources.Count; i++) {
             asset = GetAsset(_soundSources[i]);
             if(asset == null || _soundSources[i] == null) continue;
-            _soundSources[i].volume = volume * asset.volume;
+            _soundSources[i].volume = (asset.asMusic ? volumeMusic : volumeSound) * asset.volume * asset.inGameVolumeRatio;
         }
     }
 
