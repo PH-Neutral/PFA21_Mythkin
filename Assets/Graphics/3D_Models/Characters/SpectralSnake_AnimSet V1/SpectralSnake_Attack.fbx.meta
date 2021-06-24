@@ -8,10 +8,10 @@ ModelImporter:
     second: S-Attack
   - first:
       74: -3336069579346040476
-    second: Attack_Loop
+    second: Attack_Start
   - first:
       74: -1627067231929272919
-    second: Attack_Start
+    second: Attack_Loop
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -70,7 +70,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Attack_Loop
+      name: Attack_Start
       takeName: Take 001
       internalID: 0
       firstFrame: 1
@@ -99,7 +99,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Attack_Start
+      name: Attack_Loop
       takeName: Take 001
       internalID: 0
       firstFrame: 61

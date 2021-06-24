@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: m_spectralSkin_example
+  m_Name: m_spectralSkin_search
   m_Shader: {fileID: -6465566751694194690, guid: 3e0390fbf2f87c441a9d399ed83694d1, type: 3}
   m_ShaderKeywords: _DISABLE_DECALS _DISABLE_SSR_TRANSPARENT _ENABLE_FOG_ON_TRANSPARENT
     _SURFACE_TYPE_TRANSPARENT
@@ -104,7 +104,7 @@ Material:
     - Vector1_28bea275607144c4945d096cb079fd12: 0.5
     - Vector1_495f7e1ad83040ac8f42fcde8d6b32c7: 2
     - Vector1_49d63810dc6d41aab8f16e691b0cdd44: 1
-    - Vector1_595b7e9c20344e2e986b33519b4697b9: 2
+    - Vector1_595b7e9c20344e2e986b33519b4697b9: 3
     - Vector1_62a23120dbde4c33870230403e9e73b9: 0
     - Vector1_7e4e40a580784434b25572581cb24ee2: 0.3
     - Vector1_815d7f9927cd40c89cf6808cc4485456: 0.25
@@ -187,7 +187,7 @@ Material:
     - Color_08ef529d2c1f4992a34eca2fef90c617: {r: 0, g: 0, b: 0, a: 1}
     - Color_3ac4665cab664de783a897a8e3782f96: {r: 0, g: 0, b: 0, a: 0.039215688}
     - Color_5e74ddbd48e14a11863a28dc9d70a076: {r: 0, g: 0, b: 0, a: 1}
-    - Color_7addbea1fa6f489f83203a684136d511: {r: 2.9960785, g: 0, b: 0, a: 1}
+    - Color_7addbea1fa6f489f83203a684136d511: {r: 2.9960785, g: 1.4117647, b: 0, a: 1}
     - Color_980c55814a4d42ef9567e82e5b9778ba: {r: 0.5686274, g: 0, b: 0, a: 1}
     - Color_d01049b69da4435e97b52515f7f99050: {r: 0, g: 0, b: 0, a: 0}
     - Color_e601930e39624f489de2588da84745b0: {r: 1, g: 0, b: 0, a: 1}

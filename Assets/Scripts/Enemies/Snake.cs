@@ -6,11 +6,14 @@ using AshkynCore.Audio;
 
 public class Snake : Enemy
 {
+    public enum AnimState {
+        Idle = 0, Attack = 1, Die = 2
+    }
     Transform tHead {
         get { return model; }
     }
     [SerializeField] float attackDelay = 1f, headRadius = 0.5f;
-    [SerializeField] Transform model, debugHead;
+    [SerializeField] Transform model;
     Quaternion baseRotation;
     Vector3 attackPos, headStartPos;
     bool isInGround, targetInRange, startAttack, reloadAttack;
@@ -36,28 +39,31 @@ public class Snake : Enemy
         // decide the state you in
         if(soundHeard && !lastSoundIsPlayer) {
             GoInHole();
-        } else if(CheckLineOfSight()) {
+        } else if(CheckIfTargetValid()) {
             State = EnemyState.Aggro;
         }
     }
     protected override void OnAggro()
     {
         base.OnAggro();
-        StopTurningHead();
+        StopTurningToTarget();
         attackTimer = 0;
         startAttack = true;
         reloadAttack = false;
+        anim.SetInteger("State", (int)AnimState.Idle);
         if(debugLogs) Debug.Log($"{name} => AGGRO !");
     }
     protected override void OnSearch() {
         base.OnSearch();
         searchTimer = 0;
+        anim.SetInteger("State", (int)AnimState.Idle);
         AudioManager.instance.PlaySound(AudioTag.snakeTalk, gameObject);
         if(debugLogs) Debug.Log($"{name} => SEARCH !");
     }
     protected override void OnPassive() {
         base.OnPassive();
-        StopTurningHead();
+        StopTurningToTarget();
+        anim.SetInteger("State", (int)AnimState.Idle);
         if(debugLogs) Debug.Log($"{name} => PASSIVE !");
     }
     protected override void Passive()
@@ -77,7 +83,7 @@ public class Snake : Enemy
         if(soundHeard && lastSoundIsPlayer) {
             soundHeard = false;
             // when player is heard, move head towards sound source
-            StartTurningHead(lastSoundVector.Flatten());
+            StartTurningToTarget(lastSoundVector.Flatten());
             searchTimer = 0;
         } else if(searchTimer < searchDuration) {
             searchTimer += Time.deltaTime;
@@ -91,15 +97,20 @@ public class Snake : Enemy
         // prepare to attack
         if(attackTimer < attackDelay) {
             attackTimer += Time.deltaTime;
+            transform.LookAt(target.position.Flatten(transform.position.y), Vector3.up);
+            if(CheckIfTargetValid()) attackPos = target.position;
             return;
         }
         // start attacking
         if(startAttack) {
             startAttack = false;
-            attackPos = target.position;
+            if(CheckIfTargetValid()) attackPos = target.position;
+            anim.SetInteger("State", (int)AnimState.Attack);
+            anim.SetTrigger("Attack");
             AudioManager.instance.PlaySound(AudioTag.snakeScream, gameObject);
         }
         if(!reloadAttack) {
+            anim.SetFloat("AttackLoopSpeed", 1);
             // move head to target over time
             Vector3 lastPos = tHead.position;
             bool lerpFinished = MoveHead(attackPos);
@@ -114,9 +125,10 @@ public class Snake : Enemy
             reloadAttack = true;
         }
         if(reloadAttack) {
+            anim.SetFloat("AttackLoopSpeed", -1);
             // head go back at start pos
             if(MoveHead(headStartPos) && transform.SlerpRotation(baseRotation, rotationSpeed)) {
-                if(CheckLineOfSight()) {
+                if(CheckIfTargetValid()) {
                     OnAggro();
                 } else {
                     State = EnemyState.Search;
@@ -130,11 +142,11 @@ public class Snake : Enemy
             GoInHole();
         }
     }
-    void StartTurningHead(Vector3 targetPos) {
-        StopTurningHead();
+    void StartTurningToTarget(Vector3 targetPos) {
+        StopTurningToTarget();
         searchTurnHead = StartCoroutine(TurnTowardTarget(targetPos));
     }
-    void StopTurningHead() {
+    void StopTurningToTarget() {
         if(searchTurnHead == null) return;
         StopCoroutine(searchTurnHead);
     }
@@ -147,7 +159,7 @@ public class Snake : Enemy
     bool MoveHead(Vector3 targetPos) {
         return tHead.LerpPosition(targetPos, SprintSpeed);
     }
-    bool CheckLineOfSight() {
+    bool CheckIfTargetValid() {
         if(debugDraws) Debug.DrawLine(headStartPos, target.position, targetInRange ? Color.green : Color.red);
         if(!targetInRange) return false;
         Ray ray = new Ray(headStartPos, target.position - headStartPos);
@@ -172,21 +184,8 @@ public class Snake : Enemy
 
         AudioManager.instance.PlaySound(AudioTag.snakeGoesInHole, gameObject);
         //play anim goInHole
+        anim.SetInteger("State", (int)AnimState.Die);
         // Invoke(nameof(LeaveHole), inGroundTime);
-    }
-    void LeaveHole()
-    {
-        head.gameObject.SetActive(true);
-
-
-        //play anime leaveHole
-        isInGround = false;/*
-        if (Vector3.Distance(transform.position, target.position) <= GetComponent<SphereCollider>().radius)
-        {
-            Debug.Log("you died");
-            // play anim bite
-            // other.GetComponent<PlayerCharacter>().Die();
-        }*/
     }
     private void OnTriggerEnter(Collider other)
     {

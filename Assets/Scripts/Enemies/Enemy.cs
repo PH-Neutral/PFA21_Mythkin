@@ -32,7 +32,7 @@ public abstract class Enemy : MonoBehaviour
                     OnAggro();
                     break;
             }
-            ChangeMaterial(newMat, 1);
+            ChangeMaterial(newMat, 0);
             OnStateChange();
             _state = value;
             debugState = value;
