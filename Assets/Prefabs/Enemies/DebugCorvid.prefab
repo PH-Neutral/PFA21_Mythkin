@@ -485,6 +485,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SpectralRaven_T-Pose
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 8c809b9ad7138b345a266462856ad09a, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 52697195acd38d64a8b40f7a903155c4, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8c809b9ad7138b345a266462856ad09a, type: 3}
 --- !u!4 &8030711577540811986 stripped

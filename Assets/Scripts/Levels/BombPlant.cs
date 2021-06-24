@@ -6,7 +6,7 @@ public class BombPlant : Interactable
 {
     [SerializeField] float _timeToGrow = 5f;
     [SerializeField] MeshRenderer _fakeBomb;
-    public bool _gotABomb = true;
+    public bool gotABomb = true;
 
     public void GrowBomb()
     {
@@ -15,13 +15,14 @@ public class BombPlant : Interactable
     }
     void FinishGrow()
     {
-        _gotABomb = true;
+        gotABomb = true;
         _fakeBomb.enabled = true;
         UpdateOutline();
     }
     public void PickBomb()
     {
         //play anim PickBomb
+        gotABomb = false;
         _fakeBomb.enabled = false;
         UpdateOutline();
     }

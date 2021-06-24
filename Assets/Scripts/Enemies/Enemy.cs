@@ -57,6 +57,7 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] public float minHeightDetection = 0, maxHeightDetection = 6;
     [SerializeField] protected PatrolPath patrolPath = null;
     [SerializeField] protected Transform head;
+    protected Animator anim;
     protected Transform target;
     protected Vector3 destinationPoint, lastDestinationPoint;
     protected Vector3 lastSoundVector;
@@ -73,6 +74,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Awake()
     {
+        anim = GetComponentInChildren<Animator>();
         //_renderers = GetComponentsInChildren<MeshRenderer>();
     }
     protected virtual void Start() {

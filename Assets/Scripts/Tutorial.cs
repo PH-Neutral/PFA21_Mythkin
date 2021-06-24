@@ -16,7 +16,7 @@ public class Tutorial : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Return) && isInTutorial)
+        if (Input.GetKeyDown(KeyCode.Space) && isInTutorial)
         {
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.isInTutorial = false;
             Destroy(gameObject);
@@ -28,7 +28,7 @@ public class Tutorial : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer(Utils.l_Player))
         {
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.isInTutorial = true;
-            txtObj.text = txtStr + "\n\n(Appuyez sur \"Entrée\")";
+            txtObj.text = txtStr + "\n\n(Appuyez sur \"Espace\")";
         }
     }
 }

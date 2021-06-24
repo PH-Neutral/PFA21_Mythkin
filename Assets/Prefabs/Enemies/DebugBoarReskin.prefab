@@ -213,6 +213,7 @@ MonoBehaviour:
   chargeDelay: 5
   stunDuration: 5
   _attackCenter: {fileID: 2200843469878034313}
+  anim: {fileID: 0}
 --- !u!1 &6658976861675272081
 GameObject:
   m_ObjectHideFlags: 0

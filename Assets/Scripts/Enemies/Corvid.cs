@@ -4,6 +4,12 @@ using UnityEngine;
 using AshkynCore.Audio;
 
 public class Corvid : Enemy {
+
+    public enum AnimState
+    {
+        Attack, Fly
+    }
+
     [SerializeField] float _afterAttackDelay = 3, _afterAttackUpAngle = 30, _knockbackStrength = 25;
     Vector3 _suspiciousPos, _attackPos, _afterAttackPos;
     bool _trajectoryPrepared, _attackDone;
@@ -30,16 +36,19 @@ public class Corvid : Enemy {
     protected override void OnPassive() {
         base.OnPassive();
         Speed = moveSpeed;
+        anim.SetInteger("State", (int)AnimState.Fly);
     }
     protected override void OnSearch() {
         base.OnSearch();
         chargeSoundPlayed = false;
         _searchTimer = 0;
+        anim.SetInteger("State", (int)AnimState.Fly);
     }
     protected override void OnAggro() {
         base.OnAggro();
         Speed = SprintSpeed;
         _trajectoryPrepared = false;
+        anim.SetInteger("State", (int)AnimState.Attack);
     }
     protected override void OnSoundHeard() {
         //throw new System.NotImplementedException();
