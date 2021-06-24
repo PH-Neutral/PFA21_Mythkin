@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class LoadingScreen : MonoBehaviour {
+    [SerializeField] float offsetDelay = 2.5f;
     [SerializeField] Slider progressBar;
     [SerializeField] float fadeDuration = 1;
     [SerializeField] Transform circle;
@@ -12,7 +13,7 @@ public class LoadingScreen : MonoBehaviour {
     [SerializeField] float rotateSpeed = 1;
     CanvasGroup cGroup;
     AsyncOperation loadingOperation;
-    float progress = 0;
+    float progress = 0, offsetTimer = 0;
 
     private void Awake() {
         DontDestroyOnLoad(gameObject);
@@ -37,8 +38,13 @@ public class LoadingScreen : MonoBehaviour {
         while(!loadingOperation.isDone) {
             yield return null;
         }
+        offsetTimer = 0;
+        while(offsetTimer < offsetDelay) {
+            offsetTimer += Time.unscaledDeltaTime;
+            yield return null;
+        }
         while(cGroup.alpha > 0) {
-            cGroup.alpha = Mathf.Lerp(cGroup.alpha, 0, Time.unscaledTime / fadeDuration);
+            cGroup.alpha = Mathf.Lerp(cGroup.alpha, 0, Time.unscaledDeltaTime / fadeDuration);
             yield return null;
         }
         GameManager.Instance?.StartScene();

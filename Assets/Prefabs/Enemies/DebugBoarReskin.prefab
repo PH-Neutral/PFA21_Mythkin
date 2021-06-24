@@ -213,7 +213,6 @@ MonoBehaviour:
   chargeDelay: 5
   stunDuration: 5
   _attackCenter: {fileID: 2200843469878034313}
-  anim: {fileID: 0}
 --- !u!1 &6658976861675272081
 GameObject:
   m_ObjectHideFlags: 0
@@ -392,16 +391,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8476281779148126211, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8476281779148126211, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: dfb80978c5369724bb15b8aeae59dbec, type: 2}
+      objectReference: {fileID: 2100000, guid: c500b8756f5d4b046a67aa8c533a4911, type: 2}
     - target: {fileID: -8476281779148126211, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
-      objectReference: {fileID: 2100000, guid: 998d1c567390b94408f2e48a6377a228, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: -4151387431950223307, guid: a229820d6979cd44cb74bf82eda11307, type: 3}
       propertyPath: m_Layer
       value: 12
