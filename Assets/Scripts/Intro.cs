@@ -47,7 +47,7 @@ public class Intro : MonoBehaviour
     {
         if (!hasStarted) return;
 
-        timer += Time.unscaledDeltaTime;
+        //timer += Time.unscaledDeltaTime;
 
         if (timer >= slides[i - 1].duration || Input.GetKeyDown(KeyCode.Space))
         {
