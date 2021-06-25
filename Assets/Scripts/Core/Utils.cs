@@ -136,13 +136,23 @@ public static class Utils {
         return directions[(int)dir];
     }
     public static float GetValue01(this UnityEngine.UI.Slider slider) {
-        return (slider.value - slider.minValue) / (slider.maxValue - slider.minValue);
+        float val = Remap(slider.value, slider.minValue, slider.maxValue, 0, 1);
+        Debug.Log("InValue = " + slider.value + ", OutValue = " + val);
+        return val;
+        //return (slider.value - slider.minValue) / (slider.maxValue - slider.minValue);
+    }
+    public static void SetValue01(this UnityEngine.UI.Slider slider, float value01) {
+        slider.value = Remap(value01, 0, 1, slider.minValue, slider.maxValue);
+        Debug.Log("InValue = " + value01 + ", OutValue = " + slider.value);
+    }
+    public static float Remap(float inValue, float inMin, float inMax, float outMin, float outMax) {
+        return outMin + (inValue - inMin) * (outMax - outMin) / (inMax - inMin);
     }
     public static Vector3 Abs(Vector3 vector) {
         return new Vector3(Mathf.Abs(vector.x), Mathf.Abs(vector.y), Mathf.Abs(vector.z));
     }
     public static void HideCursor(bool hide) {
-        Debug.Log("Show Cursor: " + !hide);
+        //Debug.Log("Show Cursor: " + !hide);
         if(hide) {
             Cursor.lockState = CursorLockMode.Locked;
         } else {

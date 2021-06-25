@@ -10,8 +10,8 @@ namespace AshkynCore.UI {
         protected override void Start()
         {
             base.Start();
-            if (sliderMusic != null) sliderMusic.value = AudioManager.instance.volumeMusic;
-            if (sliderSound != null) sliderSound.value = AudioManager.instance.volumeSound;
+            if(sliderMusic != null) sliderMusic.SetValue01(AudioManager.instance.volumeMusic);
+            if (sliderSound != null) sliderSound.SetValue01(AudioManager.instance.volumeSound);
             onStart = false;
         }
 
