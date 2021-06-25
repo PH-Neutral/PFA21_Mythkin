@@ -14,7 +14,8 @@ namespace AshkynCore.Audio {
         creepyTombAmbience, deepCinematicWindAmbience, scaryForestNightAmbience, 
         musicMenu01, musicMenu02, musicLevel01,
         Roots, uiClicClicMusic, uiClicClicSound,
-        snakeScream
+        snakeScream,
+        collectiblePickUp
     }
     [System.Serializable]
     public class AudioAsset {

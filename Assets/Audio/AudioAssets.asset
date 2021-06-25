@@ -150,13 +150,13 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 833e05e2524ec5f4ba036b7698088453, type: 3}
     - {fileID: 8300000, guid: b73df543daacbd043bcca81cd69e619f, type: 3}
     asMusic: 0
-    volume: 0.5
+    volume: 1.5
     inGameVolumeRatio: 1
   - tag: 17
     clips:
     - {fileID: 8300000, guid: d7d1d04f7c3e6794ba90f822db5096fe, type: 3}
     asMusic: 0
-    volume: 0.5
+    volume: 1.5
     inGameVolumeRatio: 1
   - tag: 18
     clips:
@@ -215,6 +215,12 @@ MonoBehaviour:
   - tag: 30
     clips:
     - {fileID: 8300000, guid: 8f100f2d8fb541c4396441ed75cc7fa1, type: 3}
+    asMusic: 0
+    volume: 1.5
+    inGameVolumeRatio: 1
+  - tag: 31
+    clips:
+    - {fileID: 8300000, guid: c8701ece18e99c9498b624e4cb11f96f, type: 3}
     asMusic: 0
     volume: 0.5
     inGameVolumeRatio: 1
