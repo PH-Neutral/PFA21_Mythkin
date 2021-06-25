@@ -5,9 +5,12 @@ using UnityEngine.UI;
 
 public class Tutorial : MonoBehaviour
 {
-    [TextArea]public string txtStr;
+    [TextArea] public string txtStr;
+    [SerializeField] float timeUntilSkipable = 0.5f;
     Text txtObj;
     bool isInTutorial = false;
+    bool isSkipable = false;
+    float timer = 0;
 
     private void Start()
     {
@@ -16,7 +19,9 @@ public class Tutorial : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && isInTutorial)
+        if (isInTutorial) timer += Time.unscaledDeltaTime;
+        if (timer >= timeUntilSkipable) isSkipable = true;
+        if (Input.GetKeyDown(KeyCode.Space) && isInTutorial && isSkipable)
         {
             GameManager.Instance.player.canJump = false;
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.disablePauseToggle = false;
