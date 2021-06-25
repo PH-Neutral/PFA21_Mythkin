@@ -24,8 +24,7 @@ public class Intro : MonoBehaviour
     bool hasStarted = false;
 
 
-    public void StartIntro()
-    {
+    public void StartIntro() {
         currentImage.color = Color.white;
         gameObject.SetActive(true);
         i = 0;

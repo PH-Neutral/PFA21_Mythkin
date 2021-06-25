@@ -15,7 +15,7 @@ namespace AshkynCore.UI {
             base.Start();
             AudioManager.instance.PlayMusic(backgroundMusic, true);
 
-            bestTime.text = "Best time : " + (GameData.bestTime!=-1? TimeSpan.FromSeconds(GameData.bestTime).ToString("m\\:ss\\.fff"):"???");
+            bestTime.text = "Best time : " + (GameData.bestTime!=-1? TimeSpan.FromSeconds(GameData.bestTime).ToString("m\\:ss\\.fff") + "s" : "???");
             invisibleImg.sprite = GameData.invisible == 1 ? GameData.invisibleSprt : GameData.notInvisibleSprt;
             collectibles.text = GameData.maxCollectiblesCount + "/" + GameManager.collectiblesTotal;
             collectiblesImg.sprite = GameData.maxCollectiblesCount == GameManager.collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;

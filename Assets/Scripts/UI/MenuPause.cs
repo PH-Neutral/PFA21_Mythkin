@@ -13,7 +13,7 @@ namespace AshkynCore.UI {
         }
         protected override void OnHide() {
             AudioManager.instance.AdjustMusicVolume(GameManager.Instance.backgroundMusic, 1);
-            GameManager.Instance.GamePaused = false;
+            if(GameManager.Instance.gameHasStarted) GameManager.Instance.GamePaused = false;
         }
         public void LoadMainMenu() {
             LoadScene(0);

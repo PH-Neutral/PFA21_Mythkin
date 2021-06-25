@@ -40,7 +40,7 @@ public class UIManager : MonoBehaviour
         if (display)
         {
             pauseInvisibleImg.sprite = gm.isInvisible ? GameData.invisibleSprt : GameData.notInvisibleSprt;
-            pauseTimeTxt.text = "Timer : " + TimeSpan.FromSeconds(gm.timer).ToString("m\\:ss\\.fff");
+            pauseTimeTxt.text = "Timer : " + TimeSpan.FromSeconds(gm.timer).ToString("m\\:ss\\.fff") + "s";
             pauseCollectiblesTxt.text = gm.collectiblesCount.ToString() + "/" + GameManager.collectiblesTotal.ToString();
             PauseCollectiblesImg.sprite = gm.collectiblesCount == GameManager.collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
             menuPause.Show();

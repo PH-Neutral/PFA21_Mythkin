@@ -43,8 +43,9 @@ public class LoadingScreen : MonoBehaviour {
             offsetTimer += Time.unscaledDeltaTime;
             yield return null;
         }
+        Debug.Log("Timer OK");
         while(cGroup.alpha > 0) {
-            cGroup.alpha = Mathf.Lerp(cGroup.alpha, 0, Time.unscaledDeltaTime / fadeDuration);
+            cGroup.alpha = Mathf.Lerp(cGroup.alpha, 0, Time.unscaledDeltaTime / (cGroup.alpha * fadeDuration));
             yield return null;
         }
         GameManager.Instance?.StartScene();

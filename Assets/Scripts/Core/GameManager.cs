@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
         }
     }
     public Intro intro;
-    public bool disablePauseToggle = false;
+    public bool gameHasStarted = false, disablePauseToggle = false;
     public AudioTag backgroundMusic;
     public UnityEngine.AI.NavMeshSurface terrain;
     public PlayerCharacter player;
@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Transform lowestPoint;
     public float timer;
-    bool gameHasStarted = false, stopTimer = true;
+    bool stopTimer = true;
 
     private void Awake()
     {
@@ -41,10 +41,9 @@ public class GameManager : MonoBehaviour
         else if (Instance != this) Destroy(gameObject);
 
         UpdateNavMesh();
+        GamePaused = true;
     }
-    private void Start()
-    {
-        
+    private void Start() {
     }
     private void Update() {
         if (!gameHasStarted)
@@ -68,11 +67,9 @@ public class GameManager : MonoBehaviour
         }
     }
     public void StartScene() {
-        if (GameData.showIntro)
-        {
+        if (GameData.showIntro) {
             intro.StartIntro();
             GameData.showIntro = false;
-            GamePaused = true;
         }
         else
         {
@@ -131,7 +128,7 @@ public class GameManager : MonoBehaviour
 
     public void UpdateWinOrLoseLayout()
     {
-        UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff");
+        UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff") + "s";
         UIManager.Instance.collectiblesTxt.text = collectiblesCount + "/" + collectiblesTotal;
         UIManager.Instance.collectiblesImg.sprite = collectiblesCount == collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
         UIManager.Instance.invisibleImg.sprite = isInvisible ? GameData.invisibleSprt : GameData.notInvisibleSprt;
