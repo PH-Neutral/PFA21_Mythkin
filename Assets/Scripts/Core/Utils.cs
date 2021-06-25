@@ -141,6 +141,14 @@ public static class Utils {
     public static Vector3 Abs(Vector3 vector) {
         return new Vector3(Mathf.Abs(vector.x), Mathf.Abs(vector.y), Mathf.Abs(vector.z));
     }
+    public static void HideCursor(bool hide) {
+        Debug.Log("Show Cursor: " + !hide);
+        if(hide) {
+            Cursor.lockState = CursorLockMode.Locked;
+        } else {
+            Cursor.lockState = CursorLockMode.None;
+        }
+    }
     #endregion
 
     #region SOUND

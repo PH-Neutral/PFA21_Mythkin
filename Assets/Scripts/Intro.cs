@@ -23,7 +23,16 @@ public class Intro : MonoBehaviour
     float timer = 0f;
     bool hasStarted = false;
 
-
+    private void Awake() {
+        if(GameData.showIntro) ShowFirstSlide();
+        else Hide();
+    }
+    void ShowFirstSlide() {
+        currentImage.color = Color.white;
+        gameObject.SetActive(true);
+        i = 0;
+        ShowSlide();
+    }
     public void StartIntro() {
         currentImage.color = Color.white;
         gameObject.SetActive(true);

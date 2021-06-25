@@ -17,13 +17,12 @@ public class GameManager : MonoBehaviour
         }
         set {
             Time.timeScale = value ? 0 : 1;
-            UpdateCursor();
         }
     }
     public Intro intro;
     public bool gameHasStarted = false, disablePauseToggle = false;
     public AudioTag backgroundMusic;
-    public UnityEngine.AI.NavMeshSurface terrain;
+    public NavMeshSurface terrain;
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
     public MenuOptions menuOptions;
@@ -42,8 +41,7 @@ public class GameManager : MonoBehaviour
 
         UpdateNavMesh();
         GamePaused = true;
-    }
-    private void Start() {
+        Utils.HideCursor(true);
     }
     private void Update() {
         if (!gameHasStarted)
@@ -83,10 +81,13 @@ public class GameManager : MonoBehaviour
         timer = 0;
         gameHasStarted = true;
         AudioManager.instance.PlayMusic(backgroundMusic, true);
+
+        //Utils.HideCursor(false);
     }
     public void TogglePause() {
         //AudioManager.instance.PauseAudio(backgroundMusic, null);
         GamePaused = !GamePaused;
+        UpdateCursor();
         UIManager.Instance.DisplayPauseMenu(GamePaused);
         if (!GamePaused) {
             menuOptions.Hide();
@@ -135,11 +136,7 @@ public class GameManager : MonoBehaviour
     }
 
     void UpdateCursor() {
-        if(GamePaused) {
-            Cursor.lockState = CursorLockMode.None;
-        } else {
-            Cursor.lockState = CursorLockMode.Locked;
-        }
+        Utils.HideCursor(!GamePaused);
     }
 
     private void OnApplicationQuit() {

@@ -17,7 +17,7 @@ public class LoadingScreen : MonoBehaviour {
 
     private void Awake() {
         DontDestroyOnLoad(gameObject);
-        Cursor.lockState = CursorLockMode.Locked;
+        Utils.HideCursor(true);
     }
     private void Start() {
         cGroup = GetComponent<CanvasGroup>();
@@ -43,7 +43,7 @@ public class LoadingScreen : MonoBehaviour {
             offsetTimer += Time.unscaledDeltaTime;
             yield return null;
         }
-        Debug.Log("Timer OK");
+        //Debug.Log("Timer OK");
         while(cGroup.alpha > 0) {
             cGroup.alpha = Mathf.Lerp(cGroup.alpha, 0, Time.unscaledDeltaTime / (cGroup.alpha * fadeDuration));
             yield return null;

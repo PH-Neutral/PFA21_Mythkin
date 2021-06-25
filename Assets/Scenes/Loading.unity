@@ -668,7 +668,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bdbe3dc2d906c7439baa5c41274cc62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetDelay: 2.5
+  offsetDelay: 3
   progressBar: {fileID: 1790573679}
   fadeDuration: 1
   circle: {fileID: 898332657}

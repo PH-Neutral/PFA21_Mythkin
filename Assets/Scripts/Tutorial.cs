@@ -26,6 +26,7 @@ public class Tutorial : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if(!GameData.showTutorial) return;
         if (other.gameObject.layer == LayerMask.NameToLayer(Utils.l_Player))
         {
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.disablePauseToggle = true;

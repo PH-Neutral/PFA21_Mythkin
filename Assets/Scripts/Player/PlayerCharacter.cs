@@ -150,8 +150,7 @@ public class PlayerCharacter : MonoBehaviour {
         GameManager.Instance.disablePauseToggle = true;
         _anim.SetBool("isAlive", false); // play anim Death
         _anim.SetTrigger("Die");
-        // On anim end, gameOver should come up
-        //GameManager.Instance.GameOver();
+        AudioManager.instance.PlaySound(AudioTag.playerDeath, gameObject, 1);
     }
     void Look() {
         Vector2 inputs = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));

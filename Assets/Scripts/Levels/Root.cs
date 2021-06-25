@@ -17,6 +17,12 @@ public class Root : Interactable {
         _coll = GetComponentInChildren<Collider>();
         _model = transform.GetChild(0).gameObject;
     }
+    private void Update() {
+        if(animator.GetBool("FlagClosed")) {
+            animator.SetBool("FlagClosed", false);
+            OnClose();
+        }
+    }
     public void Open()
     {
         animator.Play(animNameOpen, 0, 0);
@@ -34,8 +40,11 @@ public class Root : Interactable {
         animator.Play(animNameOpen, 0, 1);
         animator.SetFloat("OpenRatio", -1);
         CancelInvoke(nameof(Close));
-        _coll.enabled = true;
         // _model.SetActive(true);
+    }
+
+    void OnClose() {
+        _coll.enabled = true;
         isInteractable = true;
         GameManager.Instance.UpdateNavMesh();
     }

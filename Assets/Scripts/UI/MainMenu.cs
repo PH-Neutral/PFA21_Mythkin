@@ -22,7 +22,7 @@ namespace AshkynCore.UI {
         }
         public void LoadGame() {
             AudioManager.instance.StopAudio(backgroundMusic, null);
-            GameData.showIntro = true;
+            GameData.showIntro = GameData.showTutorial = true;
             LoadScene(1, true);
         }
     }

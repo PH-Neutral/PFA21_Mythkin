@@ -66,6 +66,7 @@ namespace AshkynCore.UI {
         public void ReloadScene(bool showLoadingScreen = false) 
         {
             //Destroy(GameManager.Instance.gameObject);
+            GameData.showIntro = GameData.showTutorial = false;
             LoadScene(SceneManager.GetActiveScene().buildIndex, showLoadingScreen);
         } 
         public void LoadScene(int index)
