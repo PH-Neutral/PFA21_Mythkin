@@ -98,16 +98,17 @@ public class GameManager : MonoBehaviour
     }
     public void GameOver()
     {
-        UIManager.Instance.winOrLoseTxt.text = "Game Over";
+        UIManager.Instance.winOrLoseTxt.text = "Défaite...";
         GamePaused = true;
         disablePauseToggle = true;
         stopTimer = true;
         UpdateWinOrLoseLayout();
+        Utils.HideCursor(false);
         winMenu.Show();
     }
     public void Win()
     {
-        UIManager.Instance.winOrLoseTxt.text = "You Win";
+        UIManager.Instance.winOrLoseTxt.text = "Victoire !";
         GamePaused = true;
         disablePauseToggle = true;
         stopTimer = true;
@@ -124,12 +125,13 @@ public class GameManager : MonoBehaviour
             GameData.invisible = 1;
         }
         UpdateWinOrLoseLayout();
+        Utils.HideCursor(false);
         winMenu.Show();
     }
 
     public void UpdateWinOrLoseLayout()
     {
-        UIManager.Instance.timeTxt.text = "Time : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff") + "s";
+        UIManager.Instance.timeTxt.text = "Temps : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff") + "s";
         UIManager.Instance.collectiblesTxt.text = collectiblesCount + "/" + collectiblesTotal;
         UIManager.Instance.collectiblesImg.sprite = collectiblesCount == collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
         UIManager.Instance.invisibleImg.sprite = isInvisible ? GameData.invisibleSprt : GameData.notInvisibleSprt;

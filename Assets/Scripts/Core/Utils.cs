@@ -137,13 +137,11 @@ public static class Utils {
     }
     public static float GetValue01(this UnityEngine.UI.Slider slider) {
         float val = Remap(slider.value, slider.minValue, slider.maxValue, 0, 1);
-        Debug.Log("InValue = " + slider.value + ", OutValue = " + val);
         return val;
         //return (slider.value - slider.minValue) / (slider.maxValue - slider.minValue);
     }
     public static void SetValue01(this UnityEngine.UI.Slider slider, float value01) {
         slider.value = Remap(value01, 0, 1, slider.minValue, slider.maxValue);
-        Debug.Log("InValue = " + value01 + ", OutValue = " + slider.value);
     }
     public static float Remap(float inValue, float inMin, float inMax, float outMin, float outMax) {
         return outMin + (inValue - inMin) * (outMax - outMin) / (inMax - inMin);
