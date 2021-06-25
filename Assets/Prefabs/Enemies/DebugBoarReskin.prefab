@@ -198,7 +198,7 @@ MonoBehaviour:
   sprintRatio: 3
   rotationSpeed: 50
   searchDuration: 1
-  hearingLevelMin: 0
+  hearingLevelMin: 50
   rangeOfSight: 35
   fieldOfView: 120
   grassVerticalViewAngleMax: 50
