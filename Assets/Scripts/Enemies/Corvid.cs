@@ -36,19 +36,21 @@ public class Corvid : Enemy {
     protected override void OnPassive() {
         base.OnPassive();
         Speed = moveSpeed;
+        anim.speed = Speed * 0.5f;
         anim.SetInteger("State", (int)AnimState.Fly);
     }
     protected override void OnSearch() {
         base.OnSearch();
+        Speed = moveSpeed;
         chargeSoundPlayed = false;
         _searchTimer = 0;
+        anim.speed = Speed * 0.5f;
         anim.SetInteger("State", (int)AnimState.Fly);
     }
     protected override void OnAggro() {
         base.OnAggro();
         Speed = SprintSpeed;
         _trajectoryPrepared = false;
-        anim.SetInteger("State", (int)AnimState.Attack);
     }
     protected override void OnSoundHeard() {
         //throw new System.NotImplementedException();
@@ -94,8 +96,9 @@ public class Corvid : Enemy {
             }
         }
         if(_trajectoryPrepared) {
-            if (!chargeSoundPlayed)
-            {
+            if (!chargeSoundPlayed) {
+                anim.speed = 1;
+                anim.SetInteger("State", (int)AnimState.Attack);
                 AudioManager.instance.PlaySound(AudioTag.corvidCharge, gameObject);
                 chargeSoundPlayed = true;
             }
@@ -112,6 +115,8 @@ public class Corvid : Enemy {
                     _afterAttackPos = transform.position + Utils.GetDirectionUpped(transform.position - lastPos, _afterAttackUpAngle) * 10;
                 }
             } else {
+                anim.speed = Speed * 0.5f;
+                anim.SetInteger("State", (int)AnimState.Fly);
                 _afterAttackTimer -= Time.deltaTime;
                 Turn((_afterAttackPos - transform.position).Flatten(), Vector3.up, rotationSpeed);
                 if(Move(_afterAttackPos, SprintSpeed) || _afterAttackTimer <= 0) {

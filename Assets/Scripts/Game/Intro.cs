@@ -14,18 +14,16 @@ public class Intro : MonoBehaviour
     }
     public Slide[] slides = new Slide[0];
 
-
-    public bool hasFinished;
-
     bool CanBeSkipped {
         get { return skipTimer >= timeUntilSkipable; }
     }
     [SerializeField] Image currentImage;
     [SerializeField] Text currentText;
     [SerializeField] float timeUntilSkipable = 0.5f, fadeDuration = 1;
+    System.Action _onIntroEnds;
     CanvasGroup cGroup;
     int i = 0;
-    bool hasStarted = false;
+    bool _hasStarted = false, _hasFinished = false;
     float skipTimer = 0;
 
     private void Awake() {
@@ -38,25 +36,24 @@ public class Intro : MonoBehaviour
         i = 0;
         ShowSlide();
     }
-    public void StartIntro() {
+    public void StartIntro(System.Action onIntroEnds) {
+        _onIntroEnds = onIntroEnds;
         ShowFirstSlide();
-        hasStarted = true;
-        hasFinished = false;
+        _hasStarted = true;
+        _hasFinished = false;
     }
 
     private void Update()
     {
-        if (!hasStarted) return;
+        if (!_hasStarted || _hasFinished) return;
 
         skipTimer = Mathf.Clamp(skipTimer + Time.unscaledDeltaTime, 0, timeUntilSkipable);
         if (CanBeSkipped && Input.GetKeyDown(KeyCode.Space))
         {
-            if (i < slides.Length)
-            {
+            if (i < slides.Length) {
                 ShowSlide();
-            }
-            else
-            {
+            } else {
+                _hasFinished = true;
                 StartCoroutine(FadeOut());
             }
         }
@@ -85,7 +82,7 @@ public class Intro : MonoBehaviour
             yield return null;
         }
         Hide();
-        hasFinished = true;
+        _onIntroEnds?.Invoke();
         yield break;
     }
 }

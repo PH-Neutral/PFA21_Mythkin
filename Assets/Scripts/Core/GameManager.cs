@@ -19,19 +19,20 @@ public class GameManager : MonoBehaviour
             Time.timeScale = value ? 0 : 1;
         }
     }
+    [HideInInspector] public bool gameHasStarted = false, disablePauseToggle = false;
+    [HideInInspector] public int collectiblesCount = 0;
+    [HideInInspector] public bool isInvisible = true;
+    [HideInInspector] public float timer;
     public Intro intro;
-    public bool gameHasStarted = false, disablePauseToggle = false;
+    public TravelingHandler travelingHandler;
     public AudioTag backgroundMusic;
     public NavMeshSurface terrain;
     public PlayerCharacter player;
     public Material matEnemyPatrol, matEnemySearch, matEnemyAttack;
     public MenuOptions menuOptions;
     public CustomMenu winMenu;
-    public int collectiblesCount = 0;
-    public bool isInvisible = true;
 
     [SerializeField] Transform lowestPoint;
-    public float timer;
     bool stopTimer = true;
 
     private void Awake()
@@ -44,15 +45,8 @@ public class GameManager : MonoBehaviour
         Utils.HideCursor(true);
     }
     private void Update() {
-        if (!gameHasStarted)
-        {
-            if (intro.hasFinished)
-            {
-                intro.Hide();
-                StartGame();
-            }
-            return;
-        }
+        if(!gameHasStarted) return;
+
         if (Input.GetKeyDown(KeyCode.Escape) && !disablePauseToggle) {
             TogglePause();
         }
@@ -65,22 +59,32 @@ public class GameManager : MonoBehaviour
         }
     }
     public void StartScene() {
+        AudioManager.instance.PlayMusic(backgroundMusic, true);
+        AudioManager.instance.AdjustMusicVolume(backgroundMusic, 1 / 3f);
+
         if (GameData.showIntro) {
-            intro.StartIntro();
+            intro.StartIntro(() => { StartTraveling(); });
             GameData.showIntro = false;
+            return;
         }
-        else
-        {
-            intro.Hide();
+        StartTraveling();
+    }
+    public void StartTraveling() {
+        disablePauseToggle = true;
+        GamePaused = false;
+        AudioManager.instance.AdjustMusicVolume(backgroundMusic, 1f);
+        if(travelingHandler == null) {
             StartGame();
+            return;
         }
+        travelingHandler.StartTraveling(() => { StartGame(); });
     }
     public void StartGame() {
-        GamePaused = false;
+        //GamePaused = false;
+        disablePauseToggle = false;
         stopTimer = false;
         timer = 0;
         gameHasStarted = true;
-        AudioManager.instance.PlayMusic(backgroundMusic, true);
 
         //Utils.HideCursor(false);
     }
@@ -102,7 +106,7 @@ public class GameManager : MonoBehaviour
         GamePaused = true;
         disablePauseToggle = true;
         stopTimer = true;
-        UpdateWinOrLoseLayout();
+        UIManager.Instance.UpdateWinOrLoseLayout();
         Utils.HideCursor(false);
         winMenu.Show();
     }
@@ -124,17 +128,9 @@ public class GameManager : MonoBehaviour
         {
             GameData.invisible = 1;
         }
-        UpdateWinOrLoseLayout();
+        UIManager.Instance.UpdateWinOrLoseLayout();
         Utils.HideCursor(false);
         winMenu.Show();
-    }
-
-    public void UpdateWinOrLoseLayout()
-    {
-        UIManager.Instance.timeTxt.text = "Temps : " + TimeSpan.FromSeconds(timer).ToString("m\\:ss\\.fff") + "s";
-        UIManager.Instance.collectiblesTxt.text = collectiblesCount + "/" + collectiblesTotal;
-        UIManager.Instance.collectiblesImg.sprite = collectiblesCount == collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
-        UIManager.Instance.invisibleImg.sprite = isInvisible ? GameData.invisibleSprt : GameData.notInvisibleSprt;
     }
 
     void UpdateCursor() {

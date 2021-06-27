@@ -157,6 +157,19 @@ public static class Utils {
             Cursor.lockState = CursorLockMode.None;
         }
     }
+    // + + + + + + + + + MATHF FOR DOUBLE + + + + + + + + + //
+    public static double Clamp01(double d) => Clamp(d, 0d, 1d);
+    public static double Clamp(double d, double min, double max) {
+        if(d < min) d = min;
+        else if(d > max) d = max;
+        return d;
+    }
+    public static Vector3 ToVector3(this Vector3Double v) {
+        return new Vector3((float)v.x, (float)v.y, (float)v.z);
+    }
+    public static Vector3Double ToVector3Double(this Vector3 v) {
+        return new Vector3Double(v.x, v.y, v.z);
+    }
     #endregion
 
     #region SOUND
@@ -220,4 +233,32 @@ public static class Utils {
         return levelAtRange + levelStep * Mathf.Log(Mathf.Pow(distance / distanceUnit, 2), 2);
     }
     #endregion
+}
+public struct Vector3Double {
+    public double x, y, z;
+
+    public Vector3Double(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public static Vector3Double operator *(double d, Vector3Double vector) {
+        return vector * d;
+    }
+    public static Vector3Double operator *(Vector3Double v, double d) {
+        return new Vector3Double(v.x * d, v.y * d, v.z * d);
+    }
+    public static Vector3Double operator /(double d, Vector3Double vector) {
+        return vector / d;
+    }
+    public static Vector3Double operator /(Vector3Double v, double d) {
+        return new Vector3Double(v.x / d, v.y / d, v.z / d);
+    }
+    public static Vector3Double operator +(Vector3Double v1, Vector3Double v2) {
+        return new Vector3Double(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+    }
+    public static Vector3Double operator -(Vector3Double v1, Vector3Double v2) {
+        return new Vector3Double(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+    }
 }

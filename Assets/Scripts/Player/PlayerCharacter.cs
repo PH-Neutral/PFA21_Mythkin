@@ -115,7 +115,7 @@ public class PlayerCharacter : MonoBehaviour {
         helper = new GameObject("Helper_" + name).transform;
     }
     private void Update() {
-        if(GameManager.Instance.GamePaused || !isAlive) return;
+        if(GameManager.Instance.GamePaused || !GameManager.Instance.gameHasStarted || !isAlive) return;
 
         deltaTime = Time.deltaTime;
         _isJumping = Input.GetKey(KeyCode.Space) && canJump;

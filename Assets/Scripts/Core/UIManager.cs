@@ -39,13 +39,22 @@ public class UIManager : MonoBehaviour
     public void DisplayPauseMenu(bool display) {
         if (display)
         {
-            pauseInvisibleImg.sprite = gm.isInvisible ? GameData.invisibleSprt : GameData.notInvisibleSprt;
-            pauseTimeTxt.text = "Temps : " + TimeSpan.FromSeconds(gm.timer).ToString("m\\:ss\\.fff") + "s";
-            pauseCollectiblesTxt.text = gm.collectiblesCount.ToString() + "/" + GameManager.collectiblesTotal.ToString();
-            PauseCollectiblesImg.sprite = gm.collectiblesCount == GameManager.collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
+            UpdateHighscoreLayout(pauseTimeTxt, pauseCollectiblesTxt, PauseCollectiblesImg, pauseInvisibleImg, true);
             menuPause.Show();
         }
         else menuPause.Hide();
+    }
+
+    public void UpdateWinOrLoseLayout() {
+        UpdateHighscoreLayout(timeTxt, collectiblesTxt, collectiblesImg, invisibleImg, true);
+    }
+    public static void UpdateHighscoreLayout(Text timeTxt, Text collectibleTxt, Image collectibleImg, Image invisibleImg, bool inGame) {
+        GameManager gm = GameManager.Instance;
+        string time = TimeSpan.FromSeconds(inGame ? gm.timer : GameData.bestTime).ToString("m\\:ss\\.fff") + "s";
+        timeTxt.text = (inGame ? "Temps" : "Meilleur temps") + " : " + (inGame ? time : (GameData.bestTime > -1 ? time : "---"));
+        collectibleTxt.text = (inGame ? gm.collectiblesCount : GameData.maxCollectiblesCount) + "/" + GameManager.collectiblesTotal;
+        collectibleImg.sprite = (inGame ? gm.collectiblesCount : GameData.maxCollectiblesCount) == GameManager.collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
+        invisibleImg.sprite = (inGame ? gm.isInvisible : GameData.invisible == 1) ? GameData.invisibleSprt : GameData.notInvisibleSprt;
     }
 }
  
