@@ -46,7 +46,7 @@ public class PatrolPath : MonoBehaviour {
     public Waypoint GetWaypoint(int index) {
         return wayPoints[index];
     }
-
+#if UNITY_EDITOR
     private void OnDrawGizmos() {
         Vector3 origin, target;
         for(int i = 0; i < wayPoints.Length; i++) {
@@ -68,4 +68,5 @@ public class PatrolPath : MonoBehaviour {
             Gizmos.DrawLine(wayPoints[0].point.position, wayPoints[wayPoints.Length - 1].point.position);
         }
     }
+#endif
 }
