@@ -4,7 +4,7 @@ using UnityEngine;
 using AshkynCore.Audio;
 
 public class Corvid : Enemy {
-
+    const string firstStateName = "SR-Fly";
     public enum AnimState
     {
         Attack, Fly
@@ -16,6 +16,11 @@ public class Corvid : Enemy {
     bool chargeSoundPlayed = false;
     float _searchTimer, _afterAttackTimer;
 
+    protected override void Start()
+    {
+        base.Start();
+        anim.Play(firstStateName, 0, Random.Range(0, 1));
+    }
     protected override void Update() {
         base.Update();
     }

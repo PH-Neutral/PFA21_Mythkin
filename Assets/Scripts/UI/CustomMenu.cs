@@ -60,6 +60,17 @@ namespace AshkynCore.UI {
             SelectUIObject(null);
             current = null;
         }
+        public void Toggle()
+        {
+            if (isHidden)
+            {
+                Show();
+            }
+            else
+            {
+                Hide();
+            }
+        }
         public void SelectUIObject(GameObject objToSelect) {
             EventSystem.current.SetSelectedGameObject(objToSelect);
         }

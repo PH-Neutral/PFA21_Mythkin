@@ -11,6 +11,15 @@ public class TravelingHandler : MonoBehaviour {
     [SerializeField] float lookAtLaunchDelay = 1;
     
     Action _onTravelingEnds;
+    bool canBeSkiped = false;
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && canBeSkiped)
+        {
+            StopTraveling();
+        }
+    }
 
     public void StartTraveling(Action onTravelingEnds) {
         _onTravelingEnds = onTravelingEnds;
@@ -30,11 +39,21 @@ public class TravelingHandler : MonoBehaviour {
             timer += Time.unscaledDeltaTime;
             yield return null;
         }
+        canBeSkiped = true;
         walkerLookAt.BeginMoving(() => { OnTravelingEnds(); });
         yield break;
     }
     void OnTravelingEnds() {
         cam.Priority = 0;
         _onTravelingEnds?.Invoke();
+    }
+    void StopTraveling()
+    {
+        canBeSkiped = false;
+        StopAllCoroutines();
+        walkerLookAt.StopMoving();
+        walkerFollow.StopMoving();
+        UIManager.Instance.SwitchCameraMode(true);
+        OnTravelingEnds();
     }
 }

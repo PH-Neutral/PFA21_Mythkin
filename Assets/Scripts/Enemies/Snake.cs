@@ -6,6 +6,7 @@ using AshkynCore.Audio;
 
 public class Snake : Enemy
 {
+    const string firstStateName = "S-Idle"; 
     public enum AnimState {
         Idle = 0, Attack = 1, Die = 2
     }
@@ -26,6 +27,11 @@ public class Snake : Enemy
         baseRotation = transform.rotation;
         //debugHead.GetComponentInChildren<Collider>().enabled = false;
         headStartPos = tHead.position;
+    }
+    protected override void Start()
+    {
+        base.Start();
+        anim.Play(firstStateName, 0, Random.Range(0, 1));
     }
     protected override void Update()
     {

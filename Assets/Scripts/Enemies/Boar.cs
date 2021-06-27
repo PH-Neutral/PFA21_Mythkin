@@ -6,6 +6,7 @@ using AshkynCore.Audio;
 
 public class Boar : Enemy
 {
+    const string firstStateName = "Boar-IdleWalk";
     public enum AnimState
     {
         Search, Hit, Charge, WalkIdle
@@ -43,6 +44,7 @@ public class Boar : Enemy
     {
         base.Start();
         _agent.enabled = true;
+        anim.Play(firstStateName, 0, Random.Range(0, 1));
     }
 
     protected override void Update()

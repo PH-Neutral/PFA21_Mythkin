@@ -56,5 +56,19 @@ public class UIManager : MonoBehaviour
         collectibleImg.sprite = (inGame ? gm.collectiblesCount : GameData.maxCollectiblesCount) == GameManager.collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
         invisibleImg.sprite = (inGame ? gm.isInvisible : GameData.invisible == 1) ? GameData.invisibleSprt : GameData.notInvisibleSprt;
     }
+    public void SwitchCameraMode(bool blendInstantly)
+    {
+        Cinemachine.CinemachineBrain cineBrain = Camera.main.GetComponent<Cinemachine.CinemachineBrain>();
+        Cinemachine.CinemachineBlendDefinition blendMode;
+        if (blendInstantly)
+        {
+            blendMode = new Cinemachine.CinemachineBlendDefinition(Cinemachine.CinemachineBlendDefinition.Style.Cut, 0f);
+        }
+        else
+        {
+            blendMode = new Cinemachine.CinemachineBlendDefinition(Cinemachine.CinemachineBlendDefinition.Style.EaseInOut, 2f);
+        }
+        cineBrain.m_DefaultBlend = blendMode;
+    }
 }
  
