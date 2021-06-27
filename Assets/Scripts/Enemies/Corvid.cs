@@ -42,7 +42,9 @@ public class Corvid : Enemy {
         base.OnPassive();
         Speed = moveSpeed;
         anim.speed = Speed * 0.5f;
+        
         anim.SetInteger("State", (int)AnimState.Fly);
+        //if(isFirstAnimState) anim.Play(firstStateName, 0, Random.Range(0, 1));
     }
     protected override void OnSearch() {
         base.OnSearch();

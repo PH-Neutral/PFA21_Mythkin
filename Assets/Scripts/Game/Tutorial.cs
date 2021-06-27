@@ -21,8 +21,9 @@ public class Tutorial : MonoBehaviour
     {
         if (isInTutorial) timer += Time.unscaledDeltaTime;
         if (timer >= timeUntilSkipable) isSkipable = true;
-        if (Input.GetKeyDown(KeyCode.Space) && isInTutorial && isSkipable)
-        {
+        if(isSkipable) UIManager.Instance.ShowPressKeyTxt(true);
+        if (Input.GetKeyDown(KeyCode.Space) && isInTutorial && isSkipable) {
+            UIManager.Instance.ShowPressKeyTxt(false);
             GameManager.Instance.player.canJump = false;
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.disablePauseToggle = false;
             Destroy(gameObject);
@@ -35,7 +36,7 @@ public class Tutorial : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer(Utils.l_Player))
         {
             txtObj.enabled = isInTutorial = GameManager.Instance.GamePaused = GameManager.Instance.disablePauseToggle = true;
-            txtObj.text = txtStr + "\n\n(Appuyez sur \"Espace\")";
+            txtObj.text = txtStr;// + "\n\n(Appuyez sur \"Espace\")";
         }
     }
 }

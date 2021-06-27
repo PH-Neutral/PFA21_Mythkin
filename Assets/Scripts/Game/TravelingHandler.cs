@@ -15,8 +15,9 @@ public class TravelingHandler : MonoBehaviour {
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && canBeSkiped)
-        {
+        if(canBeSkiped) UIManager.Instance.ShowPressKeyTxt(true);
+        if (Input.GetKeyDown(KeyCode.Space) && canBeSkiped) {
+            UIManager.Instance.ShowPressKeyTxt(false);
             StopTraveling();
         }
     }

@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour
     public Text pauseTimeTxt, pauseCollectiblesTxt;
     public Text tutoTxt;
     public Text winOrLoseTxt;
+    public Text pressKeyTxt;
 
     public Image pauseInvisibleImg, PauseCollectiblesImg, invisibleImg, collectiblesImg;
 
@@ -29,6 +30,7 @@ public class UIManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        ShowPressKeyTxt(false);
     }
 
     private void Start()
@@ -55,6 +57,9 @@ public class UIManager : MonoBehaviour
         collectibleTxt.text = (inGame ? gm.collectiblesCount : GameData.maxCollectiblesCount) + "/" + GameManager.collectiblesTotal;
         collectibleImg.sprite = (inGame ? gm.collectiblesCount : GameData.maxCollectiblesCount) == GameManager.collectiblesTotal ? GameData.allCollectiblesSprt : GameData.notAllCollectiblesSprt;
         invisibleImg.sprite = (inGame ? gm.isInvisible : GameData.invisible == 1) ? GameData.invisibleSprt : GameData.notInvisibleSprt;
+    }
+    public void ShowPressKeyTxt(bool show) {
+        pressKeyTxt.gameObject.SetActive(show);
     }
     public void SwitchCameraMode(bool blendInstantly)
     {

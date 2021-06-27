@@ -48,8 +48,9 @@ public class Intro : MonoBehaviour
         if (!_hasStarted || _hasFinished) return;
 
         skipTimer = Mathf.Clamp(skipTimer + Time.unscaledDeltaTime, 0, timeUntilSkipable);
-        if (CanBeSkipped && Input.GetKeyDown(KeyCode.Space))
-        {
+        if(CanBeSkipped) UIManager.Instance.ShowPressKeyTxt(true);
+        if (CanBeSkipped && Input.GetKeyDown(KeyCode.Space)) {
+            UIManager.Instance.ShowPressKeyTxt(false);
             if (i < slides.Length) {
                 ShowSlide();
             } else {

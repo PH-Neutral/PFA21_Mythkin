@@ -100,7 +100,9 @@ public class Boar : Enemy
     protected override void OnPassive() {
         base.OnPassive();
         Speed = moveSpeed;
+         
         anim.SetInteger("State", (int)AnimState.WalkIdle);
+        //if(isFirstAnimState) anim.Play(firstStateName, 0, Random.Range(0, 1));
     }
     protected override void Aggro()
     {

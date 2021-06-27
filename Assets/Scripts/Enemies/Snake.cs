@@ -31,7 +31,6 @@ public class Snake : Enemy
     protected override void Start()
     {
         base.Start();
-        anim.Play(firstStateName, 0, Random.Range(0, 1));
     }
     protected override void Update()
     {
@@ -57,20 +56,19 @@ public class Snake : Enemy
         startAttack = true;
         reloadAttack = false;
         anim.SetInteger("State", (int)AnimState.Idle);
-        if(debugLogs) Debug.Log($"{name} => AGGRO !");
     }
     protected override void OnSearch() {
         base.OnSearch();
         searchTimer = 0;
         anim.SetInteger("State", (int)AnimState.Idle);
         AudioManager.instance.PlaySound(AudioTag.snakeTalk, gameObject);
-        if(debugLogs) Debug.Log($"{name} => SEARCH !");
     }
     protected override void OnPassive() {
         base.OnPassive();
         StopTurningToTarget();
+
         anim.SetInteger("State", (int)AnimState.Idle);
-        if(debugLogs) Debug.Log($"{name} => PASSIVE !");
+        //if(isFirstAnimState) anim.Play(firstStateName, 0, Random.Range(0, 1));
     }
     protected override void Passive()
     {

@@ -62,7 +62,7 @@ public abstract class Enemy : MonoBehaviour
     protected Vector3 lastSoundVector;
     protected bool soundHeard, lastSoundIsPlayer;
     protected float lastSoundLevel;
-    protected bool destinationReached = true;
+    protected bool destinationReached = true, isFirstAnimState = true;
 
     [SerializeField] Renderer[] _renderers;
     EnemyState _state = EnemyState.Idle;
@@ -79,6 +79,7 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void Start() {
         target = GameManager.Instance.player?.head;
         State = debugState;
+        isFirstAnimState = false;
 
         // set initial position and orientation forced by patrolPath
         if(patrolPath != null && patrolPath.wayPoints.Length > 0) {
